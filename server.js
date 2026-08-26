@@ -81,7 +81,7 @@ const abuseHits = new Map(); // ip -> { n, t, uas }
 const scriptTokens = new Map(); // nonce -> { scriptId, ip, exp, used }
 const AUTO_BAN_THRESHOLD = 45;
 const AUTO_BAN_WINDOW = 2 * 60 * 1000;
-const TOKEN_TTL_MS = 55 * 1000;
+const TOKEN_TTL_MS = 25 * 1000;
 const SCRAPER_UA_RE = /curl|wget|python|requests|axios|node-fetch|got\/|httpclient|libwww|scrapy|postman|insomnia|go-http|java\/|okhttp|httpie|discord|bot|crawler|spider/i;
 
 function trackAbuse(ip, ua) {
@@ -108,17 +108,25 @@ async function banIp(ip, reason) {
   } catch {}
 }
 
-function issueScriptToken(scriptId, ip) {
-  const nonce = crypto.randomBytes(10).toString('hex');
+function deliveryFingerprint(ip, ua) {
+  return crypto.createHash('sha256')
+    .update(String(ip || '') + '\n' + String(ua || '').slice(0, 220))
+    .digest('hex')
+    .slice(0, 24);
+}
+
+function issueScriptToken(scriptId, ip, ua) {
+  const nonce = crypto.randomBytes(18).toString('base64url');
   const exp = Date.now() + TOKEN_TTL_MS;
-  const payload = scriptId + '.' + exp + '.' + nonce + '.' + String(ip || '');
-  const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 28);
+  const fp = deliveryFingerprint(ip, ua);
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
+  const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
   const token = exp.toString(36) + '.' + nonce + '.' + sig;
-  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), exp, used: false });
+  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, exp, used: false });
   return token;
 }
 
-function consumeScriptToken(scriptId, token, ip) {
+function consumeScriptToken(scriptId, token, ip, ua) {
   if (!token || typeof token !== 'string') return false;
   const parts = token.split('.');
   if (parts.length !== 3) return false;
@@ -126,15 +134,16 @@ function consumeScriptToken(scriptId, token, ip) {
   const nonce = parts[1];
   const sig = parts[2];
   if (!exp || !nonce || !sig) return false;
-  if (Date.now() > exp + 2000) return false;
+  const now = Date.now();
+  if (now > exp) return false;
   const rec = scriptTokens.get(nonce);
   if (!rec || rec.used || rec.scriptId !== scriptId) return false;
-  if (Date.now() > rec.exp + 2000) return false;
-  const payloadIssued = scriptId + '.' + exp + '.' + nonce + '.' + rec.ip;
-  const expectIssued = crypto.createHmac('sha256', JWT_SECRET).update(payloadIssued).digest('hex').slice(0, 28);
-  const payloadNow = scriptId + '.' + exp + '.' + nonce + '.' + String(ip || '');
-  const expectNow = crypto.createHmac('sha256', JWT_SECRET).update(payloadNow).digest('hex').slice(0, 28);
-  if (sig !== expectIssued && sig !== expectNow) return false;
+  if (now > rec.exp) return false;
+  const fp = deliveryFingerprint(ip, ua);
+  if (fp !== rec.fp) return false;
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
+  const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
+  if (expected.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig))) return false;
   rec.used = true;
   scriptTokens.set(nonce, rec);
   return true;
@@ -1037,28 +1046,22 @@ function wrapDeliveredScript(code, apiBase, scriptId) {
 // ========== DOUBLE LINK + ANTI-SCRAPE ==========
 function buildDoubleLinkStub(cacheUrl) {
   const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  const junk = [];
-  for (let i = 0; i < 12; i++) {
-    junk.push('local _' + crypto.randomBytes(2).toString('hex') + '="' + crypto.randomBytes(5).toString('hex') + '"');
-  }
   return [
-    '-- QrexApi loader',
-    ...junk,
-    'local function __qrex_boot()',
-    '  local u="' + u + '"',
-    '  local g=game',
-    '  if type(g)~="userdata" and type(g)~="table" then error("env") end',
-    '  local src',
-    '  local ok,err=pcall(function() src=g:HttpGet(u) end)',
-    '  if not ok or type(src)~="string" or #src<8 then error(err or "fetch") end',
-    '  local fn,e2=loadstring(src)',
-    '  if type(fn)~="function" then error(e2 or "compile") end',
-    '  return fn()',
+    'local __QYREX_URL = "' + u + '"',
+    'local __QYREX_SRC',
+    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
+    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
+    'end)',
+    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
+    '  error(__QYREX_ERR or "Qyrex delivery failed")',
     'end',
-    'return __qrex_boot()'
+    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
+    'if type(__QYREX_FN) ~= "function" then',
+    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
+    'end',
+    'return __QYREX_FN()'
   ].join('\n');
 }
-
 function publicBase(req) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const proto = req.headers['x-forwarded-proto'] || 'https';
@@ -1132,7 +1135,7 @@ async function serveRealScript(req, res, scriptId) {
         apiBase: base,
         providerName: (prov && prov.name) || s.providerName || 'Qrex',
         getKeyLink,
-        scriptCode: s.obfuscated
+        scriptId: s.id
       });
     } catch (e) {
       console.error('key gate wrap', e);
@@ -1152,14 +1155,32 @@ app.get('/api/public/script/:id', async (req,res)=>{
   const owner=await User.findById(s.ownerId).select('username displayName avatar').lean(); const base=publicBase(req);
   res.json({id:s.id,name:s.name,description:s.description||'',keyMode:s.keyMode||'keyless',providerName:s.providerName||'',executions:s.executions||0,createdAt:s.createdAt,owner:owner?{username:owner.username,displayName:owner.displayName||owner.username,avatar:owner.avatar||''}:null,publicUrl:base+'/script/'+s.id,downloadUrl:base+'/api/v1/luascripts/public/'+s.id+'/download',loadstring:'loadstring(game:HttpGet(\"'+base+'/api/v1/luascripts/public/'+s.id+'/download\"))()'});
 });
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function renderPublicScriptPage(s, owner, base) {
+  const name = escapeHtml(s.name || 'Qyrex Script');
+  const desc = escapeHtml(s.description || 'Script protegido servido por Qyrex.');
+  const ownerName = escapeHtml(owner?.displayName || owner?.username || 'Qyrex');
+  const ownerUser = escapeHtml(owner?.username ? '@' + owner.username : '@qyrex');
+  const avatar = owner?.avatar ? escapeHtml(owner.avatar) : '';
+  const endpoint = base + '/api/v1/luascripts/public/' + encodeURIComponent(s.id) + '/download';
+  const loadstring = 'loadstring(game:HttpGet("' + endpoint + '"))()';
+  const mode = s.keyMode === 'key' ? 'Key System' : 'Keyless';
+  const provider = escapeHtml(s.providerName || 'Qyrex API');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#08080d"><title>${name} · Qyrex</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:#f5f5f7;background:#06070b;font:14px Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body:before{content:"";position:fixed;inset:-20%;pointer-events:none;background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.24),transparent 30%),radial-gradient(circle at 90% 10%,rgba(0,212,255,.12),transparent 25%);filter:blur(12px)}.shell{position:relative;max-width:1120px;margin:auto;padding:28px 20px 60px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:18px}.mark{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#7c5cff,#31d7ff);box-shadow:0 0 35px rgba(124,92,255,.3)}.brand small{display:block;color:#77798a;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.nav a,.btn{border:1px solid #292c39;background:#10121a;color:#f4f5f7;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer}.hero,.panel{border:1px solid #282b38;background:rgba(13,14,20,.9);box-shadow:0 28px 100px rgba(0,0,0,.35)}.hero{border-radius:28px;padding:34px;overflow:hidden;position:relative}.eyebrow{font-size:11px;color:#85889b;letter-spacing:.18em;text-transform:uppercase;font-weight:800}.title{font-size:clamp(40px,7vw,78px);line-height:.98;letter-spacing:-.05em;margin:10px 0 15px;max-width:900px}.desc{color:#a8abba;line-height:1.8;max-width:820px;font-size:15px}.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.badge{border:1px solid #2b2f3d;background:#0d0f15;border-radius:999px;padding:7px 10px;color:#adb2c5;font-size:11px;font-weight:700}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.primary{background:#f4f5f7;color:#08090d;border-color:#fff}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.panel{border-radius:22px;padding:22px}.panel h2{font-size:15px;margin:0 0 5px}.muted{font-size:12px;color:#717489}.loadbox{display:flex;gap:8px;align-items:center;margin-top:14px}.load{min-width:0;flex:1;overflow:auto;padding:14px;border-radius:14px;border:1px solid #282c39;background:#080a0f;color:#a5edcb;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.stat{border:1px solid #272b37;background:#0b0d13;border-radius:15px;padding:14px}.stat span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6e7184}.stat strong{display:block;margin-top:6px;font-size:18px}.owner{display:flex;align-items:center;gap:12px;margin-top:16px}.avatar{width:44px;height:44px;border-radius:14px;overflow:hidden;background:#151821;border:1px solid #292d39;display:grid;place-items:center;font-weight:800}.avatar img{width:100%;height:100%;object-fit:cover}.owner b{display:block;font-size:13px}.owner span{font-size:11px;color:#686b7e}.notice{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid #263b33;background:#0d1210;color:#83d9b3;font-size:11px}.foot{text-align:center;color:#55596c;font-size:11px;margin-top:18px}@media(max-width:820px){.grid{grid-template-columns:1fr}.hero{padding:24px}.loadbox{flex-direction:column;align-items:stretch}.statgrid{grid-template-columns:1fr}.copybtn{width:100%}}
+</style></head><body><main class="shell"><nav class="nav"><div class="brand"><div class="mark">Q</div><div>Qyrex<small>Protected API</small></div></div><a href="/">Dashboard</a></nav><section class="hero"><div class="eyebrow">Public endpoint</div><h1 class="title">${name}</h1><div class="desc">${desc}</div><div class="badges"><span class="badge">${provider}</span><span class="badge">${mode}</span><span class="badge">ID ${escapeHtml(s.id)}</span><span class="badge">● Online</span></div><div class="actions"><button class="btn primary" id="copy">Copiar Loadstring</button><a class="btn" href="${endpoint}">Abrir recurso</a></div></section><section class="grid"><div class="panel"><h2>Loadstring</h2><div class="muted">Esta página es la vista pública del endpoint. El código servido se mantiene fuera de esta interfaz.</div><div class="loadbox"><div class="load">${escapeHtml(loadstring)}</div><button class="btn copybtn" id="copy2">Copiar</button></div><div class="notice">🔒 El enlace de ejecución sigue funcionando por separado para clientes compatibles.</div></div><div class="panel"><h2>Detalles</h2><div class="statgrid"><div class="stat"><span>Ejecuciones</span><strong>${Number(s.executions||0).toLocaleString('en-US')}</strong></div><div class="stat"><span>Modo</span><strong>${mode}</strong></div><div class="stat"><span>Proveedor</span><strong>${provider}</strong></div></div><div class="owner"><div class="avatar">${avatar ? '<img src="'+avatar+'" alt="">' : 'Q'}</div><div><b>${ownerName}</b><span>${ownerUser}</span></div></div></div></section><div class="foot">Qyrex · Página pública del script</div></main><script>const load=${JSON.stringify(loadstring)};async function cp(){try{await navigator.clipboard.writeText(load)}catch{const t=document.createElement('textarea');t.value=load;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}for(const id of ['copy','copy2']){const b=document.getElementById(id);if(b){const old=b.textContent;b.textContent='✓ Copiado';setTimeout(()=>b.textContent=old,1500)}}}document.getElementById('copy').onclick=cp;document.getElementById('copy2').onclick=cp;</script></body></html>`;
+}
+
 app.get('/script/:id', async (req,res)=>{
   try {
     const s=await Script.findOne({id:req.params.id}).select('id name description keyMode providerName executions createdAt ownerId').lean();
-    if(!s) return res.status(404).send('<!doctype html><title>QrexApi</title><body style="margin:0;background:#07070c;color:#fff;font:16px system-ui;display:grid;place-items:center;height:100vh">Script no encontrado</body>');
-    const owner=await User.findById(s.ownerId).select('username displayName avatar').lean(); const base=publicBase(req);
-    const data=JSON.stringify({id:s.id,name:s.name,description:s.description||'',keyMode:s.keyMode||'keyless',providerName:s.providerName||'',executions:s.executions||0,owner:owner?{username:owner.username,displayName:owner.displayName||owner.username,avatar:owner.avatar||''}:null,downloadUrl:base+'/api/v1/luascripts/public/'+s.id+'/download',loadstring:'loadstring(game:HttpGet(\"'+base+'/api/v1/luascripts/public/'+s.id+'/download\"))()'});
-    res.type('html').send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${String(s.name||'Qrex Script').replace(/[<>]/g,'')}</title><style>*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 15% -10%,rgba(124,92,255,.18),transparent 60%),radial-gradient(700px 500px at 100% 100%,rgba(0,212,255,.10),transparent 60%),#07070c;color:#f5f5f7;font:14px Inter,system-ui,sans-serif;min-height:100vh}.wrap{max-width:980px;margin:auto;padding:38px 20px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-weight:800;font-size:18px;display:flex;gap:10px;align-items:center}.dot{width:10px;height:10px;border-radius:50%;background:#7c5cff;box-shadow:0 0 22px #7c5cff}.btn{border:1px solid #2a2a3c;background:#11111a;color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;cursor:pointer;font-weight:600}.primary{background:#f4f4f5;color:#08080d;border-color:#fff}.card{border:1px solid #24243a;border-radius:24px;background:rgba(15,15,23,.86);backdrop-filter:blur(16px);padding:28px;box-shadow:0 35px 100px rgba(0,0,0,.35)}.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#777790}.title{font-size:clamp(34px,7vw,62px);line-height:1.02;margin:9px 0 14px}.desc{color:#a0a0b5;line-height:1.75;max-width:760px}.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.pill{padding:7px 10px;border-radius:999px;border:1px solid #2b2b40;background:#0e0e15;color:#a7a7bc}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.code{margin-top:18px;border:1px solid #24243a;background:#09090f;padding:15px;border-radius:16px;color:#a5ebc8;font:12px/1.65 ui-monospace,Consolas,monospace;word-break:break-word}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.stat{border:1px solid #24243a;background:#0d0d14;border-radius:16px;padding:15px}.small{font-size:11px;color:#66677e}.big{font-size:20px;font-weight:700;margin-top:5px}.foot{margin-top:18px;color:#5b5c73;font-size:11px}@media(max-width:700px){.stats{grid-template-columns:1fr}.card{padding:20px}.wrap{padding-top:22px}}</style></head><body><div class="wrap"><div class="top"><div class="brand"><span class="dot"></span>QrexApi</div><a class="btn" href="/">Dashboard</a></div><div class="card"><div class="kicker">Public script page</div><div class="title" id="name">Cargando…</div><div class="desc" id="desc"></div><div class="pills" id="pills"></div><div class="actions"><button class="btn primary" id="copy">Copiar Loadstring</button><a class="btn" id="download" target="_blank" rel="noopener">Abrir endpoint</a></div><div class="code" id="code"></div><div class="stats"><div class="stat"><div class="small">Ejecuciones</div><div class="big" id="exec">—</div></div><div class="stat"><div class="small">Modo</div><div class="big" id="mode">—</div></div><div class="stat"><div class="small">Autor</div><div class="big" id="owner">—</div></div></div><div class="foot">QrexApi · Página pública · El código fuente permanece protegido.</div></div></div><script>const d=${data};document.getElementById('name').textContent=d.name;document.getElementById('desc').textContent=d.description||'Script protegido servido por QrexApi.';document.getElementById('exec').textContent=Number(d.executions||0).toLocaleString();document.getElementById('mode').textContent=d.keyMode==='key'?'Key System':'Keyless';document.getElementById('owner').textContent=d.owner?.displayName||d.owner?.username||'QrexApi';document.getElementById('pills').innerHTML='<span class="pill">'+(d.providerName||'Public')+'</span><span class="pill">ID '+d.id.slice(0,10)+'</span>';document.getElementById('code').textContent=d.loadstring;document.getElementById('download').href=d.downloadUrl;document.getElementById('copy').onclick=async()=>{try{await navigator.clipboard.writeText(d.loadstring);document.getElementById('copy').textContent='✓ Copiado';setTimeout(()=>document.getElementById('copy').textContent='Copiar Loadstring',1800)}catch{}};</script></body></html>`);
-  } catch { res.status(500).send('QrexApi error'); }
+    if(!s) return res.status(404).send('<!doctype html><title>Qyrex</title><body style="margin:0;background:#07070c;color:#fff;font:16px system-ui;display:grid;place-items:center;height:100vh">Script no encontrado</body>');
+    const owner=await User.findById(s.ownerId).select('username displayName avatar').lean();
+    res.type('html').send(renderPublicScriptPage(s, owner, publicBase(req)));
+  } catch { res.status(500).send('Qyrex error'); }
 });
 
 app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luascripts/public/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
@@ -1170,7 +1191,7 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
     await banIp(ip, 'Auto-ban flood layer1');
     return res.status(403).type('text/plain').send('-- banned');
   }
-  if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
+  if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
 
   if (isScraperUa(ua) && !/roblox/i.test(ua)) {
     res.setHeader('Cache-Control', 'no-store');
@@ -1185,7 +1206,7 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
   const s = await Script.findOne({ id: req.params.id }).select('id');
   if (!s) return res.status(404).type('text/plain').send('-- not found');
 
-  const token = issueScriptToken(s.id, ip);
+  const token = issueScriptToken(s.id, ip, ua);
   const base = publicBase(req);
   const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
 
@@ -1207,7 +1228,7 @@ app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api
   if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
 
   const token = String(req.query.t || req.headers['x-qrex-token'] || '');
-  const ok = consumeScriptToken(req.params.id, token, ip);
+  const ok = consumeScriptToken(req.params.id, token, ip, ua);
   if (!ok) {
     if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
     res.setHeader('Cache-Control', 'no-store');
@@ -1638,17 +1659,10 @@ app.delete('/api/providers/:id', auth, needMongo, async (req, res) => {
 
 
 // ========== KEY GATE (GUI) + CLAIM (Linkvertise/Lootlabs/Work.ink) ==========
-function buildKeyGateLua({ apiBase, providerName, getKeyLink, scriptCode }) {
+function buildKeyGateLua({ apiBase, providerName, getKeyLink, scriptId }) {
   const api = String(apiBase || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const prov = String(providerName || 'Qrex').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const link = String(getKeyLink || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  // script as long string - escape for Lua long brackets
-  let body = String(scriptCode || '');
-  let eq = '';
-  while (body.includes(']' + eq + ']')) eq += '=';
-  const open = '[' + eq + '[';
-  const close = ']' + eq + ']';
-
   return `-- QrexApi Key System
 -- Protected by QyrexObf · #
 local HttpService = game:GetService("HttpService")
@@ -1662,7 +1676,7 @@ local SoundService = game:GetService("SoundService")
 local _API = "${api}"
 local _PROVIDER = "${prov}"
 local _GETKEY = "${link}"
-local _SCRIPT = ${open}${body}${close}
+local _SCRIPT_ID = "${String(scriptId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"
 
 local function GetGuiParent()
   local hOk, hui = pcall(function() return gethui() end)
@@ -1699,8 +1713,8 @@ function QyrexAPI.GetKeyLink()
 end
 function QyrexAPI.VerifyKey(key)
   key = tostring(key or ""):gsub("%s+", "")
-  if key == "" then return false end
-  local body = HttpService:JSONEncode({ key = key, hwid = getHwid(), provider = _PROVIDER })
+  if key == "" then return false, nil end
+  local body = HttpService:JSONEncode({ key = key, hwid = getHwid(), provider = _PROVIDER, scriptId = _SCRIPT_ID })
   local ok, res = pcall(function()
     return httpRequest({
       Url = _API .. "/api/keys/verify",
@@ -1709,9 +1723,10 @@ function QyrexAPI.VerifyKey(key)
       Body = body
     })
   end)
-  if not ok or not res or not res.Body then return false end
+  if not ok or not res or not res.Body then return false, nil end
   local ok2, data = pcall(function() return HttpService:JSONDecode(res.Body) end)
-  return ok2 and data and data.success == true
+  if not ok2 or not data or data.success ~= true then return false, nil end
+  return true, data.scriptToken
 end
 
 local cfg = {
@@ -1772,24 +1787,38 @@ local function notify(kind, title, content)
   task.delay(3, function() if sg then sg:Destroy() end end)
 end
 
-local function runScript()
-  local fn, err = loadstring(_SCRIPT)
-  if type(fn) == "function" then
-    local ok, e = pcall(fn)
-    if not ok then warn("[QyrexApi] script error:", e) end
-  else
-    warn("[QyrexApi] load failed:", err)
+local function runScriptFromToken(token)
+  if type(token) ~= "string" or token == "" then
+    warn("[QyrexApi] missing delivery token")
+    return false
   end
+  local url = _API .. "/api/v1/luascripts/cache/public/" .. _SCRIPT_ID .. "/download?t=" .. HttpService:UrlEncode(token)
+  local okFetch, src = pcall(function() return game:HttpGet(url) end)
+  if not okFetch or type(src) ~= "string" or #src < 8 then
+    warn("[QyrexApi] protected delivery failed")
+    return false
+  end
+  local fn, err = loadstring(src)
+  if type(fn) ~= "function" then
+    warn("[QyrexApi] protected compile failed:", err)
+    return false
+  end
+  local okRun, runErr = pcall(fn)
+  if not okRun then warn("[QyrexApi] script error:", runErr) end
+  return okRun
 end
 
 -- auto verify saved key
 do
   local saved = loadKey()
-  if saved ~= "" and QyrexAPI.VerifyKey(saved) then
-    notify("Success", "Welcome", "Key valida · cargando script")
-    task.wait(0.2)
-    runScript()
-    return
+  if saved ~= "" then
+    local valid, token = QyrexAPI.VerifyKey(saved)
+    if valid and token then
+      notify("Success", "Welcome", "Key valida · cargando script")
+      task.wait(0.2)
+      runScriptFromToken(token)
+      return
+    end
   end
 end
 
@@ -1936,14 +1965,14 @@ local function doVerify()
   verifying = true
   notify("Info", "Checking...", "Validando key")
   task.spawn(function()
-    local ok = QyrexAPI.VerifyKey(key)
+    local ok, token = QyrexAPI.VerifyKey(key)
     verifying = false
-    if ok then
+    if ok and token then
       saveKey(key)
       notify("Success", "Success!", "Key verificada")
       Screen:Destroy()
       task.wait(0.15)
-      runScript()
+      runScriptFromToken(token)
     else
       notify("Error", "Invalid Key", "Key incorrecta o expirada")
     end
@@ -2138,6 +2167,11 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
       return res.status(401).json({ success: false, error: 'Key expirada' });
     }
 
+    const requestedScriptId = String((req.body || {}).scriptId || '').trim();
+    if (!requestedScriptId) return res.status(400).json({ success: false, error: 'scriptId requerido' });
+    const scriptForKey = await Script.findOne({ id: requestedScriptId, providerId: String(doc.providerId) }).select('id');
+    if (!scriptForKey) return res.status(401).json({ success: false, error: 'Script no autorizado para esta key' });
+
     const hw = (hwid || '').trim();
     if (hw) {
       if (!doc.hwids.includes(hw)) {
@@ -2152,6 +2186,8 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
     doc.lastUsedAt = new Date();
     await doc.save();
 
+    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req));
+
     fireWebhooks(doc.ownerId, 'key_verify', {
       key: kstr.slice(0, 8) + '...',
       provider: doc.providerName,
@@ -2164,7 +2200,8 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
       provider: doc.providerName,
       expiresAt: doc.expiresAt,
       hwidLimit: doc.hwidLimit,
-      hwidsUsed: doc.hwids.length
+      hwidsUsed: doc.hwids.length,
+      scriptToken: deliveryToken
     });
   } catch (e) {
     console.error('verify', e);
