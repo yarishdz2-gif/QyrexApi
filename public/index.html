@@ -637,6 +637,108 @@
     .sidebar-collapse-btn{display:none!important}
   }
 
+
+/* ===== QYREX RESPONSIVE FINAL OVERRIDES ===== */
+html,body{width:100%;min-height:100%;overflow-x:hidden}
+body{background:#07070c}
+#appView{width:100%;min-height:100vh;overflow-x:hidden}
+#appView > .flex{width:100%;min-width:0}
+#appView main.main-content{min-width:0;margin-left:260px!important;width:calc(100% - 260px)!important}
+.main-content > .flex.items-center{
+  position:sticky;top:0;z-index:40;min-height:70px;padding-left:22px!important;padding-right:22px!important;
+  background:rgba(7,8,15,.78)!important;border-color:rgba(255,255,255,.08)!important;
+}
+/* VIP lives in the header on desktop instead of floating over content */
+.vip-top-btn{
+  position:static!important;right:auto!important;top:auto!important;z-index:auto!important;
+  flex:0 0 auto;white-space:nowrap;height:40px;padding:0 14px!important;
+  border-radius:11px!important;background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(245,158,11,.08))!important;
+}
+.notif-wrap{flex:0 0 auto}
+.notif-btn{height:40px;width:40px}
+#appView .p-8{min-width:0}
+#appView .page{min-width:0}
+#appView .page > *{min-width:0}
+#scriptsList .card,#hubList .card{min-width:0}
+.table-wrap,.overflow-x-auto{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{min-width:620px}
+textarea{max-width:100%}
+.editor-wrap{max-width:100%}
+
+/* desktop collapse */
+@media (min-width:901px){
+  .mobile-topbar{display:none!important}
+  .sidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:260px!important;max-width:none!important;transform:none!important;z-index:60!important}
+  body.sidebar-collapsed .sidebar{width:78px!important}
+  #appView main.main-content{margin-left:260px!important;width:calc(100% - 260px)!important}
+  body.sidebar-collapsed #appView main.main-content{margin-left:78px!important;width:calc(100% - 78px)!important}
+  .sidebar-overlay{display:none!important}
+  .sidebar-close-btn{display:none!important}
+  .main-content > .flex.items-center{padding-right:24px!important}
+  .p-8{padding:24px!important}
+}
+
+/* tablet */
+@media (max-width:1100px) and (min-width:901px){
+  #appView main.main-content{margin-left:220px!important;width:calc(100% - 220px)!important}
+  body.sidebar-collapsed #appView main.main-content{margin-left:78px!important;width:calc(100% - 78px)!important}
+  .sidebar{width:220px!important}
+  .sidebar .flex.items-center.gap-3.px-5.py-5{padding-left:16px!important;padding-right:12px!important}
+  .main-content > .flex.items-center{gap:8px!important}
+  .vip-top-btn{padding:0 12px!important}
+}
+
+/* mobile: clean drawer + compact header */
+@media (max-width:900px){
+  #appView main.main-content,#appView main.main-content{margin-left:0!important;width:100%!important}
+  .mobile-topbar{position:sticky!important;top:0!important;z-index:80!important}
+  .main-content > .flex.items-center{
+    position:sticky;top:70px;z-index:45;min-height:62px;padding:10px 12px!important;
+    gap:8px!important;flex-wrap:nowrap!important;
+  }
+  .main-content > .flex.items-center > .text-sm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vip-top-btn{height:38px!important;padding:0 11px!important;font-size:11px!important}
+  .vip-top-btn span{display:inline!important}
+  .notif-btn{width:38px;height:38px}
+  #appView .p-8{padding:14px!important}
+  .ov-hero{padding:20px!important;border-radius:18px!important}
+  .ov-title{font-size:clamp(24px,8vw,34px)!important}
+  .ov-sub{font-size:13px}
+  .ov-stat{padding:15px!important}
+  .card{border-radius:14px!important}
+  .profile-banner{height:130px!important}
+  .vip-modal-backdrop{padding:12px!important}
+  .vip-modal{max-height:calc(100vh - 24px);overflow:auto;border-radius:18px!important}
+  .vip-modal-head{padding:17px 16px!important;position:sticky;top:0;background:rgba(19,18,23,.98);z-index:2}
+  .vip-free{margin:14px 16px!important}
+  .vip-plans{padding:10px 16px!important;grid-template-columns:1fr!important}
+  .vip-note{padding:4px 16px 18px!important}
+  .search-box{width:100%;max-width:none}
+  .script-actions{width:100%}
+  .script-actions .btn-primary,.script-actions .btn-ghost{flex:1}
+  .editor-body{min-height:180px!important;max-height:55vh!important}
+  .studio-toolbar{width:100%}
+  .studio-toolbar .btn-ghost{flex:1}
+}
+
+@media (max-width:520px){
+  .main-content > .flex.items-center{top:62px;min-height:58px;padding:9px 10px!important}
+  .vip-top-btn{font-size:0!important;width:38px;padding:0!important;justify-content:center}
+  .vip-top-btn::before{content:'✦';font-size:15px}
+  .notif-btn{width:38px;height:38px}
+  #appView .p-8{padding:10px!important}
+  .ov-hero{padding:16px!important}
+  .ov-cta,.ov-ghost{width:100%;justify-content:center}
+  .vip-modal{width:100%}
+  .vip-plan{padding:16px!important}
+  .profile-grid{grid-template-columns:1fr!important}
+}
+
+/* avoid clipping rounded content and improve focus/interaction */
+button,input,textarea,select{font-family:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(251,191,36,.65);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+
 </style>
 </head>
 <body>
