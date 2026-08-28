@@ -7,7 +7,7 @@
 <meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   .vip-head-safe{display:none;height:0}.main-content{position:relative;z-index:1}
   *{box-sizing:border-box}
@@ -555,7 +555,7 @@
   .ov-sub{color:#8b8b9e;font-size:14px;max-width:46ch;line-height:1.6}
   .ov-cta{
     display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;
-    background:linear-gradient(135deg,#e8e8ed,#f4f4f5);color:#fff;font-weight:700;font-size:15px;
+    background:linear-gradient(135deg,#e8e8ed,#f4f4f5);color:#0a0a0f;font-weight:700;font-size:15px;
     box-shadow:0 18px 44px -18px rgba(255,255,255,.95);transition:transform .2s,box-shadow .2s,filter .2s;
   }
   .ov-cta:hover{transform:translateY(-2px);filter:brightness(1.06)}
@@ -643,6 +643,88 @@
     .sidebar-collapse-btn{display:none!important}
   }
 
+  /* ===== v5: image-safe + i18n + mobile polish (do not touch --lg-bg) ===== */
+  html,body{overflow-x:hidden;max-width:100%;-webkit-text-size-adjust:100%}
+  h1,.ov-title,.lg-title,.vip-price{font-family:Outfit,Inter,system-ui,sans-serif}
+  .stat-val,.ov-stat .val{font-variant-numeric:tabular-nums}
+
+  .ov-logo,.lg-mark img,.lg-topbar img,.lg-mobile-mark img,
+  .qx-ring img,.mt-brand img,.sidebar img[alt="Qrex"],.sidebar img[alt="QrexApi"]{
+    object-fit:cover!important;object-position:center;flex-shrink:0;
+    background:#12121a;display:block
+  }
+  .lg-photo{
+    background-repeat:no-repeat!important;
+    background-size:cover!important;
+    background-position:center!important
+  }
+  #loginView{overflow:hidden}
+
+  .ov-cta{color:#0a0a0f!important}
+  .ov-cta:hover,.ov-cta:focus{color:#0a0a0f!important;filter:brightness(1.04)}
+
+  .vip-top-btn{position:relative!important;top:auto!important;right:auto!important;z-index:5}
+  .top-tools{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+  .lang-switch{position:relative;z-index:40}
+  .lang-btn{
+    display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 12px;
+    border-radius:12px;border:1px solid #2a2a3a;background:rgba(17,17,24,.92);
+    color:#e4e4ed;font-size:11px;font-weight:800;letter-spacing:.08em;
+    cursor:pointer;transition:border-color .2s,transform .2s,background .2s
+  }
+  .lang-btn:hover{border-color:#e8e8ed;transform:translateY(-1px)}
+  .lang-btn svg{width:14px;height:14px;opacity:.85;flex-shrink:0}
+  .lang-menu{
+    display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:168px;
+    padding:6px;border-radius:14px;border:1px solid #2a2a3a;
+    background:rgba(12,12,18,.98);box-shadow:0 18px 50px rgba(0,0,0,.45);
+    backdrop-filter:blur(16px);z-index:80
+  }
+  .lang-switch.open .lang-menu{display:grid;gap:2px;animation:fadeUp .18s both}
+  .lang-menu button{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    width:100%;text-align:left;padding:10px 12px;border:0;border-radius:10px;
+    background:transparent;color:#c8c8d4;font-size:13px;font-weight:600;cursor:pointer
+  }
+  .lang-menu button:hover{background:#16161f;color:#fff}
+  .lang-menu button.on{background:#161618;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+  .lang-menu button small{font-size:10px;letter-spacing:.08em;color:#6b6b80;font-weight:800}
+  .lang-switch-login{position:fixed;top:16px;right:16px;z-index:5002;pointer-events:auto}
+  .lg-topbar{padding:0 110px}
+
+  .ov-hero{padding:clamp(20px,4vw,32px)}
+  .ov-cta,.ov-ghost{min-height:46px}
+
+  @media (max-width:900px){
+    .lang-switch-login{top:max(10px,env(safe-area-inset-top));right:10px}
+    .lg-topbar{top:max(12px,env(safe-area-inset-top));padding:0 92px}
+    .mobile-topbar{padding-top:max(10px,env(safe-area-inset-top));gap:8px}
+    .ov-hero .ov-cta,.ov-hero .ov-ghost{width:100%;justify-content:center}
+    .ov-logo{width:52px;height:52px;border-radius:16px}
+    .vip-modal{max-height:min(92dvh,860px);overflow:auto;-webkit-overflow-scrolling:touch}
+    .vip-modal-backdrop{padding:10px;align-items:flex-end}
+    .vip-modal{border-radius:18px 18px 12px 12px}
+    .top-tools{gap:6px}
+    .lang-btn{height:40px;padding:0 10px}
+    .notif-btn{width:40px;height:40px}
+    body{padding-bottom:env(safe-area-inset-bottom)}
+  }
+  @media (max-width:480px){
+    .lg-title{font-size:26px}
+    .ov-title{font-size:1.55rem}
+    .lang-switch-login .lang-btn span:not([data-lang-label]){display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .lang-switch.open .lang-menu{animation:none}
+  }
+  .mobile-topbar .lang-switch{display:none}
+  .mobile-topbar .mt-brand{min-width:0;flex:1}
+  @media (max-width:900px){
+    .mobile-topbar .lang-switch{display:block}
+    main .top-tools .lang-switch{display:none}
+  }
+
 </style>
 </head>
 <body>
@@ -651,8 +733,8 @@
 
 <!-- LOADER GLOBAL -->
 <div class="qx-loader show" id="qxLoader">
-  <div class="qx-ring"><img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="QrexApi"/></div>
-  <div class="qx-ltext" id="qxLoaderText">Cargando <b>QrexApi</b>...</div>
+  <div class="qx-ring"><img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/></div>
+  <div class="qx-ltext" id="qxLoaderText" data-i18n-html="login.loading">Cargando <b>QrexApi</b>...</div>
   <div class="qx-bar"><i></i></div>
 </div>
 
@@ -662,15 +744,26 @@
     <h3 id="qxModalTitle">Terminos</h3>
     <div class="qx-upd" id="qxModalDate">Ultima actualizacion: agosto 2026</div>
     <div id="qxModalBody"></div>
-    <button class="btn-primary qx-modal-close" onclick="closeLegal()">Entendido</button>
+    <button class="btn-primary qx-modal-close" onclick="closeLegal()" data-i18n="login.ok">Entendido</button>
   </div>
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
 <div id="loginView" class="min-h-screen flex items-center justify-center p-6">
   <div class="lg-topbar">
-    <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
+    <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
     <b>QrexApi</b>
+  </div>
+  <div class="lang-switch lang-switch-login" data-lang-switch>
+    <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <span data-lang-label>ES</span>
+    </button>
+    <div class="lang-menu" role="listbox">
+      <button type="button" data-set-lang="es">Español <small>ES</small></button>
+      <button type="button" data-set-lang="en">English <small>EN</small></button>
+      <button type="button" data-set-lang="pt">Português <small>PT</small></button>
+    </div>
   </div>
   <div class="lg-photo"></div>
   <div class="lg-photo-tint"></div>
@@ -684,53 +777,53 @@
     <section class="lg-aside">
       <div>
         <div class="lg-mark">
-          <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
+          <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
           <b>QrexApi</b>
         </div>
-        <p class="lg-kicker" style="margin-top:34px">Panel privado</p>
-        <h1 class="lg-title">Tus scripts,<br/><em>bajo llave.</em></h1>
-        <p class="lg-sub">Subes el script, generas las keys y ves quien lo ejecuta. Sin vueltas.</p>
+        <p class="lg-kicker" style="margin-top:34px" data-i18n="login.kicker">Panel privado</p>
+        <h1 class="lg-title" data-i18n-html="login.title">Tus scripts,<br/><em>bajo llave.</em></h1>
+        <p class="lg-sub" data-i18n="login.sub">Subes el script, generas las keys y ves quien lo ejecuta. Sin vueltas.</p>
         <ul class="lg-points">
-          <li><span>&#10003;</span> Loadstrings con version y rollback</li>
-          <li><span>&#10003;</span> Keys con caducidad y HWID lock</li>
-          <li><span>&#10003;</span> Webhooks a tu Discord al instante</li>
+          <li><span>&#10003;</span> <span data-i18n="login.p1">Loadstrings con version y rollback</span></li>
+          <li><span>&#10003;</span> <span data-i18n="login.p2">Keys con caducidad y HWID lock</span></li>
+          <li><span>&#10003;</span> <span data-i18n="login.p3">Webhooks a tu Discord al instante</span></li>
         </ul>
       </div>
-      <div class="lg-foot"><i class="lg-dot"></i> API operativa &middot; ~80ms</div>
+      <div class="lg-foot"><i class="lg-dot"></i> <span data-i18n="login.foot">API operativa · ~80ms</span></div>
     </section>
 
     <section class="lg-panel">
       <div class="lg-mobile-mark">
-        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
         <b>QrexApi</b>
       </div>
 
       <div class="lg-switch">
         <i class="lg-thumb" id="tabThumb"></i>
-        <button id="tabLogin" class="on" onclick="setTab('login')">Entrar</button>
-        <button id="tabReg" onclick="setTab('register')">Registrarse</button>
+        <button id="tabLogin" class="on" onclick="setTab('login')" data-i18n="login.enter">Entrar</button>
+        <button id="tabReg" onclick="setTab('register')" data-i18n="login.register">Registrarse</button>
       </div>
 
       <a class="lg-discord" href="/auth/discord">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4a9.6 9.6 0 0 0-9.6 9.6c0 1.72.45 3.33 1.25 4.73L2.4 21.6l5.05-1.22A9.55 9.55 0 0 0 12 21.6a9.6 9.6 0 0 0 0-19.2Zm-3.5 8.3c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm7 0c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm-7.6 4.9h8.2a4.2 4.2 0 0 1-8.2 0Z"/></svg>
-        Continuar con Discord
+        <span data-i18n="login.discord">Continuar con Discord</span>
       </a>
 
-      <div class="lg-or">o con tu cuenta</div>
+      <div class="lg-or" data-i18n="login.or">o con tu cuenta</div>
 
-      <div class="lg-field"><input id="authUser" type="text" placeholder="Usuario" autocomplete="username"/></div>
-      <div class="lg-field"><input id="authPass" type="password" placeholder="Contrase&ntilde;a" autocomplete="current-password"/></div>
+      <div class="lg-field"><input id="authUser" type="text" placeholder="Usuario" data-i18n-placeholder="login.user" autocomplete="username"/></div>
+      <div class="lg-field"><input id="authPass" type="password" placeholder="Contraseña" data-i18n-placeholder="login.pass" autocomplete="current-password"/></div>
       <button id="authBtn" onclick="doAuth()" class="btn-primary w-full" style="padding:13px">Entrar</button>
       <p id="loginErr" class="text-red-400 text-sm text-center hidden mt-3"></p>
 
-      <p class="lg-legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de QrexApi.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
+      <p class="lg-legal" data-i18n-html="login.legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de QrexApi.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
       <div class="lg-links">
-        <button onclick="openLegal('terms')">Terminos</button><span>&middot;</span>
-        <button onclick="openLegal('privacy')">Privacidad</button><span>&middot;</span>
-        <button onclick="openLegal('cookies')">Cookies</button><span>&middot;</span>
-        <button onclick="openLegal('support')">Soporte</button>
+        <button onclick="openLegal('terms')" data-i18n="login.terms">Terminos</button><span>&middot;</span>
+        <button onclick="openLegal('privacy')" data-i18n="login.privacy">Privacidad</button><span>&middot;</span>
+        <button onclick="openLegal('cookies')" data-i18n="login.cookies">Cookies</button><span>&middot;</span>
+        <button onclick="openLegal('support')" data-i18n="login.support">Soporte</button>
       </div>
-      <p class="lg-legal" style="margin-top:14px;color:#3f3f52">&copy; 2026 QrexApi &middot; Todos los derechos reservados</p>
+      <p class="lg-legal" style="margin-top:14px;color:#3f3f52" data-i18n-html="login.rights">&copy; 2026 QrexApi · Todos los derechos reservados</p>
 
     </section>
   </div>
@@ -740,34 +833,34 @@
 <div id="vipModal" class="vip-modal-backdrop" onclick="if(event.target===this)closeVipModal()">
   <div class="vip-modal" role="dialog" aria-modal="true" aria-labelledby="vipModalTitle">
     <div class="vip-modal-head">
-      <div><div id="vipModalTitle" class="text-lg font-bold" style="color:#fbbf24">✦ Qyrex VIP Licenses</div><div class="text-xs mt-1" style="color:#757589">Elige una licencia y abre un ticket para comprarla.</div></div>
+      <div><div id="vipModalTitle" class="text-lg font-bold" style="color:#fbbf24" data-i18n="vip.title">✦ Qyrex VIP Licenses</div><div class="text-xs mt-1" style="color:#757589" data-i18n="vip.sub">Elige una licencia y abre un ticket para comprarla.</div></div>
       <button class="btn-ghost" onclick="closeVipModal()" aria-label="Cerrar">✕</button>
     </div>
-    <div class="vip-free"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-semibold">FREE</div><div class="text-xs mt-1">Para empezar: acceso básico a Qyrex con límites estándar.</div></div><span class="chip">INCLUIDO</span></div></div>
+    <div class="vip-free"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-semibold">FREE</div><div class="text-xs mt-1" data-i18n="vip.freeDesc">Para empezar: acceso básico a Qyrex con límites estándar.</div></div><span class="chip" data-i18n="vip.included">INCLUIDO</span></div></div>
     <div class="vip-compare">
-      <div class="vip-compare-card free"><div class="vc-head"><div><span class="vc-badge">FREE</span><div class="vc-title">Para empezar</div></div><span class="vc-state">● ACTIVO</span></div><div class="vc-list">
-        <div><span>✓</span> Acceso básico a la plataforma</div><div><span>✓</span> Uso con límites estándar</div><div><span>✓</span> Publicación básica de scripts</div><div><span>•</span> Sin extras VIP</div>
+      <div class="vip-compare-card free"><div class="vc-head"><div><span class="vc-badge">FREE</span><div class="vc-title" data-i18n="vip.start">Para empezar</div></div><span class="vc-state" data-i18n="vip.active">● ACTIVO</span></div><div class="vc-list">
+        <div><span>✓</span> <span data-i18n="vip.f1">Acceso básico a la plataforma</span></div><div><span>✓</span> <span data-i18n="vip.f2">Uso con límites estándar</span></div><div><span>✓</span> <span data-i18n="vip.f3">Publicación básica de scripts</span></div><div><span>•</span> <span data-i18n="vip.f4">Sin extras VIP</span></div>
       </div></div>
-      <div class="vip-compare-card pro"><div class="vc-head"><div><span class="vc-badge vip">✦ VIP</span><div class="vc-title">Para uso intensivo</div></div><span class="vc-state vip">✦ PREMIUM</span></div><div class="vc-list">
-        <div><span>✓</span> Todo lo incluido en FREE</div><div><span>✓</span> Límites y cuotas superiores*</div><div><span>✓</span> Funciones y temas exclusivos VIP</div><div><span>✓</span> Prioridad en futuras mejoras*</div>
+      <div class="vip-compare-card pro"><div class="vc-head"><div><span class="vc-badge vip">✦ VIP</span><div class="vc-title" data-i18n="vip.intense">Para uso intensivo</div></div><span class="vc-state vip">✦ PREMIUM</span></div><div class="vc-list">
+        <div><span>✓</span> <span data-i18n="vip.v1">Todo lo incluido en FREE</span></div><div><span>✓</span> <span data-i18n="vip.v2">Límites y cuotas superiores*</span></div><div><span>✓</span> <span data-i18n="vip.v3">Funciones y temas exclusivos VIP</span></div><div><span>✓</span> <span data-i18n="vip.v4">Prioridad en futuras mejoras*</span></div>
       </div></div>
     </div>
-    <div class="vip-section-title"><span>Comparación rápida</span><small>*Según la licencia y las funciones habilitadas</small></div>
+    <div class="vip-section-title"><span data-i18n="vip.compare">Comparación rápida</span><small data-i18n="vip.compareNote">*Según la licencia y las funciones habilitadas</small></div>
     <div class="vip-matrix">
-      <div class="vip-row vip-row-head"><span>Característica</span><b>FREE</b><b>VIP</b></div>
-      <div class="vip-row"><span>Acceso al dashboard</span><b>✓</b><b class="gold">✓</b></div>
-      <div class="vip-row"><span>API / scripts</span><b>Estándar</b><b class="gold">✓ Premium</b></div>
-      <div class="vip-row"><span>Temas exclusivos</span><b>—</b><b class="gold">✓</b></div>
-      <div class="vip-row"><span>Personalización VIP</span><b>—</b><b class="gold">✓</b></div>
-      <div class="vip-row"><span>Experiencia prioritaria</span><b>—</b><b class="gold">✓</b></div>
+      <div class="vip-row vip-row-head"><span data-i18n="vip.feature">Característica</span><b>FREE</b><b>VIP</b></div>
+      <div class="vip-row"><span data-i18n="vip.r1">Acceso al dashboard</span><b>✓</b><b class="gold">✓</b></div>
+      <div class="vip-row"><span data-i18n="vip.r2">API / scripts</span><b>Estándar</b><b class="gold">✓ Premium</b></div>
+      <div class="vip-row"><span data-i18n="vip.r3">Temas exclusivos</span><b>—</b><b class="gold">✓</b></div>
+      <div class="vip-row"><span data-i18n="vip.r4">Personalización VIP</span><b>—</b><b class="gold">✓</b></div>
+      <div class="vip-row"><span data-i18n="vip.r5">Experiencia prioritaria</span><b>—</b><b class="gold">✓</b></div>
     </div>
-    <div class="vip-value"><div><div class="text-xs font-bold" style="color:#fbbf24">✦ ¿Por qué VIP?</div><div class="text-xs mt-1">Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.</div></div><div class="vip-save">10 MESES • MEJOR VALOR</div></div>
+    <div class="vip-value"><div><div class="text-xs font-bold" style="color:#fbbf24" data-i18n="vip.why">✦ ¿Por qué VIP?</div><div class="text-xs mt-1" data-i18n="vip.whySub">Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.</div></div><div class="vip-save" data-i18n="vip.best">10 MESES • MEJOR VALOR</div></div>
     <div class="vip-plans">
-      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 MES</div><div class="vip-price mt-3">$30 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b">Acceso VIP por 30 días.</div><button class="btn-primary w-full" onclick="buyVip('1 mes','30 MXN')">Comprar</button></div>
-      <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b">Una opción de mejor valor para uso prolongado.</div><button class="btn-primary w-full" onclick="buyVip('10 meses','150 MXN')">Comprar</button></div>
-      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 AÑO</div><div class="vip-price mt-3">$500 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b">Acceso VIP por 12 meses.</div><button class="btn-primary w-full" onclick="buyVip('1 año','500 MXN')">Comprar</button></div>
+      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 MES</div><div class="vip-price mt-3">$30 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m1">Acceso VIP por 30 días.</div><button class="btn-primary w-full" onclick="buyVip('1 mes','30 MXN')" data-i18n="vip.buy">Comprar</button></div>
+      <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m10">Una opción de mejor valor para uso prolongado.</div><button class="btn-primary w-full" onclick="buyVip('10 meses','150 MXN')" data-i18n="vip.buy">Comprar</button></div>
+      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 AÑO</div><div class="vip-price mt-3">$500 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m12">Acceso VIP por 12 meses.</div><button class="btn-primary w-full" onclick="buyVip('1 año','500 MXN')" data-i18n="vip.buy">Comprar</button></div>
     </div>
-    <div class="vip-note">Al pulsar comprar se abrirá Discord. <b style="color:#a8a8b8">Saca un ticket para contactarte con el owner.</b></div>
+    <div class="vip-note" data-i18n-html="vip.note">Al pulsar comprar se abrirá Discord. <b style="color:#a8a8b8">Saca un ticket para contactarte con el owner.</b></div>
   </div>
 </div>
 
@@ -776,9 +869,20 @@
   <canvas id="vipParticleCanvas"></canvas>
   <div class="mobile-topbar">
     <div class="mt-brand">
-      <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
+      <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
       <b>QrexApi</b>
     </div>
+    <div class="lang-switch" data-lang-switch>
+    <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <span data-lang-label>ES</span>
+    </button>
+    <div class="lang-menu" role="listbox">
+      <button type="button" data-set-lang="es">Español <small>ES</small></button>
+      <button type="button" data-set-lang="en">English <small>EN</small></button>
+      <button type="button" data-set-lang="pt">Português <small>PT</small></button>
+    </div>
+  </div>
     <button type="button" class="mt-open" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" onclick="toggleSidebar()">
       <span class="burger-icon" aria-hidden="true">
         <span></span><span></span><span></span>
@@ -795,7 +899,7 @@
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
       <div class="flex items-center gap-3 px-5 py-5">
-        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/>
         <div class="min-w-0">
           <div class="font-bold text-lg tracking-tight leading-tight">QrexApi</div>
           <a class="qyrex-credit mt-1" href="#" target="_blank" rel="noopener" title="Ofuscador QyrexObf">
@@ -805,92 +909,92 @@
         </div>
       </div>
       <nav class="flex-1 overflow-y-auto main-scroll pb-4">
-        <div class="nav-section">GENERAL</div>
+        <div class="nav-section" data-i18n="nav.general">GENERAL</div>
         <button class="nav-item active" data-page="overview" onclick="go('overview')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
-          Overview
+          <span data-i18n="nav.overview">Overview</span>
         </button>
         <button class="nav-item" data-page="executions" onclick="go('executions')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Analytics
+          <span data-i18n="nav.analytics">Analytics</span>
         </button>
         <button class="nav-item" data-page="logs" onclick="go('logs')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-          Logs
+          <span data-i18n="nav.logs">Logs</span>
         </button>
         <button class="nav-item" data-page="status" onclick="go('status')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          System Status
+          <span data-i18n="nav.status">System Status</span>
         </button>
 
-        <div class="nav-section">SCRIPTS</div>
+        <div class="nav-section" data-i18n="nav.scripts">SCRIPTS</div>
         <button class="nav-item" data-page="scripts" onclick="go('scripts')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-          Lua Scripts
+          <span data-i18n="nav.lua">Lua Scripts</span>
         </button>
         <button class="nav-item" data-page="create" onclick="if(!editingId)resetCreateForm();go('create')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-          Create Script
+          <span data-i18n="nav.create">Create Script</span>
         </button>
         <button class="nav-item" data-page="studio" onclick="go('studio')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-          Studio
+          <span data-i18n="nav.studio">Studio</span>
         </button>
         <button class="nav-item" data-page="hub" onclick="go('hub')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-          Script Hub
+          <span data-i18n="nav.hub">Script Hub</span>
         </button>
         <button class="nav-item" data-page="templates" onclick="go('templates')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-          Templates
+          <span data-i18n="nav.templates">Templates</span>
         </button>
 
-        <div class="nav-section">KEY SYSTEM</div>
+        <div class="nav-section" data-i18n="nav.keysys">KEY SYSTEM</div>
         <button class="nav-item" data-page="keys" onclick="go('keys')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          Keys & Providers
+          <span data-i18n="nav.keys">Keys & Providers</span>
         </button>
         <button class="nav-item" data-page="webhooks" onclick="go('webhooks')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          Webhooks
+          <span data-i18n="nav.webhooks">Webhooks</span>
         </button>
 
-        <div class="nav-section">CLOUD</div>
+        <div class="nav-section" data-i18n="nav.cloud">CLOUD</div>
         <button class="nav-item" data-page="assets" onclick="go('assets')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-          My Assets
+          <span data-i18n="nav.assets">My Assets</span>
         </button>
 
-        <div class="nav-section">COMMUNITY</div>
+        <div class="nav-section" data-i18n="nav.community">COMMUNITY</div>
         <button class="nav-item" data-page="leaderboard" onclick="go('leaderboard')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Leaderboard
+          <span data-i18n="nav.leaderboard">Leaderboard</span>
         </button>
         <button class="nav-item" data-page="changelog" onclick="go('changelog')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-          Changelog
+          <span data-i18n="nav.changelog">Changelog</span>
         </button>
 
-        <div class="nav-section">DEVELOPER</div>
+        <div class="nav-section" data-i18n="nav.dev">DEVELOPER</div>
         <button class="nav-item" data-page="apiinfo" onclick="go('apiinfo')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          API Info
+          <span data-i18n="nav.apiinfo">API Info</span>
         </button>
         <button class="nav-item" data-page="playground" onclick="go('playground')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          API Playground
+          <span data-i18n="nav.playground">API Playground</span>
         </button>
 
-        <div class="nav-section admin-only" style="display:none">ADMIN</div>
+        <div class="nav-section admin-only" style="display:none" data-i18n="nav.adminsec">ADMIN</div>
         <button class="nav-item admin-only" style="display:none" data-page="admin" onclick="go('admin')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          Admin Panel
+          <span data-i18n="nav.admin">Admin Panel</span>
         </button>
 
-        <div class="nav-section">ACCOUNT</div>
+        <div class="nav-section" data-i18n="nav.account">ACCOUNT</div>
         <button class="nav-item" data-page="settings" onclick="go('settings')">
           <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          Settings
+          <span data-i18n="nav.settings">Settings</span>
         </button>
 </nav>
       <div class="user-pill">
@@ -901,7 +1005,7 @@
             <span id="sidebarVip" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded" style="background:#3d3418;color:#fbbf24;border:1px solid #5c4d1f">VIP</span>
             <span id="sidebarAdmin" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded" style="background:#161618;color:#f4f4f5;border:1px solid #3b2a5c">ADMIN</span>
           </div>
-          <div class="text-xs" style="color:#5a5a6e" id="sidebarRole">Usuario</div>
+          <div class="text-xs" style="color:#5a5a6e" id="sidebarRole" data-i18n="role.user">Usuario</div>
         </div>
         <button onclick="logout()" title="Salir" style="background:none;border:none;color:#5a5a6e;cursor:pointer;padding:4px">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -912,9 +1016,22 @@
     <main class="flex-1 min-h-screen main-content" style="margin-left:260px">
       <div class="vip-head-safe" aria-hidden="true"></div>
       <div class="flex items-center px-8 py-4 border-b" style="border-color:#1a1a24;gap:10px">
-        <div class="text-sm flex-1 min-w-0" style="color:#5a5a6e">Dashboard <span style="color:#3a3a4a">›</span> <span id="breadcrumb" style="color:#a0a0b0">Overview</span></div>
-        <button type="button" class="vip-top-btn" onclick="openVipModal()" aria-label="Ver licencias VIP">✦ <span>VIP</span></button>
-        <div class="notif-wrap" id="notifWrap"><button class="notif-btn" onclick="toggleNotifications()" aria-label="Notificaciones"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="notifDot" class="notif-dot"></span></button><div id="notifPanel" class="notif-panel"><div class="flex items-center justify-between mb-2"><div class="font-semibold">Notificaciones</div><button class="btn-ghost text-xs" onclick="markAllNotificationsRead()">Marcar leídas</button></div><div id="notifList" class="notif-list"><div class="notif-empty">Cargando…</div></div></div></div>
+        <div class="text-sm flex-1 min-w-0" style="color:#5a5a6e"><span data-i18n="dash.crumb">Dashboard</span> <span style="color:#3a3a4a">›</span> <span id="breadcrumb" style="color:#a0a0b0">Overview</span></div>
+        <div class="top-tools">
+        <div class="lang-switch" data-lang-switch>
+    <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <span data-lang-label>ES</span>
+    </button>
+    <div class="lang-menu" role="listbox">
+      <button type="button" data-set-lang="es">Español <small>ES</small></button>
+      <button type="button" data-set-lang="en">English <small>EN</small></button>
+      <button type="button" data-set-lang="pt">Português <small>PT</small></button>
+    </div>
+  </div>
+        <button type="button" class="vip-top-btn" onclick="openVipModal()" aria-label="Ver licencias VIP" data-i18n-title="vip.aria">✦ <span>VIP</span></button>
+        <div class="notif-wrap" id="notifWrap"><button class="notif-btn" onclick="toggleNotifications()" aria-label="Notificaciones"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="notifDot" class="notif-dot"></span></button><div id="notifPanel" class="notif-panel"><div class="flex items-center justify-between mb-2"><div class="font-semibold" data-i18n="notif.title">Notificaciones</div><button class="btn-ghost text-xs" onclick="markAllNotificationsRead()" data-i18n="notif.read">Marcar leídas</button></div><div id="notifList" class="notif-list"><div class="notif-empty" data-i18n="notif.loading">Cargando…</div></div></div></div>
+        </div>
       </div>
 
       <div class="p-8">
@@ -922,43 +1039,43 @@
         <section id="page-overview" class="page">
           <div class="ov-hero">
             <div class="flex flex-wrap items-center gap-5">
-              <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="QrexApi"/>
+              <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/>
               <div class="min-w-0">
-                <div class="ov-kicker">QrexApi &middot; Panel privado</div>
-                <h1 class="ov-title">Tus scripts,<br/><em>bajo control.</em></h1>
-                <p class="ov-sub">Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
+                <div class="ov-kicker" data-i18n="ov.kicker">QrexApi · Panel privado</div>
+                <h1 class="ov-title" data-i18n-html="ov.title">Tus scripts,<br/><em>bajo control.</em></h1>
+                <p class="ov-sub" data-i18n="ov.sub">Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
               </div>
             </div>
             <div class="flex flex-wrap gap-3 mt-7">
               <button type="button" class="ov-cta" onclick="resetCreateForm();go('create')">
                 <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                Create Script
+                <span data-i18n="ov.create">Create Script</span>
               </button>
-              <button type="button" class="ov-ghost" onclick="go('scripts')">Mis scripts</button>
-              <button type="button" class="ov-ghost" onclick="toggleSidebar()">Abrir panel</button>
+              <button type="button" class="ov-ghost" onclick="go('scripts')" data-i18n="ov.myscripts">Mis scripts</button>
+              <button type="button" class="ov-ghost" onclick="toggleSidebar()" data-i18n="ov.panel">Abrir panel</button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             <div class="ov-stat">
-              <div class="lbl">Scripts</div>
+              <div class="lbl" data-i18n="ov.scripts">Scripts</div>
               <div class="val" id="stScripts">0</div>
             </div>
             <div class="ov-stat">
-              <div class="lbl">Ejecuciones totales</div>
+              <div class="lbl" data-i18n="ov.exec">Ejecuciones totales</div>
               <div class="val" style="color:#f4f4f5" id="stExec">0</div>
             </div>
             <div class="ov-stat">
-              <div class="lbl">Estado</div>
+              <div class="lbl" data-i18n="ov.state">Estado</div>
               <div class="flex items-center gap-2 mt-4">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                <span class="text-sm font-semibold text-emerald-400">Online</span>
+                <span class="text-sm font-semibold text-emerald-400" data-i18n="ov.online">Online</span>
               </div>
             </div>
           </div>
 
           <div class="card p-5 mt-6">
-            <div class="text-sm font-semibold mb-4">Ejecuciones (ultimos 7 dias)</div>
+            <div class="text-sm font-semibold mb-4" data-i18n="ov.chart">Ejecuciones (últimos 7 días)</div>
             <canvas id="chartOverview" height="120"></canvas>
           </div>
         </section>
@@ -966,13 +1083,13 @@
         <!-- SCRIPTS LIST -->
         <section id="page-scripts" class="page hidden">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h1 class="text-2xl font-bold">Lua Scripts</h1>
+            <h1 class="text-2xl font-bold" data-i18n="nav.lua">Lua Scripts</h1>
             <div class="flex items-center gap-3">
               <div class="search-box">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                <input id="scriptSearch" placeholder="Buscar script..." oninput="filterScripts()" />
+                <input id="scriptSearch" placeholder="Buscar script..." data-i18n-placeholder="scripts.search" oninput="filterScripts()" />
               </div>
-              <button onclick="resetCreateForm();go('create')" class="btn-primary text-sm py-2.5 px-4">+ Create</button>
+              <button onclick="resetCreateForm();go('create')" class="btn-primary text-sm py-2.5 px-4">+ <span data-i18n="scripts.create">Create</span></button>
             </div>
           </div>
           <div id="scriptsList" class="grid gap-3"></div>
@@ -983,7 +1100,7 @@
         <section id="page-hub" class="page hidden">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 class="text-2xl font-bold">Script Hub</h1>
+              <h1 class="text-2xl font-bold" data-i18n="nav.hub">Script Hub</h1>
               <p class="text-xs mt-1" style="color:#5a5a6e">Scripts públicos de la comunidad · mínimo 500 ejecuciones para publicar</p>
             </div>
             <button onclick="document.getElementById('hubPublishCard').classList.toggle('hidden')" class="btn-primary text-sm py-2.5 px-4">+ Publicar</button>
@@ -1024,7 +1141,7 @@
         <section id="page-keys" class="page hidden">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 class="text-2xl font-bold">Key System</h1>
+              <h1 class="text-2xl font-bold" data-i18n="page.keys">Key System</h1>
               <p class="text-xs mt-1" style="color:#5a5a6e">Providers · Keys · HWID · Verificación Roblox</p>
             </div>
             <div class="flex gap-2">
@@ -1109,8 +1226,8 @@
                   <svg width="18" height="18" fill="none" stroke="#f4f4f5" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                 </div>
                 <div>
-                  <div class="font-semibold" id="createTitle">Create Script</div>
-                  <div class="text-xs" style="color:#5a5a6e" id="createSubtitle">Create or modify Lua script</div>
+                  <div class="font-semibold" id="createTitle" data-i18n="nav.create">Create Script</div>
+                  <div class="text-xs" style="color:#5a5a6e" id="createSubtitle" data-i18n="create.sub">Create or modify Lua script</div>
                 </div>
               </div>
             </div>
@@ -1207,11 +1324,11 @@ local Players = game:GetService(&quot;Players&quot;)
             </div>
 
             <div class="flex items-center justify-end gap-3 px-6 py-4 border-t" style="border-color:#1e1e2a;background:#0d0d14">
-              <button type="button" onclick="resetCreateForm();go('scripts')" class="btn-ghost px-5 py-2.5">Cancel</button>
+              <button type="button" onclick="resetCreateForm();go('scripts')" class="btn-ghost px-5 py-2.5" data-i18n="create.cancel">Cancel</button>
               <input type="hidden" id="editId" value=""/>
               <button id="createBtn" onclick="createScript()" class="btn-primary px-5 py-2.5 flex items-center gap-2">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                <span id="createBtnLabel">Create</span>
+                <span id="createBtnLabel" data-i18n="create.btn">Create</span>
               </button>
             </div>
           </div>
@@ -1219,11 +1336,11 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
         <section id="page-logs" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2">Logs</h1>
-          <p class="text-xs mb-4" style="color:#5a5a6e">Quién ejecuta tus scripts · ban por HWID o IP</p>
+          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.logs">Logs</h1>
+          <p class="text-xs mb-4" style="color:#5a5a6e" data-i18n="logs.sub">Quién ejecuta tus scripts · ban por HWID o IP</p>
           <div class="log-summary" id="logsSummary">Cargando…</div>
           <div class="mb-4 flex gap-2">
-            <input id="logsSearch" placeholder="Buscar usuario / executor / IP…" oninput="filterLogs()" class="flex-1"/>
+            <input id="logsSearch" placeholder="Buscar usuario / executor / IP…" data-i18n-placeholder="logs.search" oninput="filterLogs()" class="flex-1"/>
             <button class="btn-ghost text-sm" onclick="loadLogs()">Refresh</button>
           </div>
           <div id="logsList"></div>
@@ -1231,7 +1348,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ANALYTICS / EXECUTIONS CON GRÁFICAS -->
         <section id="page-executions" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">Analytics</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.analytics">Analytics</h1>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             <div class="card p-5">
               <div class="text-sm font-semibold mb-1">Ejecuciones por día</div>
@@ -1260,7 +1377,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- API INFO -->
         <section id="page-apiinfo" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">API Info</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.apiinfo">API Info</h1>
           <div class="card p-6 max-w-2xl space-y-4">
             <div>
               <div class="text-xs font-medium mb-1" style="color:#6b6b80">Base URL</div>
@@ -1281,7 +1398,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ADMIN -->
         <section id="page-admin" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2">Admin Panel</h1>
+          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.admin">Admin Panel</h1>
           <p class="text-xs mb-6" style="color:#5a5a6e">Solo visible para OWNER / admin</p>
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="adminStats">
             <div class="card p-4"><div class="text-xs" style="color:#6b6b80">Users</div><div class="text-2xl font-bold" id="aUsers">—</div></div>
@@ -1370,7 +1487,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- WEBHOOKS -->
         <section id="page-webhooks" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2">Webhooks</h1>
+          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.webhooks">Webhooks</h1>
           <p class="text-xs mb-6" style="color:#5a5a6e">Alertas a Discord cuando verifican una key o ejecutan un script</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
             <input id="whUrl" placeholder="https://discord.com/api/webhooks/..."/>
@@ -1382,7 +1499,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- LEADERBOARD -->
         <section id="page-leaderboard" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">Leaderboard</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.leaderboard">Leaderboard</h1>
           <div class="card overflow-hidden max-w-2xl">
             <table>
               <thead><tr><th>#</th><th>Dev</th><th>Scripts</th><th>Ejecuciones</th></tr></thead>
@@ -1393,7 +1510,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ASSETS -->
         <section id="page-assets" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2">My Assets</h1>
+          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.assets">My Assets</h1>
           <p class="text-xs mb-6" style="color:#5a5a6e">Nube privada: texto, URLs, snippets UI (máx 20 free / 100 VIP)</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
             <input id="assetName" placeholder="Nombre"/>
@@ -1406,13 +1523,13 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- TEMPLATES -->
         <section id="page-templates" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">Templates / Snippets</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="page.templates">Templates / Snippets</h1>
           <div id="tplList" class="grid gap-3 max-w-3xl"></div>
         </section>
 
         <!-- STATUS -->
         <section id="page-status" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">System Status</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.status">System Status</h1>
           <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mb-6">
             <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">API</div><div id="stApi" class="text-lg font-bold">—</div></div>
             <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">MongoDB</div><div id="stMongo" class="text-lg font-bold">—</div></div>
@@ -1427,7 +1544,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- PLAYGROUND -->
         <section id="page-playground" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">API Playground</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.playground">API Playground</h1>
           <div class="card p-6 max-w-2xl space-y-3">
             <div class="flex gap-2">
               <select id="pgMethod" style="max-width:120px"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
@@ -1442,7 +1559,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- CHANGELOG -->
         <section id="page-changelog" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6">Changelog</h1>
+          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.changelog">Changelog</h1>
           <div class="space-y-4 max-w-2xl">
             <div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist, límite 15 scripts (ilimitado VIP).</div></div>
             <div class="card p-5"><div class="text-sm font-semibold">v1.0 — Launch</div><div class="text-xs mt-2" style="color:#8b8b9e">Auth usuario/contraseña, scripts ofuscados, analytics, access denied page.</div></div>
@@ -1453,7 +1570,7 @@ local Players = game:GetService(&quot;Players&quot;)
         <section id="page-studio" class="page hidden">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
-              <h1 class="text-2xl font-bold">Studio</h1>
+              <h1 class="text-2xl font-bold" data-i18n="nav.studio">Studio</h1>
               <p class="text-xs mt-1" style="color:#5a5a6e">Editor libre · OpenRouter IA · números sin tapar código</p>
             </div>
             <div class="flex gap-2">
@@ -1493,7 +1610,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- SETTINGS -->
         <section id="page-settings" class="page hidden">
-          <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h1 class="text-2xl font-bold">Tu cuenta</h1></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
+          <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h1 class="text-2xl font-bold" data-i18n="settings.account">Tu cuenta</h1></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
           <div class="grid gap-4 max-w-4xl">
             <div class="card overflow-hidden"><div class="profile-banner" id="profileBanner"><div class="profile-avatar-xl" id="profileAvatarLarge">?</div></div><div class="p-6 pt-8"><div class="flex flex-wrap items-end justify-between gap-4"><div><div class="text-xl font-bold" id="profileDisplayName">—</div><div class="text-xs" style="color:#68687e" id="profileHandle">@—</div></div><div id="profileBadges" class="flex flex-wrap gap-1"></div></div><p id="profileBioPreview" class="text-sm mt-3" style="color:#9696aa">Sin biografía.</p></div></div>
             <div class="card p-6"><div class="text-sm font-semibold mb-1">✏️ Perfil</div><div class="text-xs mb-5" style="color:#5a5a6e">Personaliza tu nombre, avatar, banner y biografía.</div><div class="profile-grid"><div><label class="field">Nombre visible</label><input id="profileDisplayNameInput" maxlength="32" placeholder="Tu nombre"/></div><div><label class="field">Username</label><div class="flex gap-2"><input id="accountUsernameInput" maxlength="24" placeholder="tu_usuario"/><button class="btn-ghost text-xs" onclick="saveAccountProfile()">Guardar</button></div></div></div><div class="mt-4"><label class="field">Biografía</label><textarea id="profileBioInput" maxlength="160" rows="3" placeholder="Cuéntale algo a la gente…"></textarea></div><div class="profile-grid mt-4"><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🖼️ Subir avatar</div><div class="text-[11px] mt-1" style="color:#67677d">PNG/JPG/WebP/GIF · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="readAccountImage(this,'avatar')"/></label><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🌌 Subir banner</div><div class="text-[11px] mt-1" style="color:#67677d">Recomendado 1200×400 · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="readAccountImage(this,'banner')"/></label></div><input id="accountAvatarInput" class="mt-3" placeholder="URL del avatar (opcional)"/><input id="accountBannerInput" class="mt-3" placeholder="URL del banner (opcional)"/><button class="btn-primary mt-4" onclick="saveAccountProfile()">Guardar perfil</button></div>
@@ -1523,8 +1640,18 @@ local Players = game:GetService(&quot;Players&quot;)
               <input id="deleteAccountPassword" type="password" placeholder="tu contraseña" class="mb-2"/><input id="deleteAccountConfirm" placeholder="escribe ELIMINAR para confirmar" class="mb-3"/><button class="btn-ghost text-sm" style="color:#f87171;border-color:#4a2020" onclick="deleteMyAccount()">Eliminar mi cuenta permanentemente</button>
             </div>
 
+
             <div class="card p-6">
-              <div class="text-sm font-semibold mb-1">Preferencias</div>
+              <div class="text-sm font-semibold mb-1" data-i18n="lang.title">Idioma</div>
+              <div class="text-xs mb-4" style="color:#5a5a6e" data-i18n="lang.sub">Cambia el idioma del panel. Se guarda en este dispositivo.</div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn-ghost text-sm" onclick="setLang('es')">Español</button>
+                <button type="button" class="btn-ghost text-sm" onclick="setLang('en')">English</button>
+                <button type="button" class="btn-ghost text-sm" onclick="setLang('pt')">Português</button>
+              </div>
+            </div>
+            <div class="card p-6">
+              <div class="text-sm font-semibold mb-1" data-i18n="settings.prefs">Preferencias</div>
               <div class="text-xs mb-4" style="color:#5a5a6e">Opciones del panel</div>
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Animaciones</span>
@@ -1603,6 +1730,176 @@ local Players = game:GetService(&quot;Players&quot;)
 </div>
 
 <script>
+
+const I18N = {
+es:{
+"login.kicker":"Panel privado","login.title":"Tus scripts,<br/><em>bajo llave.</em>","login.sub":"Subes el script, generas las keys y ves quien lo ejecuta. Sin vueltas.",
+"login.p1":"Loadstrings con version y rollback","login.p2":"Keys con caducidad y HWID lock","login.p3":"Webhooks a tu Discord al instante",
+"login.foot":"API operativa · ~80ms","login.enter":"Entrar","login.register":"Registrarse","login.create":"Crear cuenta","login.discord":"Continuar con Discord",
+"login.or":"o con tu cuenta","login.user":"Usuario","login.pass":"Contraseña","login.ok":"Entendido","login.loading":"Cargando <b>QrexApi</b>...",
+"login.legal":"Al continuar aceptas los <a href=\"#\" onclick=\"openLegal('terms');return false\">Términos de servicio</a> y la <a href=\"#\" onclick=\"openLegal('privacy');return false\">Política de privacidad</a> de QrexApi.<br/>Nunca compartas tu key ni tu contraseña con terceros. El soporte jamás te las pedirá.",
+"login.terms":"Términos","login.privacy":"Privacidad","login.cookies":"Cookies","login.support":"Soporte",
+"login.rights":"© 2026 QrexApi · Todos los derechos reservados",
+"nav.general":"GENERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
+"nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
+"nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
+"nav.community":"COMMUNITY","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
+"nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"ACCOUNT","nav.settings":"Settings",
+"ov.kicker":"QrexApi · Panel privado","ov.title":"Tus scripts,<br/><em>bajo control.</em>",
+"ov.sub":"Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.",
+"ov.create":"Create Script","ov.myscripts":"Mis scripts","ov.panel":"Abrir panel","ov.scripts":"Scripts","ov.exec":"Ejecuciones totales",
+"ov.state":"Estado","ov.online":"Online","ov.chart":"Ejecuciones (últimos 7 días)",
+"dash.crumb":"Dashboard","notif.title":"Notificaciones","notif.read":"Marcar leídas","notif.loading":"Cargando…","notif.empty":"Todo está al día",
+"role.user":"Usuario","role.admin":"Administrador","role.vip":"VIP · Premium",
+"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Elige una licencia y abre un ticket para comprarla.","vip.aria":"Ver licencias VIP",
+"vip.freeDesc":"Para empezar: acceso básico a Qyrex con límites estándar.","vip.included":"INCLUIDO","vip.start":"Para empezar","vip.active":"● ACTIVO",
+"vip.f1":"Acceso básico a la plataforma","vip.f2":"Uso con límites estándar","vip.f3":"Publicación básica de scripts","vip.f4":"Sin extras VIP",
+"vip.intense":"Para uso intensivo","vip.v1":"Todo lo incluido en FREE","vip.v2":"Límites y cuotas superiores*","vip.v3":"Funciones y temas exclusivos VIP","vip.v4":"Prioridad en futuras mejoras*",
+"vip.compare":"Comparación rápida","vip.compareNote":"*Según la licencia y las funciones habilitadas","vip.feature":"Característica",
+"vip.r1":"Acceso al dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalización VIP","vip.r5":"Experiencia prioritaria",
+"vip.why":"✦ ¿Por qué VIP?","vip.whySub":"Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.",
+"vip.best":"10 MESES • MEJOR VALOR","vip.m1":"Acceso VIP por 30 días.","vip.m10":"Una opción de mejor valor para uso prolongado.","vip.m12":"Acceso VIP por 12 meses.",
+"vip.buy":"Comprar","vip.note":"Al pulsar comprar se abrirá Discord. <b style=\"color:#a8a8b8\">Saca un ticket para contactarte con el owner.</b>",
+"scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"No hay scripts","scripts.first":"Crear el primero",
+"page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Quién ejecuta tus scripts · ban por HWID o IP","logs.search":"Buscar usuario / executor / IP…",
+"create.sub":"Create or modify Lua script","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
+"settings.account":"Tu cuenta","settings.prefs":"Preferencias","lang.title":"Idioma","lang.sub":"Cambia el idioma del panel. Se guarda en este dispositivo.",
+"toast.needUser":"Pon usuario y contraseña","toast.copied":"Copiado al portapapeles","toast.vipOnly":"Solo VIP","toast.pasteVip":"Pega la llave VIP",
+"confirm.delScript":"¿Eliminar este script de forma permanente?","loader.sync":"Sincronizando con el servidor...","loader.verify":"Verificando acceso...","loader.create":"Creando tu cuenta...",
+"legal.terms":"Términos de servicio","legal.privacy":"Política de privacidad","legal.cookies":"Uso de cookies y almacenamiento","legal.support":"Soporte y contacto"
+},
+en:{
+"login.kicker":"Private panel","login.title":"Your scripts,<br/><em>under lock.</em>","login.sub":"Upload the script, generate keys and see who runs it. No fuss.",
+"login.p1":"Loadstrings with versioning and rollback","login.p2":"Keys with expiry and HWID lock","login.p3":"Instant Discord webhooks",
+"login.foot":"API online · ~80ms","login.enter":"Sign in","login.register":"Sign up","login.create":"Create account","login.discord":"Continue with Discord",
+"login.or":"or with your account","login.user":"Username","login.pass":"Password","login.ok":"Got it","login.loading":"Loading <b>QrexApi</b>...",
+"login.legal":"By continuing you accept the <a href=\"#\" onclick=\"openLegal('terms');return false\">Terms of service</a> and the <a href=\"#\" onclick=\"openLegal('privacy');return false\">Privacy policy</a> of QrexApi.<br/>Never share your key or password. Support will never ask for them.",
+"login.terms":"Terms","login.privacy":"Privacy","login.cookies":"Cookies","login.support":"Support",
+"login.rights":"© 2026 QrexApi · All rights reserved",
+"nav.general":"GENERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
+"nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
+"nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
+"nav.community":"COMMUNITY","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
+"nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"ACCOUNT","nav.settings":"Settings",
+"ov.kicker":"QrexApi · Private panel","ov.title":"Your scripts,<br/><em>under control.</em>",
+"ov.sub":"Upload your Lua, protect it with QyrexObf (beta), generate HWID keys and watch who runs it live.",
+"ov.create":"Create Script","ov.myscripts":"My scripts","ov.panel":"Open panel","ov.scripts":"Scripts","ov.exec":"Total executions",
+"ov.state":"Status","ov.online":"Online","ov.chart":"Executions (last 7 days)",
+"dash.crumb":"Dashboard","notif.title":"Notifications","notif.read":"Mark as read","notif.loading":"Loading…","notif.empty":"You're all caught up",
+"role.user":"User","role.admin":"Administrator","role.vip":"VIP · Premium",
+"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Pick a license and open a ticket to buy it.","vip.aria":"View VIP licenses",
+"vip.freeDesc":"To get started: basic Qyrex access with standard limits.","vip.included":"INCLUDED","vip.start":"To get started","vip.active":"● ACTIVE",
+"vip.f1":"Basic platform access","vip.f2":"Standard usage limits","vip.f3":"Basic script publishing","vip.f4":"No VIP extras",
+"vip.intense":"For heavy use","vip.v1":"Everything in FREE","vip.v2":"Higher limits and quotas*","vip.v3":"Exclusive VIP features and themes","vip.v4":"Priority on future upgrades*",
+"vip.compare":"Quick comparison","vip.compareNote":"*Depends on the license and enabled features","vip.feature":"Feature",
+"vip.r1":"Dashboard access","vip.r2":"API / scripts","vip.r3":"Exclusive themes","vip.r4":"VIP customization","vip.r5":"Priority experience",
+"vip.why":"✦ Why VIP?","vip.whySub":"More features, customization and an experience built for people who use Qyrex at full speed.",
+"vip.best":"10 MONTHS • BEST VALUE","vip.m1":"VIP access for 30 days.","vip.m10":"Better value for long-term use.","vip.m12":"VIP access for 12 months.",
+"vip.buy":"Buy","vip.note":"Buying opens Discord. <b style=\"color:#a8a8b8\">Open a ticket to contact the owner.</b>",
+"scripts.search":"Search script...","scripts.create":"Create","scripts.empty":"No scripts yet","scripts.first":"Create the first one",
+"page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Who runs your scripts · ban by HWID or IP","logs.search":"Search user / executor / IP…",
+"create.sub":"Create or modify a Lua script","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
+"settings.account":"Your account","settings.prefs":"Preferences","lang.title":"Language","lang.sub":"Change the panel language. Saved on this device.",
+"toast.needUser":"Enter username and password","toast.copied":"Copied to clipboard","toast.vipOnly":"VIP only","toast.pasteVip":"Paste the VIP key",
+"confirm.delScript":"Permanently delete this script?","loader.sync":"Syncing with the server...","loader.verify":"Verifying access...","loader.create":"Creating your account...",
+"legal.terms":"Terms of service","legal.privacy":"Privacy policy","legal.cookies":"Cookies and storage","legal.support":"Support and contact"
+},
+pt:{
+"login.kicker":"Painel privado","login.title":"Seus scripts,<br/><em>sob chave.</em>","login.sub":"Envie o script, gere as keys e veja quem executa. Sem rodeios.",
+"login.p1":"Loadstrings com versão e rollback","login.p2":"Keys com validade e HWID lock","login.p3":"Webhooks no Discord na hora",
+"login.foot":"API online · ~80ms","login.enter":"Entrar","login.register":"Registrar","login.create":"Criar conta","login.discord":"Continuar com Discord",
+"login.or":"ou com sua conta","login.user":"Usuário","login.pass":"Senha","login.ok":"Entendi","login.loading":"Carregando <b>QrexApi</b>...",
+"login.legal":"Ao continuar você aceita os <a href=\"#\" onclick=\"openLegal('terms');return false\">Termos de serviço</a> e a <a href=\"#\" onclick=\"openLegal('privacy');return false\">Política de privacidade</a> da QrexApi.<br/>Nunca compartilhe sua key nem sua senha. O suporte jamais pedirá isso.",
+"login.terms":"Termos","login.privacy":"Privacidade","login.cookies":"Cookies","login.support":"Suporte",
+"login.rights":"© 2026 QrexApi · Todos os direitos reservados",
+"nav.general":"GERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
+"nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
+"nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
+"nav.community":"COMUNIDADE","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
+"nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"CONTA","nav.settings":"Settings",
+"ov.kicker":"QrexApi · Painel privado","ov.title":"Seus scripts,<br/><em>sob controle.</em>",
+"ov.sub":"Envie seu Lua, proteja com QyrexObf (beta), gere keys com HWID e veja quem executa ao vivo.",
+"ov.create":"Create Script","ov.myscripts":"Meus scripts","ov.panel":"Abrir painel","ov.scripts":"Scripts","ov.exec":"Execuções totais",
+"ov.state":"Status","ov.online":"Online","ov.chart":"Execuções (últimos 7 dias)",
+"dash.crumb":"Dashboard","notif.title":"Notificações","notif.read":"Marcar lidas","notif.loading":"Carregando…","notif.empty":"Tudo em dia",
+"role.user":"Usuário","role.admin":"Administrador","role.vip":"VIP · Premium",
+"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Escolha uma licença e abra um ticket para comprar.","vip.aria":"Ver licenças VIP",
+"vip.freeDesc":"Para começar: acesso básico ao Qyrex com limites padrão.","vip.included":"INCLUÍDO","vip.start":"Para começar","vip.active":"● ATIVO",
+"vip.f1":"Acesso básico à plataforma","vip.f2":"Uso com limites padrão","vip.f3":"Publicação básica de scripts","vip.f4":"Sem extras VIP",
+"vip.intense":"Para uso intenso","vip.v1":"Tudo do FREE","vip.v2":"Limites e cotas superiores*","vip.v3":"Funções e temas exclusivos VIP","vip.v4":"Prioridade em melhorias futuras*",
+"vip.compare":"Comparação rápida","vip.compareNote":"*Conforme a licença e as funções ativas","vip.feature":"Recurso",
+"vip.r1":"Acesso ao dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalização VIP","vip.r5":"Experiência prioritária",
+"vip.why":"✦ Por que VIP?","vip.whySub":"Mais funções, personalização e uma experiência feita para quem usa o Qyrex no máximo.",
+"vip.best":"10 MESES • MELHOR VALOR","vip.m1":"Acesso VIP por 30 dias.","vip.m10":"Melhor custo para uso prolongado.","vip.m12":"Acesso VIP por 12 meses.",
+"vip.buy":"Comprar","vip.note":"Ao comprar, o Discord abre. <b style=\"color:#a8a8b8\">Abra um ticket para falar com o owner.</b>",
+"scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"Nenhum script","scripts.first":"Criar o primeiro",
+"page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Quem executa seus scripts · ban por HWID ou IP","logs.search":"Buscar usuário / executor / IP…",
+"create.sub":"Criar ou modificar script Lua","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
+"settings.account":"Sua conta","settings.prefs":"Preferências","lang.title":"Idioma","lang.sub":"Mude o idioma do painel. Salvo neste dispositivo.",
+"toast.needUser":"Informe usuário e senha","toast.copied":"Copiado para a área de transferência","toast.vipOnly":"Somente VIP","toast.pasteVip":"Cole a chave VIP",
+"confirm.delScript":"Excluir este script permanentemente?","loader.sync":"Sincronizando com o servidor...","loader.verify":"Verificando acesso...","loader.create":"Criando sua conta...",
+"legal.terms":"Termos de serviço","legal.privacy":"Política de privacidade","legal.cookies":"Cookies e armazenamento","legal.support":"Suporte e contato"
+}
+};
+let currentLang = (localStorage.getItem('qrex_lang') || (navigator.language||'es').slice(0,2) || 'es').toLowerCase();
+if(!I18N[currentLang]) currentLang = 'es';
+function t(key){
+  const pack = I18N[currentLang] || I18N.es;
+  return (pack && pack[key]) || (I18N.es && I18N.es[key]) || key;
+}
+function applyI18n(){
+  document.documentElement.lang = currentLang === 'pt' ? 'pt' : currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (el.childElementCount === 0) el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const v = t(el.getAttribute('data-i18n-title'));
+    el.setAttribute('title', v);
+    if (el.hasAttribute('aria-label')) el.setAttribute('aria-label', v);
+  });
+  document.querySelectorAll('[data-lang-label]').forEach(el => { el.textContent = currentLang.toUpperCase(); });
+  document.querySelectorAll('[data-set-lang]').forEach(b => {
+    b.classList.toggle('on', b.getAttribute('data-set-lang') === currentLang);
+  });
+  if (typeof buildPageNames === 'function') pageNames = buildPageNames();
+  const authBtn = document.getElementById('authBtn');
+  if (authBtn && !authBtn.disabled) authBtn.textContent = (typeof mode !== 'undefined' && mode === 'register') ? t('login.create') : t('login.enter');
+  const loader = document.getElementById('qxLoaderText');
+  if (loader && document.getElementById('qxLoader')?.classList.contains('show')) loader.innerHTML = t('login.loading');
+}
+function setLang(code){
+  if (!I18N[code]) return;
+  currentLang = code;
+  localStorage.setItem('qrex_lang', code);
+  document.querySelectorAll('[data-lang-switch]').forEach(el => el.classList.remove('open'));
+  applyI18n();
+  if (typeof mode !== 'undefined') try { setTab(mode); } catch(e) {}
+}
+function toggleLangMenu(ev, btn){
+  if (ev) ev.stopPropagation();
+  const root = (btn && btn.closest('[data-lang-switch]')) || (ev && ev.currentTarget && ev.currentTarget.closest('[data-lang-switch]'));
+  document.querySelectorAll('[data-lang-switch]').forEach(el => {
+    if (el !== root) el.classList.remove('open');
+  });
+  if (root) root.classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const hit = e.target.closest('[data-set-lang]');
+  if (hit) { setLang(hit.getAttribute('data-set-lang')); return; }
+  if (!e.target.closest('[data-lang-switch]')) {
+    document.querySelectorAll('[data-lang-switch]').forEach(el => el.classList.remove('open'));
+  }
+});
+function buildPageNames(){
+  return { overview:t('nav.overview'), scripts:t('nav.lua'), hub:t('nav.hub'), keys:t('page.keys'), webhooks:t('nav.webhooks'), leaderboard:t('nav.leaderboard'), assets:t('nav.assets'), templates:t('nav.templates'), status:t('nav.status'), playground:t('nav.playground'), changelog:t('nav.changelog'), create:t('nav.create'), studio:t('nav.studio'), executions:t('nav.analytics'), logs:t('nav.logs'), apiinfo:t('nav.apiinfo'), settings:t('nav.settings'), admin:t('nav.admin') };
+}
+
 function scriptDownloadUrl(id){
   return location.origin + '/api/v1/luascripts/public/' + id + '/download';
 }
@@ -1632,7 +1929,7 @@ function headers(){ return { 'Authorization': 'Bearer ' + token, 'Content-Type':
 function setTab(m){
   mode = m;
   const isLogin = m === 'login';
-  document.getElementById('authBtn').textContent = isLogin ? 'Entrar' : 'Crear cuenta';
+  document.getElementById('authBtn').textContent = isLogin ? t('login.enter') : t('login.create');
   document.getElementById('tabThumb').classList.toggle('right', !isLogin);
   document.getElementById('tabLogin').classList.toggle('on', isLogin);
   document.getElementById('tabReg').classList.toggle('on', !isLogin);
@@ -1684,9 +1981,9 @@ function showApp(user){
   if (vip) vip.classList.toggle('hidden', !user?.premium);
   if (adm) adm.classList.toggle('hidden', user?.role !== 'admin');
   if (role) {
-    if (user?.role === 'admin') role.textContent = 'Administrador';
-    else if (user?.premium) role.textContent = 'VIP · Premium';
-    else role.textContent = 'Usuario';
+    if (user?.role === 'admin') role.textContent = t('role.admin');
+    else if (user?.premium) role.textContent = t('role.vip');
+    else role.textContent = t('role.user');
   }
   // admin nav
   document.querySelectorAll('.admin-only').forEach(el => {
@@ -1728,7 +2025,7 @@ async function refreshVipStatus(){
 async function redeemVipKey(){
   const input = document.getElementById('vipCodeInput');
   const code = (input && input.value || '').trim();
-  if (!code) { toast('Pega la llave VIP', 'err'); return; }
+  if (!code) { toast(t('toast.pasteVip'), 'err'); return; }
   try {
     const r = await fetch('/api/vip/redeem', {
       method: 'POST',
@@ -1773,7 +2070,7 @@ async function genVipKeysAdmin(){
 
 function requireVip(){
   if (currentUser && currentUser.premium) return true;
-  toast('Solo VIP', 'err');
+  toast(t('toast.vipOnly'), 'err');
   const hint = document.getElementById('vipLockHint');
   if (hint) hint.classList.remove('hidden');
   return false;
@@ -1914,7 +2211,7 @@ function scriptPublicUrl(id){ return location.origin + '/script/' + id; }
 function readAccountImage(input,kind){const file=input?.files?.[0];if(!file)return;if(file.size>500000){toast('Imagen demasiado grande (máx. 500 KB)','err');input.value='';return}const fr=new FileReader();fr.onload=()=>{const el=document.getElementById(kind==='avatar'?'accountAvatarInput':'accountBannerInput');if(el)el.value=String(fr.result||'')};fr.readAsDataURL(file)}
 function renderAccountVisual(d){const name=d.displayName||d.username||'?';const a=document.getElementById('profileAvatarLarge');if(a)setAvatar(a,{avatar:d.avatar},name);const b=document.getElementById('profileBanner');if(b)b.style.backgroundImage=d.banner?'url("'+d.banner.replace(/"/g,'')+'")':'linear-gradient(135deg,#171720,#0b0b10)';const dn=document.getElementById('profileDisplayName');if(dn)dn.textContent=name;const h=document.getElementById('profileHandle');if(h)h.textContent='@'+(d.username||'—');const bio=document.getElementById('profileBioPreview');if(bio)bio.textContent=d.bio||'Sin biografía.';const inp=document.getElementById('profileDisplayNameInput');if(inp)inp.value=name;const bi=document.getElementById('profileBioInput');if(bi)bi.value=d.bio||''}
 function toggleNotifications(){const p=document.getElementById('notifPanel');if(!p)return;p.classList.toggle('show');if(p.classList.contains('show'))loadNotifications()}
-function renderNotifications(list){const el=document.getElementById('notifList'),dot=document.getElementById('notifDot');if(!el)return;const unread=(list||[]).filter(x=>!x.read).length;if(dot)dot.style.display=unread?'block':'none';if(!list?.length){el.innerHTML='<div class="notif-empty">Todo está al día ✨</div>';return}el.innerHTML=list.map(n=>'<div class="notif-item '+(!n.read?'unread':'')+'"><div class="notif-icon">'+(n.type==='warning'?'⚠':n.type==='success'?'✓':'●')+'</div><div class="min-w-0"><div class="text-xs font-semibold">'+esc(n.title)+'</div><div class="text-[11px] mt-1" style="color:#78788e">'+esc(n.message)+'</div><div class="text-[10px] mt-2" style="color:#4f4f66">'+(n.createdAt?new Date(n.createdAt).toLocaleString():'Ahora')+'</div></div></div>').join('')}
+function renderNotifications(list){const el=document.getElementById('notifList'),dot=document.getElementById('notifDot');if(!el)return;const unread=(list||[]).filter(x=>!x.read).length;if(dot)dot.style.display=unread?'block':'none';if(!list?.length){el.innerHTML='<div class="notif-empty">'+t('notif.empty')+'</div>';return}el.innerHTML=list.map(n=>'<div class="notif-item '+(!n.read?'unread':'')+'"><div class="notif-icon">'+(n.type==='warning'?'⚠':n.type==='success'?'✓':'●')+'</div><div class="min-w-0"><div class="text-xs font-semibold">'+esc(n.title)+'</div><div class="text-[11px] mt-1" style="color:#78788e">'+esc(n.message)+'</div><div class="text-[10px] mt-2" style="color:#4f4f66">'+(n.createdAt?new Date(n.createdAt).toLocaleString():'Ahora')+'</div></div></div>').join('')}
 async function loadNotifications(){try{const r=await fetch('/api/notifications',{headers:headers()});if(!r.ok)return;const d=await r.json();renderNotifications(d.notifications||[])}catch{}}
 async function markAllNotificationsRead(){try{await fetch('/api/notifications/read-all',{method:'POST',headers:headers()});loadNotifications()}catch{}}
 document.addEventListener('click',e=>{const w=document.getElementById('notifWrap');if(w&&!w.contains(e.target))document.getElementById('notifPanel')?.classList.remove('show')});
@@ -1961,9 +2258,9 @@ async function doAuth(){
   const username = document.getElementById('authUser').value.trim();
   const password = document.getElementById('authPass').value;
   const btn = document.getElementById('authBtn');
-  if (!username || !password) { setErr('Pon usuario y contraseña'); return; }
+  if (!username || !password) { setErr(t('toast.needUser')); return; }
   btn.disabled = true; btn.textContent = '...';
-  showLoader(mode === 'login' ? 'Verificando acceso...' : 'Creando tu cuenta...');
+  showLoader(mode === 'login' ? t('loader.verify') : t('loader.create'));
   document.getElementById('loginErr').classList.add('hidden');
   try {
     const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
@@ -1978,7 +2275,7 @@ async function doAuth(){
     if (!r.ok) throw new Error(d.error || ('Error HTTP '+r.status));
     token = d.token; localStorage.setItem('qrex_token', token); showApp(d.user);
   } catch(e) { setErr(e.message); }
-  finally { hideLoader(); btn.disabled = false; btn.textContent = mode === 'login' ? 'Entrar' : 'Crear cuenta'; }
+  finally { hideLoader(); btn.disabled = false; btn.textContent = mode === 'login' ? t('login.enter') : t('login.create'); }
 }
 
 document.addEventListener('keydown', e => {
@@ -1986,7 +2283,7 @@ document.addEventListener('keydown', e => {
 });
 
 window.onload = function(){
-  try { refreshAiChips(); updateLines(); } catch(e) {}
+  try { applyI18n(); refreshAiChips(); updateLines(); } catch(e) {}
 
   // Login con Discord: el servidor vuelve con ?token=... o ?discord_error=...
   try {
@@ -2011,7 +2308,7 @@ window.onload = function(){
   updateLines();
 };
 
-const pageNames = { overview:'Overview', scripts:'Lua Scripts', hub:'Script Hub', keys:'Key System', webhooks:'Webhooks', leaderboard:'Leaderboard', assets:'My Assets', templates:'Templates', status:'System Status', playground:'API Playground', changelog:'Changelog', create:'Create Script', studio:'Studio', executions:'Analytics', logs:'Logs', apiinfo:'API Info', settings:'Settings', admin:'Admin Panel' };
+let pageNames = buildPageNames();
 
 
 function isMobileNav(){ return window.matchMedia('(max-width: 900px)').matches; }
@@ -2092,6 +2389,7 @@ window.addEventListener('resize', function(){
 document.addEventListener('DOMContentLoaded', function(){
   var main = document.querySelector('#appView main.main-content');
   if (main) main.style.marginLeft = '0';
+  try { applyI18n(); } catch(e) {}
 });
 
 function esc(t){ const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
@@ -2286,7 +2584,7 @@ function renderScripts(list){
   const el = document.getElementById('scriptsList');
   const host = location.origin;
   if (!list.length) {
-    el.innerHTML = '<div class="card empty-state"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><div>No hay scripts</div><button onclick="go(\'create\')" class="btn-primary mt-4 text-sm">Crear el primero</button></div>';
+    el.innerHTML = '<div class="card empty-state"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><div>'+t('scripts.empty')+'</div><button onclick="go(\'create\')" class="btn-primary mt-4 text-sm">'+t('scripts.first')+'</button></div>';
     return;
   }
   el.innerHTML = list.map(s => {
@@ -2327,7 +2625,7 @@ function renderScripts(list){
 }
 
 function copyLs(text){
-  navigator.clipboard.writeText(text).then(() => toast('Copiado al portapapeles')).catch(() => toast('No se pudo copiar', 'err'));
+  navigator.clipboard.writeText(text).then(() => toast(t('toast.copied'))).catch(() => toast(t('toast.copied'), 'err'));
 }
 
 async function loadScripts(){
@@ -2351,9 +2649,9 @@ async function editScript(id){
     document.getElementById('sSource').value = s.source || '';
     const om = document.getElementById('sObfMode');
     if (om) om.value = s.obfMode || (s.doObfuscate === false ? 'none' : 'qyrex');
-    document.getElementById('createTitle').textContent = 'Edit Script';
+    document.getElementById('createTitle').textContent = t('create.edit');
     document.getElementById('createSubtitle').textContent = 'Modificando · ' + (s.name || id);
-    document.getElementById('createBtnLabel').textContent = 'Save changes';
+    document.getElementById('createBtnLabel').textContent = t('create.save');
     document.getElementById('createOutWrap').classList.add('hidden');
     updateLines();
     go('create');
@@ -2369,11 +2667,11 @@ function resetCreateForm(){
   document.getElementById('sName').value = '';
   document.getElementById('sDesc').value = '';
   document.getElementById('sSource').value = '';
-  document.getElementById('createTitle').textContent = 'Create Script';
-  document.getElementById('createSubtitle').textContent = 'Create or modify Lua script';
-  document.getElementById('createBtnLabel').textContent = 'Create';
+  document.getElementById('createTitle').textContent = t('nav.create');
+  document.getElementById('createSubtitle').textContent = t('create.sub');
+  document.getElementById('createBtnLabel').textContent = t('create.btn');
   document.getElementById('createOutWrap').classList.add('hidden');
-  const om2 = document.getElementById('sObfMode'); if (om2) om2.value = 'qrex';
+  const om2 = document.getElementById('sObfMode'); if (om2) om2.value = 'qyrex';
   updateLines();
 }
 
@@ -2394,7 +2692,7 @@ async function createScript(){
     if (editId) {
       r = await fetch('/api/scripts/' + editId, {
         method: 'PUT', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
+        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
       });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error al guardar');
@@ -2410,7 +2708,7 @@ async function createScript(){
     } else {
       r = await fetch('/api/scripts', {
         method:'POST', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
+        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
       });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error');
@@ -2439,7 +2737,7 @@ async function createScript(){
 }
 
 async function delScript(id){
-  if (!confirm('¿Eliminar este script de forma permanente?')) return;
+  if (!confirm(t('confirm.delScript'))) return;
   try {
     const r = await fetch('/api/scripts/' + id, { method: 'DELETE', headers: headers() });
     if (!r.ok) throw new Error('No se pudo eliminar');
@@ -3379,6 +3677,12 @@ function hideLoader(){
   setTimeout(()=>{ el.classList.remove('show','hide-out'); }, 340);
 }
 window.addEventListener('load', ()=> setTimeout(hideLoader, 500));
+(function bindLogoFallback(){
+  const fb = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16161f"/><text x="32" y="40" text-anchor="middle" font-family="Outfit,Inter,sans-serif" font-size="22" font-weight="700" fill="#f4f4f5">Q</text></svg>');
+  document.querySelectorAll('img[src*="ibb.co"]').forEach(img => {
+    img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; });
+  });
+})();
 setTimeout(()=>{ const el=document.getElementById('qxLoader'); if(el&&el.classList.contains('show')) hideLoader(); }, 6000);
 
 /* loader automatico para peticiones lentas */
@@ -3387,7 +3691,7 @@ setTimeout(()=>{ const el=document.getElementById('qxLoader'); if(el&&el.classLi
   let pending = 0, timer = null;
   window.fetch = function(...args){
     pending++;
-    if(!timer) timer = setTimeout(()=>{ if(pending>0) showLoader('Sincronizando con el servidor...'); }, 350);
+    if(!timer) timer = setTimeout(()=>{ if(pending>0) showLoader(t('loader.sync')); }, 350);
     return origFetch(...args).finally(()=>{
       pending = Math.max(0, pending-1);
       if(pending === 0){ clearTimeout(timer); timer = null; hideLoader(); }
@@ -3464,7 +3768,7 @@ const LEGAL = {
 };
 function openLegal(k){
   const d = LEGAL[k]; if(!d) return;
-  document.getElementById('qxModalTitle').textContent = d.title;
+  document.getElementById('qxModalTitle').textContent = t('legal.'+k) || d.title;
   document.getElementById('qxModalBody').innerHTML = d.body;
   document.getElementById('qxModal').classList.add('show');
 }
