@@ -567,25 +567,23 @@ function wrapWithEnvLogger(source) {
 }
 
 async function resolveObfuscated(source, mode) {
-  const src = String(source || '');
-  if (!src.trim()) throw new Error('Código vacío');
-  const m = String(mode || 'qyrex').toLowerCase().replace(/^qrex$/,'qyrex');
-  if (m === 'none' || m === 'false' || m === 'plain') {
-    return { code: src, doObfuscate: false, obfMode: 'none' };
+  const src = String(source || "");
+  if (!src.trim()) throw new Error("Código vacío");
+  const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
+  if (m === "none" || m === "false" || m === "plain") {
+    return { code: src, doObfuscate: false, obfMode: "none" };
   }
   try {
-    const result = qyrexObfuscate(src, { antiTamper: true, vm: true, strings: true, numbers: true, renameLocals: true });
-    let code = (result && result.code) ? result.code : String(result || '');
-    if (!code.trim().startsWith('-- Protect by QyrexObf')) {
-      code = '-- Protect by QyrexObf v6 (beta)\n' + code;
-    }
-    return { code, doObfuscate: true, obfMode: 'qrex' };
+    // Stability-first: do not rewrite Lua tokens or inject independent chunks.
+    const result = qyrexObfuscate(src, { vm: true });
+    const code = result && result.code ? result.code : String(result || "");
+    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
+    return { code, doObfuscate: true, obfMode: "qrex" };
   } catch (e) {
-    console.error('QyrexObf fail:', e.message);
-    throw new Error('Ofuscación falló: ' + (e.message || 'error'));
+    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación falló: " + (e.message || "error"));
   }
 }
-
 
 function localObfuscate(code) {
   const raw = String(code || '');
@@ -1034,48 +1032,26 @@ function buildExecReporterLua(apiBase, scriptId) {
 }
 
 function wrapDeliveredScript(code, apiBase, scriptId) {
-  // Intentionally do not concatenate guard files after a script that may contain
-  // a top-level return. Combining independent Lua chunks here caused valid
-  // scripts to fail with "Expected <eof>, got 'local'". The stored payload is
-  // already protected/obfuscated by the selected obfuscation mode.
-  return String(code || '');
+  return String(code || "");
 }
 
 // ========== DOUBLE LINK + ANTI-SCRAPE ==========
-function buildDoubleLinkStub(scriptUrl) {
-  const u = String(scriptUrl || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+function buildDoubleLinkStub(cacheUrl) {
+  const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return [
-    'local ScriptURL = "' + u + '"',
-    '',
-    'pcall(function()',
-    '    game:GetService("StarterGui"):SetCore("SendNotification", {',
-    '        Title = "Qyrex",',
-    '        Text = "Cargando script, por favor espera...",',
-    '        Duration = 3',
-    '    })',
+    'local __QYREX_URL = "' + u + '"',
+    'local __QYREX_SRC',
+    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
+    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
     'end)',
-    '',
-    'local success, result = pcall(function()',
-    '    local source = game:HttpGet(ScriptURL)',
-    '    local fn, compileError = loadstring(source)',
-    '    if type(fn) ~= "function" then',
-    '        error(compileError or "Qyrex: respuesta del servidor inválida")',
-    '    end',
-    '    return fn()',
-    'end)',
-    '',
-    'if success then',
-    '    print("✅ Script cargado con éxito")',
-    'else',
-    '    warn("❌ Error al cargar el script:", result)',
-    '    pcall(function()',
-    '        game:GetService("StarterGui"):SetCore("SendNotification", {',
-    '            Title = "Error de Carga",',
-    '            Text = "No se pudo conectar con el servidor.",',
-    '            Duration = 5',
-    '        })',
-    '    end)',
-    'end'
+    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
+    '  error(__QYREX_ERR or "Qyrex delivery failed")',
+    'end',
+    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
+    'if type(__QYREX_FN) ~= "function" then',
+    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
+    'end',
+    'return __QYREX_FN()'
   ].join('\n');
 }
 function publicBase(req) {
@@ -1207,56 +1183,51 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
     await banIp(ip, 'Auto-ban flood layer1');
     return res.status(403).type('text/plain').send('-- banned');
   }
+  if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
 
-  // Normal browsers see the public script page instead of the Lua payload.
-  // Roblox/executor HttpGet clients receive the actual script directly.
-  if (isBrowserReq(req)) {
-    return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
+  if (isScraperUa(ua) && !/roblox/i.test(ua)) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'public');
+    return res.type('text/plain').send(decoyLua());
   }
 
   if (!mongoReady && mongoose.connection.readyState !== 1) {
-    return res.status(503).type('text/plain').send('-- Qyrex: database offline');
+    return res.status(503).type('text/plain').send('-- offline');
   }
 
-  const s = await Script.findOne({ id: req.params.id }).select('id obfuscated keyMode providerId providerName').lean();
-  if (!s) return res.status(404).type('text/plain').send('-- Qyrex: script not found');
+  const s = await Script.findOne({ id: req.params.id }).select('id');
+  if (!s) return res.status(404).type('text/plain').send('-- not found');
 
-  let payload = s.obfuscated || '';
-
-  // Key-mode scripts intentionally return the key gate as the delivered source.
-  if (s.keyMode === 'key' && s.providerId) {
-    try {
-      const prov = await Provider.findById(s.providerId).lean();
-      const base = publicBase(req);
-      const claimUrl = base + '/getkey/' + s.providerId;
-      const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
-      payload = buildKeyGateLua({
-        apiBase: base,
-        providerName: (prov && prov.name) || s.providerName || 'Qyrex',
-        getKeyLink,
-        scriptId: s.id
-      });
-    } catch (e) {
-      console.error('key gate wrap', e.message);
-      return res.status(500).type('text/plain').send('-- Qyrex: key system error');
-    }
-  }
-
-  if (!payload || !String(payload).trim()) {
-    return res.status(500).type('text/plain').send('-- Qyrex: empty script');
-  }
-
-  // Validate the exact bytes that will be delivered. This catches server-side
-  // composition mistakes before the client attempts loadstring().
-  payload = String(payload).replace(/^\uFEFF/, '');
+  const token = issueScriptToken(s.id, ip, ua);
+  const base = publicBase(req);
+  const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
 
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.setHeader('Pragma', 'no-cache');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Content-Disposition', 'inline');
-  res.type('text/plain').send(payload);
+  res.setHeader('X-Qrex-Layer', 'public');
+  res.type('text/plain').send(buildDoubleLinkStub(cacheUrl));
+});
+
+app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api/raw/cache/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
+  const ip = clientIp(req);
+  const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer2');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
+  if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
+
+  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
+  const ok = consumeScriptToken(req.params.id, token, ip, ua);
+  if (!ok) {
+    if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'cache');
+    return res.status(403).type('text/plain').send(decoyLua());
+  }
+  return serveRealScript(req, res, req.params.id);
 });
 
 // ========== VIP REDEEM ==========
