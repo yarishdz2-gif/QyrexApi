@@ -644,6 +644,129 @@
   }
 
 </style>
+<link rel="preload" as="image" href="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" fetchpriority="high">
+
+<style id="qrex-fix-plus">
+  /* ===== QrexApi polish + image resilience ===== */
+  html{
+    scroll-behavior:smooth;
+    text-rendering:optimizeLegibility;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  body{overflow-x:hidden;min-height:100vh}
+  button,input,textarea,select{font:inherit}
+  img{
+    image-rendering:auto;
+    -webkit-user-drag:none;
+  }
+
+  /* Fondo de acceso: mantiene una capa elegante aunque la imagen no responda. */
+  #loginView{isolation:isolate}
+  #loginView .lg-photo{
+    background-color:#090b13!important;
+    background-repeat:no-repeat!important;
+    background-size:cover!important;
+    background-position:center center!important;
+    will-change:transform;
+  }
+  #loginView .lg-photo::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(900px 520px at 18% 20%,rgba(255,255,255,.10),transparent 60%),
+      radial-gradient(780px 520px at 82% 78%,rgba(88,101,242,.13),transparent 62%);
+    pointer-events:none;
+  }
+
+  /* Contenedor principal más nítido y estable. */
+  #loginView .lg-shell{
+    border-color:rgba(255,255,255,.09);
+    box-shadow:
+      0 35px 110px -42px rgba(0,0,0,.95),
+      0 0 0 1px rgba(255,255,255,.035),
+      0 12px 40px -22px rgba(88,101,242,.20);
+  }
+  #loginView .lg-aside,
+  #loginView .lg-panel{
+    backdrop-filter:blur(18px) saturate(1.08);
+    -webkit-backdrop-filter:blur(18px) saturate(1.08);
+  }
+
+  .qx-loader .qx-ring,
+  .lg-mark img,
+  .lg-mobile-mark img,
+  .lg-topbar img,
+  .ov-logo{
+    overflow:hidden;
+    object-fit:cover;
+    background:#0e1018;
+    box-shadow:0 0 0 1px rgba(255,255,255,.09);
+  }
+
+  /* Mejoras de inputs/botones sin cambiar IDs ni la lógica JS. */
+  input:hover,textarea:hover,select:hover{border-color:#303043}
+  input:focus,textarea:focus,select:focus{
+    outline:none;
+    border-color:#8f8fa2!important;
+    box-shadow:0 0 0 3px rgba(255,255,255,.08),0 8px 30px -18px rgba(88,101,242,.50);
+  }
+  .btn-primary{
+    box-shadow:0 8px 26px -18px rgba(255,255,255,.45);
+  }
+  .btn-ghost:hover,.icon-btn:hover{
+    box-shadow:0 8px 24px -18px rgba(255,255,255,.35);
+  }
+  .card:hover{
+    transform:translateY(-1px);
+    box-shadow:0 18px 50px -30px rgba(0,0,0,.70);
+  }
+
+  /* Barra lateral y navegación más premium. */
+  .sidebar{
+    box-shadow:14px 0 50px -42px rgba(0,0,0,.95);
+  }
+  .nav-item.active{
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+  }
+  .nav-item:hover svg{transform:translateX(1px)}
+  .nav-item svg{transition:transform .18s ease,opacity .18s ease}
+
+  /* Estados de carga y accesibilidad. */
+  .btn-primary:focus-visible,.btn-ghost:focus-visible,
+  .icon-btn:focus-visible,.nav-item:focus-visible,
+  .lg-switch button:focus-visible,.lg-discord:focus-visible{
+    outline:2px solid #8f8fa2;
+    outline-offset:2px;
+  }
+  ::selection{
+    background:rgba(88,101,242,.35);
+    color:#fff;
+  }
+
+  /* Móvil: conserva el diseño actual, pero evita desbordes. */
+  @media(max-width:900px){
+    #loginView{padding-left:14px!important;padding-right:14px!important}
+    #loginView .lg-shell{width:min(100%,460px);border-radius:18px}
+    #loginView .lg-panel{padding:28px 22px}
+  }
+  @media(max-width:560px){
+    #loginView{padding-top:82px!important;padding-bottom:30px!important}
+    #loginView .lg-panel{padding:24px 18px}
+    #loginView .lg-topbar b{font-size:19px}
+    #loginView .lg-topbar img{width:38px;height:38px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      scroll-behavior:auto!important;
+      animation-duration:.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.001ms!important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -3472,5 +3595,50 @@ function closeLegal(){ document.getElementById('qxModal').classList.remove('show
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
 </script>
+
+<script id="qrex-image-fix">
+(function(){
+  'use strict';
+
+  const QREX_LOGO_FALLBACK = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2096%2096%22%3E%0A%3Cdefs%3E%0A%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f7f7fb%22%2F%3E%0A%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235865f2%22%2F%3E%0A%20%20%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2288%22%20height%3D%2288%22%20rx%3D%2224%22%20fill%3D%22%2311131b%22%2F%3E%0A%3Crect%20x%3D%226%22%20y%3D%226%22%20width%3D%2284%22%20height%3D%2284%22%20rx%3D%2222%22%20fill%3D%22url%28%23g%29%22%20opacity%3D%22.96%22%2F%3E%0A%3Crect%20x%3D%2218%22%20y%3D%2218%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2217%22%20fill%3D%22%230b0c12%22%20opacity%3D%22.94%22%2F%3E%0A%3Cpath%20d%3D%22M31%2054c0-11%207-19%2017-19s17%208%2017%2019c0%205-1%209-3%2012l-7-4c1-2%202-5%202-8%200-6-3-10-9-10s-9%204-9%2010c0%203%201%206%202%208l-7%204c-2-3-3-7-3-12Z%22%20fill%3D%22%23fff%22%2F%3E%0A%3Ccircle%20cx%3D%2243%22%20cy%3D%2252%22%20r%3D%223.3%22%20fill%3D%22%235865f2%22%2F%3E%3Ccircle%20cx%3D%2253%22%20cy%3D%2252%22%20r%3D%223.3%22%20fill%3D%22%235865f2%22%2F%3E%0A%3C%2Fsvg%3E';
+
+  function repairImage(img){
+    if (!img || img.dataset.qxImageBound === '1') return;
+    img.dataset.qxImageBound = '1';
+    img.decoding = 'async';
+    img.referrerPolicy = 'no-referrer';
+    img.addEventListener('error', function onImageError(){
+      if (img.dataset.qxImageFallback === '1') return;
+      img.dataset.qxImageFallback = '1';
+      img.removeAttribute('srcset');
+      img.src = QREX_LOGO_FALLBACK;
+      img.alt = img.alt || 'QrexApi';
+    }, { once:false });
+  }
+
+  function initQrexImages(){
+    document.querySelectorAll('img').forEach(repairImage);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initQrexImages, {once:true});
+  } else {
+    initQrexImages();
+  }
+
+  /* También cubre imágenes que se inserten después por el panel. */
+  const observer = new MutationObserver(function(mutations){
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes || []) {
+        if (node.nodeType !== 1) continue;
+        if (node.tagName === 'IMG') repairImage(node);
+        if (node.querySelectorAll) node.querySelectorAll('img').forEach(repairImage);
+      }
+    }
+  });
+  observer.observe(document.documentElement, {childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
