@@ -644,44 +644,6 @@
   }
 
 
-  /* ===== TOPBAR STABILITY PATCH ===== */
-  #appView .main-content > .flex.items-center{
-    position:sticky;top:0;z-index:45;
-    min-height:74px;padding-left:clamp(14px,2.2vw,32px)!important;padding-right:clamp(14px,2.2vw,32px)!important;
-    background:rgba(7,8,15,.84)!important;
-    backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);
-    box-shadow:0 1px 0 rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.12);
-  }
-  #appView .main-content > .flex.items-center > .text-sm{
-    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  #appView .header-actions{
-    flex:0 0 auto;min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;
-  }
-  #appView .header-actions > *{flex:0 0 auto}
-  #appView .vip-top-btn{
-    position:relative!important;right:auto!important;top:auto!important;
-    white-space:nowrap;overflow:hidden;
-  }
-  #appView .notif-wrap{position:relative;flex:0 0 auto}
-  #appView .notif-panel{max-width:calc(100vw - 24px);}
-  @media(max-width:900px){
-    #appView .main-content > .flex.items-center{min-height:62px;padding:8px 12px!important}
-    #appView .main-content > .flex.items-center > .text-sm{display:block;max-width:30vw;font-size:11px!important}
-    #appView .header-actions{gap:6px;max-width:72vw}
-    #appView .lang-switch,#appView .vip-top-btn,#appView .notif-btn{height:40px!important;width:40px;min-width:40px;padding:0!important;justify-content:center}
-    #appView .vip-top-btn{font-size:0}
-    #appView .vip-top-btn::first-letter{font-size:14px}
-    #appView .lang-switch{font-size:0}
-    #appView .notif-btn{width:40px!important}
-    #appView .notif-panel{position:fixed;right:12px;top:70px;width:min(390px,calc(100vw - 24px));max-height:calc(100dvh - 84px);overflow:auto}
-  }
-  @media(max-width:520px){
-    #appView .main-content > .flex.items-center > .text-sm{max-width:22vw}
-    #appView .header-actions{gap:5px;max-width:none}
-    #appView .lang-switch,#appView .vip-top-btn,#appView .notif-btn{width:38px!important;min-width:38px;height:38px!important}
-  }
-
   /* ===== QYREX FINAL UI POLISH: overflow, images, mobile, header ===== */
   html{scroll-behavior:smooth;overflow-x:hidden}
   body{overflow-x:hidden;min-width:320px}
@@ -2195,29 +2157,13 @@ function go(p){
 
 
 window.addEventListener('resize', function(){
+  // keep main margin desktop
   var main = document.querySelector('#appView main.main-content');
-  if (!main) return;
-  var mobile = window.matchMedia('(max-width: 900px)').matches;
-  if (mobile) {
-    main.style.marginLeft = '0';
-    main.style.width = '100%';
-  } else {
-    var collapsed = document.body.classList.contains('sidebar-collapsed');
-    main.style.marginLeft = collapsed ? '84px' : '280px';
-    main.style.width = collapsed ? 'calc(100% - 84px)' : 'calc(100% - 280px)';
-  }
+  if (main) main.style.marginLeft = '0';
 });
 document.addEventListener('DOMContentLoaded', function(){
   var main = document.querySelector('#appView main.main-content');
-  if (!main) return;
-  if (window.matchMedia('(max-width: 900px)').matches) {
-    main.style.marginLeft = '0';
-    main.style.width = '100%';
-  } else {
-    var collapsed = document.body.classList.contains('sidebar-collapsed');
-    main.style.marginLeft = collapsed ? '84px' : '280px';
-    main.style.width = collapsed ? 'calc(100% - 84px)' : 'calc(100% - 280px)';
-  }
+  if (main) main.style.marginLeft = '0';
 });
 
 function esc(t){ const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
