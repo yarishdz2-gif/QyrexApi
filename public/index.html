@@ -3,14 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <title>QrexApi &middot; Panel privado de scripts</title>
 <meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<script src="https://cdn.tailwindcss.com" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   .vip-head-safe{display:none;height:0}.main-content{position:relative;z-index:1}
   *{box-sizing:border-box}
@@ -52,16 +49,14 @@
   .editor-wrap{transition:border-color .2s}
   .editor-wrap:focus-within{border-color:#e8e8ed}
 
-  .sidebar{background:linear-gradient(180deg,#0d0d14,#09090d);border-right:1px solid #1a1a24;width:260px;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+  .sidebar{background:#0d0d14;border-right:1px solid #1a1a24;width:260px}
   .nav-section{font-size:10px;letter-spacing:.08em;color:#5a5a6e;font-weight:600;padding:16px 16px 6px;text-transform:uppercase}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:2px 8px;border-radius:10px;color:#8b8b9e;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);border:1px solid transparent;background:transparent;width:calc(100% - 16px);text-align:left}
-  .nav-item:hover{background:rgba(255,255,255,.08);color:#fafafa;border-color:rgba(255,255,255,.12)}
-  .nav-item.active{background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.08));color:#fafafa;border-color:rgba(255,255,255,.2);box-shadow:0 4px 12px rgba(255,255,255,.1)}
-  .nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7;transition:opacity .2s}
-  .nav-item:hover svg{opacity:.9}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:1px 8px;border-radius:8px;color:#8b8b9e;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:transparent;width:calc(100% - 16px);text-align:left}
+  .nav-item:hover{background:#16161f;color:#fafafa}
+  .nav-item.active{background:#161618;color:#f4f4f5}
+  .nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7}
   .nav-item.active svg{opacity:1}
-  .card{background:#111118;border:1px solid #1e1e2a;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:all .3s cubic-bezier(.22,1,.36,1)}
-  .card:hover{border-color:#2a2a3d;box-shadow:0 8px 24px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.05)}
+  .card{background:#111118;border:1px solid #1e1e2a;border-radius:14px}
   input,textarea,select{background:#0c0c12;border:1px solid #252533;color:#e4e4ed;border-radius:10px;padding:11px 14px;font-size:14px;width:100%;outline:none;transition:border .15s}
   input:focus,textarea:focus,select:focus{border-color:#e8e8ed}
   .btn-primary{background:#f5f5f5;color:#0a0a0f;border:1px solid #e4e4e7;border-radius:10px;padding:11px 20px;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);box-shadow:0 8px 24px rgba(245,245,245,.2)}
@@ -740,7 +735,7 @@
 <!-- LOADER GLOBAL -->
 <div class="qx-loader show" id="qxLoader">
   <div class="qx-ring"><img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/></div>
-  <div class="qx-ltext" id="qxLoaderText" data-i18n-html="login.loading">Cargando <b>QrexApi</b>...</div>
+  <div class="qx-ltext" id="qxLoaderText" data-i18n="login.loading">Cargando QrexApi...</div>
   <div class="qx-bar"><i></i></div>
 </div>
 
@@ -822,14 +817,14 @@
       <button id="authBtn" onclick="doAuth()" class="btn-primary w-full" style="padding:13px">Entrar</button>
       <p id="loginErr" class="text-red-400 text-sm text-center hidden mt-3"></p>
 
-      <p class="lg-legal" data-i18n-html="login.legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de QrexApi.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
+      <p class="lg-legal" data-i18n="login.legal">Al continuar aceptas los Términos de servicio y la Política de privacidad de QrexApi. Nunca compartas tu key ni tu contraseña con terceros. El soporte jamás te las pedirá.</p>
       <div class="lg-links">
         <button onclick="openLegal('terms')" data-i18n="login.terms">Terminos</button><span>&middot;</span>
         <button onclick="openLegal('privacy')" data-i18n="login.privacy">Privacidad</button><span>&middot;</span>
         <button onclick="openLegal('cookies')" data-i18n="login.cookies">Cookies</button><span>&middot;</span>
         <button onclick="openLegal('support')" data-i18n="login.support">Soporte</button>
       </div>
-      <p class="lg-legal" style="margin-top:14px;color:#3f3f52" data-i18n-html="login.rights">&copy; 2026 QrexApi · Todos los derechos reservados</p>
+      <p class="lg-legal" style="margin-top:14px;color:#3f3f52" data-i18n="login.rights">© 2026 QrexApi · Todos los derechos reservados</p>
 
     </section>
   </div>
@@ -866,7 +861,7 @@
       <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m10">Una opción de mejor valor para uso prolongado.</div><button class="btn-primary w-full" onclick="buyVip('10 meses','150 MXN')" data-i18n="vip.buy">Comprar</button></div>
       <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 AÑO</div><div class="vip-price mt-3">$500 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m12">Acceso VIP por 12 meses.</div><button class="btn-primary w-full" onclick="buyVip('1 año','500 MXN')" data-i18n="vip.buy">Comprar</button></div>
     </div>
-    <div class="vip-note" data-i18n-html="vip.note">Al pulsar comprar se abrirá Discord. <b style="color:#a8a8b8">Saca un ticket para contactarte con el owner.</b></div>
+    <div class="vip-note" data-i18n="vip.note">Al pulsar comprar se abrirá Discord. Saca un ticket para contactarte con el owner.</div>
   </div>
 </div>
 
@@ -1765,7 +1760,7 @@ es:{
 "vip.r1":"Acceso al dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalización VIP","vip.r5":"Experiencia prioritaria",
 "vip.why":"✦ ¿Por qué VIP?","vip.whySub":"Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.",
 "vip.best":"10 MESES • MEJOR VALOR","vip.m1":"Acceso VIP por 30 días.","vip.m10":"Una opción de mejor valor para uso prolongado.","vip.m12":"Acceso VIP por 12 meses.",
-"vip.buy":"Comprar","vip.note":"Al pulsar comprar se abrirá Discord. <b style=\"color:#a8a8b8\">Saca un ticket para contactarte con el owner.</b>",
+"vip.buy":"Comprar","vip.note":"Al pulsar comprar se abrirá Discord. Saca un ticket para contactarte con el owner.",
 "scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"No hay scripts","scripts.first":"Crear el primero",
 "page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Quién ejecuta tus scripts · ban por HWID o IP","logs.search":"Buscar usuario / executor / IP…",
 "create.sub":"Create or modify Lua script","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
@@ -1775,11 +1770,11 @@ es:{
 "legal.terms":"Términos de servicio","legal.privacy":"Política de privacidad","legal.cookies":"Uso de cookies y almacenamiento","legal.support":"Soporte y contacto"
 },
 en:{
-"login.kicker":"Private panel","login.title":"Your scripts,<br/><em>under lock.</em>","login.sub":"Upload the script, generate keys and see who runs it. No fuss.",
+"login.kicker":"Private panel","login.title":"Your scripts, under lock.","login.sub":"Upload the script, generate keys and see who runs it. No fuss.",
 "login.p1":"Loadstrings with versioning and rollback","login.p2":"Keys with expiry and HWID lock","login.p3":"Instant Discord webhooks",
 "login.foot":"API online · ~80ms","login.enter":"Sign in","login.register":"Sign up","login.create":"Create account","login.discord":"Continue with Discord",
-"login.or":"or with your account","login.user":"Username","login.pass":"Password","login.ok":"Got it","login.loading":"Loading <b>QrexApi</b>...",
-"login.legal":"By continuing you accept the <a href=\"#\" onclick=\"openLegal('terms');return false\">Terms of service</a> and the <a href=\"#\" onclick=\"openLegal('privacy');return false\">Privacy policy</a> of QrexApi.<br/>Never share your key or password. Support will never ask for them.",
+"login.or":"or with your account","login.user":"Username","login.pass":"Password","login.ok":"Got it","login.loading":"Loading QrexApi...",
+"login.legal":"By continuing you accept the Terms of service and the Privacy policy of QrexApi. Never share your key or password. Support will never ask for them.",
 "login.terms":"Terms","login.privacy":"Privacy","login.cookies":"Cookies","login.support":"Support",
 "login.rights":"© 2026 QrexApi · All rights reserved",
 "nav.general":"GENERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
@@ -1801,7 +1796,7 @@ en:{
 "vip.r1":"Dashboard access","vip.r2":"API / scripts","vip.r3":"Exclusive themes","vip.r4":"VIP customization","vip.r5":"Priority experience",
 "vip.why":"✦ Why VIP?","vip.whySub":"More features, customization and an experience built for people who use Qyrex at full speed.",
 "vip.best":"10 MONTHS • BEST VALUE","vip.m1":"VIP access for 30 days.","vip.m10":"Better value for long-term use.","vip.m12":"VIP access for 12 months.",
-"vip.buy":"Buy","vip.note":"Buying opens Discord. <b style=\"color:#a8a8b8\">Open a ticket to contact the owner.</b>",
+"vip.buy":"Buy","vip.note":"Buying opens Discord. Open a ticket to contact the owner.",
 "scripts.search":"Search script...","scripts.create":"Create","scripts.empty":"No scripts yet","scripts.first":"Create the first one",
 "page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Who runs your scripts · ban by HWID or IP","logs.search":"Search user / executor / IP…",
 "create.sub":"Create or modify a Lua script","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
@@ -1811,11 +1806,11 @@ en:{
 "legal.terms":"Terms of service","legal.privacy":"Privacy policy","legal.cookies":"Cookies and storage","legal.support":"Support and contact"
 },
 pt:{
-"login.kicker":"Painel privado","login.title":"Seus scripts,<br/><em>sob chave.</em>","login.sub":"Envie o script, gere as keys e veja quem executa. Sem rodeios.",
+"login.kicker":"Painel privado","login.title":"Seus scripts, sob chave.","login.sub":"Envie o script, gere as keys e veja quem executa. Sem rodeios.",
 "login.p1":"Loadstrings com versão e rollback","login.p2":"Keys com validade e HWID lock","login.p3":"Webhooks no Discord na hora",
 "login.foot":"API online · ~80ms","login.enter":"Entrar","login.register":"Registrar","login.create":"Criar conta","login.discord":"Continuar com Discord",
-"login.or":"ou com sua conta","login.user":"Usuário","login.pass":"Senha","login.ok":"Entendi","login.loading":"Carregando <b>QrexApi</b>...",
-"login.legal":"Ao continuar você aceita os <a href=\"#\" onclick=\"openLegal('terms');return false\">Termos de serviço</a> e a <a href=\"#\" onclick=\"openLegal('privacy');return false\">Política de privacidade</a> da QrexApi.<br/>Nunca compartilhe sua key nem sua senha. O suporte jamais pedirá isso.",
+"login.or":"ou com sua conta","login.user":"Usuário","login.pass":"Senha","login.ok":"Entendi","login.loading":"Carregando QrexApi...",
+"login.legal":"Ao continuar você aceita os Termos de serviço e a Política de privacidade da QrexApi. Nunca compartilhe sua key nem sua senha. O suporte jamais pedirá isso.",
 "login.terms":"Termos","login.privacy":"Privacidade","login.cookies":"Cookies","login.support":"Suporte",
 "login.rights":"© 2026 QrexApi · Todos os direitos reservados",
 "nav.general":"GERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
@@ -1837,7 +1832,7 @@ pt:{
 "vip.r1":"Acesso ao dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalização VIP","vip.r5":"Experiência prioritária",
 "vip.why":"✦ Por que VIP?","vip.whySub":"Mais funções, personalização e uma experiência feita para quem usa o Qyrex no máximo.",
 "vip.best":"10 MESES • MELHOR VALOR","vip.m1":"Acesso VIP por 30 dias.","vip.m10":"Melhor custo para uso prolongado.","vip.m12":"Acesso VIP por 12 meses.",
-"vip.buy":"Comprar","vip.note":"Ao comprar, o Discord abre. <b style=\"color:#a8a8b8\">Abra um ticket para falar com o owner.</b>",
+"vip.buy":"Comprar","vip.note":"Ao comprar, o Discord abre. Abra um ticket para falar com o owner.",
 "scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"Nenhum script","scripts.first":"Criar o primeiro",
 "page.keys":"Key System","page.templates":"Templates / Snippets","logs.sub":"Quem executa seus scripts · ban por HWID ou IP","logs.search":"Buscar usuário / executor / IP…",
 "create.sub":"Criar ou modificar script Lua","create.btn":"Create","create.cancel":"Cancel","create.save":"Save changes","create.edit":"Edit Script",
@@ -1849,34 +1844,20 @@ pt:{
 };
 let currentLang = (localStorage.getItem('qrex_lang') || (navigator.language||'es').slice(0,2) || 'es').toLowerCase();
 if(!I18N[currentLang]) currentLang = 'es';
-const i18nCache = {};
 function t(key){
-  if(!key || typeof key !== 'string') return key || '';
-  if(i18nCache[key]) return i18nCache[key];
   const pack = I18N[currentLang] || I18N.es;
-  const result = (pack && pack[key]) || (I18N.es && I18N.es[key]) || key;
-  i18nCache[key] = result;
-  return result;
+  return (pack && pack[key]) || (I18N.es && I18N.es[key]) || key;
 }
 function applyI18n(){
   document.documentElement.lang = currentLang === 'pt' ? 'pt' : currentLang;
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    if (el && el.childElementCount === 0) {
-      const key = el.getAttribute('data-i18n');
-      if(key) el.textContent = t(key);
-    }
+    if (el.childElementCount === 0) el.textContent = t(el.getAttribute('data-i18n'));
   });
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    if(el) {
-      const key = el.getAttribute('data-i18n-html');
-      if(key) el.textContent = t(key);
-    }
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    if(el) {
-      const key = el.getAttribute('data-i18n-placeholder');
-      if(key) el.setAttribute('placeholder', t(key));
-    }
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const v = t(el.getAttribute('data-i18n-title'));
@@ -1944,10 +1925,7 @@ const chartDefaults = {
   }
 };
 
-function headers(){ 
-  if(!token) throw new Error('No authentication token available');
-  return { 'Authorization': 'Bearer ' + (token || ''), 'Content-Type': 'application/json' }; 
-}
+function headers(){ return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }; }
 
 function setTab(m){
   mode = m;
@@ -1960,25 +1938,21 @@ function setTab(m){
 }
 
 function setAvatar(el, user, name){
-  if (!el || typeof el.appendChild !== 'function') return;
-  try {
-    const url = user && (user.avatar || user.avatarUrl);
-    const letter = (name || '?').charAt(0).toUpperCase();
-    if (url && typeof url === 'string') {
-      el.style.padding = '0';
-      el.style.overflow = 'hidden';
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = name || 'avatar';
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-      img.onerror = function(){ el.innerHTML = ''; el.textContent = letter; };
-      el.innerHTML = '';
-      el.appendChild(img);
-    } else {
-      el.textContent = letter;
-    }
-  } catch(e) { 
-    if(el) el.textContent = (name || '?').charAt(0).toUpperCase();
+  if (!el) return;
+  const url = user && (user.avatar || user.avatarUrl);
+  const letter = (name || '?').charAt(0).toUpperCase();
+  el.textContent = '';
+  if (url) {
+    el.style.padding = '0';
+    el.style.overflow = 'hidden';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = name || 'avatar';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    img.onerror = function(){ el.textContent = letter; };
+    el.appendChild(img);
+  } else {
+    el.textContent = letter;
   }
 }
 
@@ -3690,55 +3664,38 @@ async function loadAnalytics(){
   } catch(e) { console.error(e); }
 }
 
-/* ===== Loader global mejorado ===== */
-const qxLoaderState = { pending: 0, timer: null, loaderTimeout: null };
+/* ===== Loader global ===== */
 function showLoader(msg){
   const el = document.getElementById('qxLoader');
   if(!el) return;
-  try {
-    if(msg) {
-      const textEl = document.getElementById('qxLoaderText');
-      if(textEl) textEl.textContent = msg;
-    }
-    el.classList.remove('hide-out');
-    el.classList.add('show');
-    // Timeout de seguridad para prevenir loader permanente
-    if(qxLoaderState.loaderTimeout) clearTimeout(qxLoaderState.loaderTimeout);
-    qxLoaderState.loaderTimeout = setTimeout(hideLoader, 8000);
-  } catch(e) { console.error('showLoader error:', e); }
+  if(msg) document.getElementById('qxLoaderText').innerHTML = msg;
+  el.classList.remove('hide-out'); el.classList.add('show');
 }
 function hideLoader(){
   const el = document.getElementById('qxLoader');
   if(!el) return;
-  try {
-    el.classList.add('hide-out');
-    if(qxLoaderState.loaderTimeout) clearTimeout(qxLoaderState.loaderTimeout);
-    setTimeout(()=>{ el.classList.remove('show','hide-out'); }, 340);
-  } catch(e) { console.error('hideLoader error:', e); }
+  el.classList.add('hide-out');
+  setTimeout(()=>{ el.classList.remove('show','hide-out'); }, 340);
 }
-window.addEventListener('load', ()=> setTimeout(hideLoader, 500), { once: true });
+window.addEventListener('load', ()=> setTimeout(hideLoader, 500));
 (function bindLogoFallback(){
   const fb = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16161f"/><text x="32" y="40" text-anchor="middle" font-family="Outfit,Inter,sans-serif" font-size="22" font-weight="700" fill="#f4f4f5">Q</text></svg>');
   document.querySelectorAll('img[src*="ibb.co"]').forEach(img => {
-    img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; }, { once: true });
+    img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; });
   });
 })();
+setTimeout(()=>{ const el=document.getElementById('qxLoader'); if(el&&el.classList.contains('show')) hideLoader(); }, 6000);
 
-/* Loader automático para peticiones lentas (sin race conditions) */
+/* loader automatico para peticiones lentas */
 (function(){
   const origFetch = window.fetch.bind(window);
+  let pending = 0, timer = null;
   window.fetch = function(...args){
-    qxLoaderState.pending++;
-    if(!qxLoaderState.timer && qxLoaderState.pending > 0) {
-      qxLoaderState.timer = setTimeout(()=>{ if(qxLoaderState.pending>0) showLoader(typeof t === 'function' ? t('loader.sync') : 'Cargando...'); }, 350);
-    }
+    pending++;
+    if(!timer) timer = setTimeout(()=>{ if(pending>0) showLoader(t('loader.sync')); }, 350);
     return origFetch(...args).finally(()=>{
-      qxLoaderState.pending = Math.max(0, qxLoaderState.pending-1);
-      if(qxLoaderState.pending === 0){ 
-        clearTimeout(qxLoaderState.timer); 
-        qxLoaderState.timer = null; 
-        hideLoader(); 
-      }
+      pending = Math.max(0, pending-1);
+      if(pending === 0){ clearTimeout(timer); timer = null; hideLoader(); }
     });
   };
 })();
