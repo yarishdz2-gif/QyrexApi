@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <title>QrexApi &middot; Panel privado de scripts</title>
 <meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<script src="https://cdn.tailwindcss.com" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 <style>
   .vip-head-safe{display:none;height:0}.main-content{position:relative;z-index:1}
   *{box-sizing:border-box}
@@ -1843,20 +1846,34 @@ pt:{
 };
 let currentLang = (localStorage.getItem('qrex_lang') || (navigator.language||'es').slice(0,2) || 'es').toLowerCase();
 if(!I18N[currentLang]) currentLang = 'es';
+const i18nCache = {};
 function t(key){
+  if(!key || typeof key !== 'string') return key || '';
+  if(i18nCache[key]) return i18nCache[key];
   const pack = I18N[currentLang] || I18N.es;
-  return (pack && pack[key]) || (I18N.es && I18N.es[key]) || key;
+  const result = (pack && pack[key]) || (I18N.es && I18N.es[key]) || key;
+  i18nCache[key] = result;
+  return result;
 }
 function applyI18n(){
   document.documentElement.lang = currentLang === 'pt' ? 'pt' : currentLang;
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    if (el.childElementCount === 0) el.textContent = t(el.getAttribute('data-i18n'));
+    if (el && el.childElementCount === 0) {
+      const key = el.getAttribute('data-i18n');
+      if(key) el.textContent = t(key);
+    }
   });
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+    if(el) {
+      const key = el.getAttribute('data-i18n-html');
+      if(key) el.textContent = t(key);
+    }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    if(el) {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(key) el.setAttribute('placeholder', t(key));
+    }
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const v = t(el.getAttribute('data-i18n-title'));
@@ -1924,7 +1941,10 @@ const chartDefaults = {
   }
 };
 
-function headers(){ return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }; }
+function headers(){ 
+  if(!token) throw new Error('No authentication token available');
+  return { 'Authorization': 'Bearer ' + (token || ''), 'Content-Type': 'application/json' }; 
+}
 
 function setTab(m){
   mode = m;
@@ -1937,21 +1957,25 @@ function setTab(m){
 }
 
 function setAvatar(el, user, name){
-  if (!el) return;
-  const url = user && (user.avatar || user.avatarUrl);
-  const letter = (name || '?').charAt(0).toUpperCase();
-  el.textContent = '';
-  if (url) {
-    el.style.padding = '0';
-    el.style.overflow = 'hidden';
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = name || 'avatar';
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-    img.onerror = function(){ el.textContent = letter; };
-    el.appendChild(img);
-  } else {
-    el.textContent = letter;
+  if (!el || typeof el.appendChild !== 'function') return;
+  try {
+    const url = user && (user.avatar || user.avatarUrl);
+    const letter = (name || '?').charAt(0).toUpperCase();
+    if (url && typeof url === 'string') {
+      el.style.padding = '0';
+      el.style.overflow = 'hidden';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = name || 'avatar';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+      img.onerror = function(){ el.innerHTML = ''; el.textContent = letter; };
+      el.innerHTML = '';
+      el.appendChild(img);
+    } else {
+      el.textContent = letter;
+    }
+  } catch(e) { 
+    if(el) el.textContent = (name || '?').charAt(0).toUpperCase();
   }
 }
 
@@ -3663,38 +3687,55 @@ async function loadAnalytics(){
   } catch(e) { console.error(e); }
 }
 
-/* ===== Loader global ===== */
+/* ===== Loader global mejorado ===== */
+const qxLoaderState = { pending: 0, timer: null, loaderTimeout: null };
 function showLoader(msg){
   const el = document.getElementById('qxLoader');
   if(!el) return;
-  if(msg) document.getElementById('qxLoaderText').innerHTML = msg;
-  el.classList.remove('hide-out'); el.classList.add('show');
+  try {
+    if(msg) {
+      const textEl = document.getElementById('qxLoaderText');
+      if(textEl) textEl.textContent = msg;
+    }
+    el.classList.remove('hide-out');
+    el.classList.add('show');
+    // Timeout de seguridad para prevenir loader permanente
+    if(qxLoaderState.loaderTimeout) clearTimeout(qxLoaderState.loaderTimeout);
+    qxLoaderState.loaderTimeout = setTimeout(hideLoader, 8000);
+  } catch(e) { console.error('showLoader error:', e); }
 }
 function hideLoader(){
   const el = document.getElementById('qxLoader');
   if(!el) return;
-  el.classList.add('hide-out');
-  setTimeout(()=>{ el.classList.remove('show','hide-out'); }, 340);
+  try {
+    el.classList.add('hide-out');
+    if(qxLoaderState.loaderTimeout) clearTimeout(qxLoaderState.loaderTimeout);
+    setTimeout(()=>{ el.classList.remove('show','hide-out'); }, 340);
+  } catch(e) { console.error('hideLoader error:', e); }
 }
-window.addEventListener('load', ()=> setTimeout(hideLoader, 500));
+window.addEventListener('load', ()=> setTimeout(hideLoader, 500), { once: true });
 (function bindLogoFallback(){
   const fb = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16161f"/><text x="32" y="40" text-anchor="middle" font-family="Outfit,Inter,sans-serif" font-size="22" font-weight="700" fill="#f4f4f5">Q</text></svg>');
   document.querySelectorAll('img[src*="ibb.co"]').forEach(img => {
-    img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; });
+    img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; }, { once: true });
   });
 })();
-setTimeout(()=>{ const el=document.getElementById('qxLoader'); if(el&&el.classList.contains('show')) hideLoader(); }, 6000);
 
-/* loader automatico para peticiones lentas */
+/* Loader automático para peticiones lentas (sin race conditions) */
 (function(){
   const origFetch = window.fetch.bind(window);
-  let pending = 0, timer = null;
   window.fetch = function(...args){
-    pending++;
-    if(!timer) timer = setTimeout(()=>{ if(pending>0) showLoader(t('loader.sync')); }, 350);
+    qxLoaderState.pending++;
+    if(!qxLoaderState.timer && qxLoaderState.pending > 0) {
+      qxLoaderState.timer = setTimeout(()=>{ if(qxLoaderState.pending>0) showLoader(typeof t === 'function' ? t('loader.sync') : 'Cargando...'); }, 350);
+    }
     return origFetch(...args).finally(()=>{
-      pending = Math.max(0, pending-1);
-      if(pending === 0){ clearTimeout(timer); timer = null; hideLoader(); }
+      qxLoaderState.pending = Math.max(0, qxLoaderState.pending-1);
+      if(qxLoaderState.pending === 0){ 
+        clearTimeout(qxLoaderState.timer); 
+        qxLoaderState.timer = null; 
+        hideLoader(); 
+      }
     });
   };
 })();
