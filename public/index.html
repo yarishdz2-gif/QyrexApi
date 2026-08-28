@@ -644,27 +644,6 @@
   }
 
 </style>
-
-<style id="qrex-local-image-fix">
-/* Logo local: evita hotlink/cors/cache y mantiene dimensiones consistentes. */
-img[src="/assets/qrex-logo.png"]{
-  display:block;
-  width:100%;
-  height:100%;
-  max-width:100%;
-  object-fit:contain;
-  object-position:center;
-  background:#f4f4f5;
-}
-.qx-ring img[src="/assets/qrex-logo.png"]{border-radius:inherit}
-.lg-mark img[src="/assets/qrex-logo.png"],
-.lg-mobile-mark img[src="/assets/qrex-logo.png"],
-.lg-topbar img[src="/assets/qrex-logo.png"],
-.ov-logo[src="/assets/qrex-logo.png"]{
-  object-fit:cover;
-}
-</style>
-
 </head>
 <body>
 
@@ -672,7 +651,7 @@ img[src="/assets/qrex-logo.png"]{
 
 <!-- LOADER GLOBAL -->
 <div class="qx-loader show" id="qxLoader">
-  <div class="qx-ring"><img src="/assets/qrex-logo.png" alt="QrexApi"/></div>
+  <div class="qx-ring"><img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="QrexApi"/></div>
   <div class="qx-ltext" id="qxLoaderText">Cargando <b>QrexApi</b>...</div>
   <div class="qx-bar"><i></i></div>
 </div>
@@ -690,7 +669,7 @@ img[src="/assets/qrex-logo.png"]{
 <div class="toast-wrap" id="toasts"></div>
 <div id="loginView" class="min-h-screen flex items-center justify-center p-6">
   <div class="lg-topbar">
-    <img src="/assets/qrex-logo.png" alt="Qrex"/>
+    <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
     <b>QrexApi</b>
   </div>
   <div class="lg-photo"></div>
@@ -705,7 +684,7 @@ img[src="/assets/qrex-logo.png"]{
     <section class="lg-aside">
       <div>
         <div class="lg-mark">
-          <img src="/assets/qrex-logo.png" alt="Qrex"/>
+          <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
           <b>QrexApi</b>
         </div>
         <p class="lg-kicker" style="margin-top:34px">Panel privado</p>
@@ -722,7 +701,7 @@ img[src="/assets/qrex-logo.png"]{
 
     <section class="lg-panel">
       <div class="lg-mobile-mark">
-        <img src="/assets/qrex-logo.png" alt="Qrex"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
         <b>QrexApi</b>
       </div>
 
@@ -797,7 +776,7 @@ img[src="/assets/qrex-logo.png"]{
   <canvas id="vipParticleCanvas"></canvas>
   <div class="mobile-topbar">
     <div class="mt-brand">
-      <img src="/assets/qrex-logo.png" alt="Qrex"/>
+      <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex"/>
       <b>QrexApi</b>
     </div>
     <button type="button" class="mt-open" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" onclick="toggleSidebar()">
@@ -816,7 +795,7 @@ img[src="/assets/qrex-logo.png"]{
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
       <div class="flex items-center gap-3 px-5 py-5">
-        <img src="/assets/qrex-logo.png" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/>
         <div class="min-w-0">
           <div class="font-bold text-lg tracking-tight leading-tight">QrexApi</div>
           <a class="qyrex-credit mt-1" href="#" target="_blank" rel="noopener" title="Ofuscador QyrexObf">
@@ -943,7 +922,7 @@ img[src="/assets/qrex-logo.png"]{
         <section id="page-overview" class="page">
           <div class="ov-hero">
             <div class="flex flex-wrap items-center gap-5">
-              <img class="ov-logo" src="/assets/qrex-logo.png" alt="QrexApi"/>
+              <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" alt="QrexApi"/>
               <div class="min-w-0">
                 <div class="ov-kicker">QrexApi &middot; Panel privado</div>
                 <h1 class="ov-title">Tus scripts,<br/><em>bajo control.</em></h1>
@@ -3493,25 +3472,5 @@ function closeLegal(){ document.getElementById('qxModal').classList.remove('show
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
 </script>
-
-<script id="qrex-local-image-guard">
-(() => {
-  const logo = '/assets/qrex-logo.png';
-  const fix = (img) => {
-    if (!img || img.dataset.qrexGuard === '1') return;
-    img.dataset.qrexGuard = '1';
-    if (img.getAttribute('src') === logo) {
-      img.addEventListener('error', () => {
-        img.style.visibility = 'hidden';
-      }, {once:true});
-    }
-  };
-  const scan = () => document.querySelectorAll('img').forEach(fix);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, {once:true});
-  else scan();
-  new MutationObserver(scan).observe(document.documentElement, {subtree:true, childList:true});
-})();
-</script>
-
 </body>
 </html>
