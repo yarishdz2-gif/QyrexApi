@@ -1054,6 +1054,370 @@ function buildDoubleLinkStub(cacheUrl) {
     'return __QYREX_FN()'
   ].join('\n');
 }
+
+// ========== ADDED: ANTI-DUMP HARDENING LAYER (append-only) ==========
+// This layer intentionally sits on top of the existing delivery pipeline.
+// It does not remove or disable any previous protections.
+const QYREX_DELIVERY_HARDENING = {
+  enabled: String(process.env.QYREX_DELIVERY_HARDENING ?? 'true').toLowerCase() !== 'false',
+  suspiciousThreshold: Math.max(3, Number(process.env.QYREX_SUSPICIOUS_THRESHOLD || 6)),
+  canaryWindowMs: 60 * 1000,
+  canaryMax: 6,
+  replayWindowMs: 20 * 1000,
+};
+
+const qyrexDeliveryRisk = new Map();
+function qyrexRiskKey(req) {
+  return clientIp(req) + '|' + deliveryFingerprint(clientIp(req), req.headers['user-agent'] || '');
+}
+function qyrexMarkRisk(req, reason, weight = 1) {
+  const key = qyrexRiskKey(req);
+  const now = Date.now();
+  let e = qyrexDeliveryRisk.get(key);
+  if (!e || now - e.t > QYREX_DELIVERY_HARDENING.canaryWindowMs) e = { n: 0, t: now, reasons: [] };
+  e.n += Math.max(1, Number(weight) || 1);
+  e.t = now;
+  if (reason && e.reasons.length < 8) e.reasons.push(String(reason).slice(0, 64));
+  qyrexDeliveryRisk.set(key, e);
+  return e.n;
+}
+function qyrexRiskScore(req) {
+  const e = qyrexDeliveryRisk.get(qyrexRiskKey(req));
+  if (!e || Date.now() - e.t > QYREX_DELIVERY_HARDENING.canaryWindowMs) return 0;
+  return e.n;
+}
+function qyrexObviousDumpPath(pathname) {
+  return /(?:dump|dumper|decompile|decompiler|source(?:code)?|rawsource|bytecode|scriptbytecode|saveinstance|syn%-?save|memory|gc|upvalues?|constants?)/i.test(String(pathname || ''));
+}
+function qyrexDecoy200(res) {
+  res.status(200);
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('X-Qrex-Layer', 'decoy');
+  return res.type('text/plain').send(decoyLua());
+}
+function qyrexHardeningHeaders(res) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('X-Qrex-Protection', 'anti-dump-v3');
+}
+
+const qyrexCanaryPaths = [
+  '/api/source', '/api/raw-source', '/api/dump', '/api/decompile', '/api/bytecode',
+  '/api/getscriptbytecode', '/api/memory-dump', '/api/script-source', '/source.lua', '/dump.lua'
+];
+for (const pth of qyrexCanaryPaths) {
+  app.all(pth, (req, res) => {
+    const score = qyrexMarkRisk(req, 'canary:' + pth, 2);
+    if (score >= QYREX_DELIVERY_HARDENING.suspiciousThreshold) {
+      banIp(clientIp(req), 'Anti-dump canary: ' + pth).catch(() => {});
+    }
+    return qyrexDecoy200(res);
+  });
+}
+
+// Catch common probing patterns before static/public fallbacks.
+app.use((req, res, next) => {
+  if (!QYREX_DELIVERY_HARDENING.enabled) return next();
+  const ua = String(req.headers['user-agent'] || '');
+  const pathName = String(req.path || req.originalUrl || '');
+  const accept = String(req.headers['accept'] || '').toLowerCase();
+  const suspiciousUa = /python|curl|wget|powershell|postman|insomnia|httpclient|okhttp|scrapy|crawler|spider|libwww|go-http|java\//i.test(ua);
+  const probingHeaders = !ua.trim() || (accept.includes('*/*') && !accept.includes('text/plain'));
+  if (qyrexObviousDumpPath(pathName)) {
+    const score = qyrexMarkRisk(req, 'probe-path', 2);
+    if (score >= QYREX_DELIVERY_HARDENING.suspiciousThreshold) banIp(clientIp(req), 'Anti-dump path probe').catch(() => {});
+    if (pathName.startsWith('/api/') || pathName.endsWith('.lua')) return qyrexDecoy200(res);
+  }
+  if (suspiciousUa && /(?:\/api\/raw|\/api\/v1\/luascripts|\/api\/cache)/i.test(pathName)) {
+    qyrexMarkRisk(req, 'scraper-ua', 1);
+  }
+  if (probingHeaders && /(?:\/api\/raw|\/api\/v1\/luascripts|\/api\/cache)/i.test(pathName)) {
+    qyrexMarkRisk(req, 'probe-headers', 1);
+  }
+  qyrexHardeningHeaders(res);
+  next();
+});
+
+// Extra one-time delivery replay ledger. Existing scriptTokens remain authoritative;
+// this ledger adds an independent short replay window for successful cache deliveries.
+const qyrexReplayLedger = new Map();
+function qyrexReplayDigest(req, scriptId, token) {
+  return crypto.createHmac('sha256', JWT_SECRET)
+    .update(String(scriptId) + '|' + String(token) + '|' + deliveryFingerprint(clientIp(req), req.headers['user-agent'] || ''))
+    .digest('hex');
+}
+function qyrexReplaySeen(req, scriptId, token) {
+  const d = qyrexReplayDigest(req, scriptId, token);
+  const now = Date.now();
+  for (const [k, t] of qyrexReplayLedger) if (now - t > QYREX_DELIVERY_HARDENING.replayWindowMs) qyrexReplayLedger.delete(k);
+  if (qyrexReplayLedger.has(d)) return true;
+  qyrexReplayLedger.set(d, now);
+  return false;
+}
+
+// Polymorphic in-memory delivery wrapper. The previous wrapper is preserved as the
+// first layer; this second layer changes every delivered payload without changing
+// the existing loader contract.
+const qyrexLegacyWrapDeliveredScript = wrapDeliveredScript;
+wrapDeliveredScript = function hardenedWrapDeliveredScript(code, apiBase, scriptId) {
+  const base = qyrexLegacyWrapDeliveredScript(code, apiBase, scriptId);
+  if (!QYREX_DELIVERY_HARDENING.enabled || !base) return base;
+
+  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const ident = (prefix) => {
+    let out = '__qrx_' + prefix;
+    for (let i = 0; i < 9; i++) out += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
+    return out;
+  };
+  const luaBytes = (buf) => {
+    let out = '"';
+    for (const b of buf) out += '\\' + String(b).padStart(3, '0');
+    return out + '"';
+  };
+  const raw = Buffer.from(base, 'utf8');
+  const masks = Array.from({ length: 7 }, () => crypto.randomBytes(24));
+  let transformed = raw;
+  const rounds = [];
+  for (let r = masks.length - 1; r >= 0; r--) {
+    const m = masks[r];
+    const out = Buffer.allocUnsafe(transformed.length);
+    for (let i = 0; i < transformed.length; i++) {
+      out[i] = transformed[i] ^ m[i % m.length] ^ ((i * (31 + r * 17) + 43 + r * 11) & 0xff);
+    }
+    transformed = Buffer.from(out);
+    rounds.push(m);
+  }
+  const ids = {
+    env: ident('e'), score: ident('s'), ls: ident('l'), data: ident('d'), out: ident('o'),
+    masks: ident('m'), bx: ident('x'), i: ident('i'), r: ident('r'), b: ident('b'), fn: ident('f')
+  };
+  const scoreNames = JSON.stringify([
+    'getgc','getreg','getconnections','getupvalues','getupvalue','getconstants','getconstant',
+    'getproto','getprotos','getsenv','getscriptbytecode','dumpstring','saveinstance','clonefunction',
+    'getrawmetatable','hookfunction','hookmetamethod','newcclosure','iscclosure','isfunctionhooked'
+  ]);
+  const keyLits = rounds.reverse().map(luaBytes).join(',');
+  const payload = luaBytes(transformed);
+  const sourceTag = crypto.createHash('sha256').update(raw).digest('hex').slice(0, 16);
+  const decoyA = crypto.randomBytes(48).toString('hex');
+  const decoyB = crypto.randomBytes(36).toString('hex');
+
+  return [
+    '-- Qyrex polymorphic delivery ' + sourceTag,
+    'do',
+    '  local ' + ids.env + '=(getgenv and getgenv()) or _G',
+    '  local ' + ids.score + '=0',
+    '  local __n=' + scoreNames,
+    '  for _,__k in ipairs(__n) do if type(' + ids.env + '[__k])=="function" then ' + ids.score + '=' + ids.score + '+1 end end',
+    '  local __dbg=debug',
+    '  if __dbg and type(__dbg)~="table" then ' + ids.score + '=' + ids.score + '+2 end',
+    '  if type(getrawmetatable)=="function" and type(hookfunction)=="function" then ' + ids.score + '=' + ids.score + '+1 end',
+    '  if ' + ids.score + '>=' + String(QYREX_DELIVERY_HARDENING.suspiciousThreshold) + ' then warn("skidder noob"); return end',
+    '  local ' + ids.masks + '={' + keyLits + '}',
+    '  local ' + ids.data + '=' + payload,
+    '  local ' + ids.out + '={}',
+    '  local ' + ids.bx + '=(bit32 and bit32.bxor) or function(a,b) local o,p,x,y=0,1,a,b for q=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
+    '  local __decoy1="' + decoyA + '"',
+    '  local __decoy2="' + decoyB + '"',
+    '  if #__decoy1<16 or #__decoy2<16 then return end',
+    '  for ' + ids.r + '=1,#' + ids.masks + ' do',
+    '    local ' + ids.b + '={}',
+    '    local __mask=' + ids.masks + '[' + ids.r + ']',
+    '    for ' + ids.i + '=1,#' + ids.data + ' do',
+    '      local __v=string.byte(' + ids.data + ',' + ids.i + ')',
+    '      local __k=string.byte(__mask,((' + ids.i + '-1)%#' + ids.masks + '[' + ids.r + '])+1)',
+    '      local __z=(((' + ids.i + '-1)*(31+(' + ids.r + '-1)*17)+43+((' + ids.r + '-1)*11))%256)',
+    '      ' + ids.b + '[' + ids.i + ']=string.char(' + ids.bx + '(' + ids.bx + '(__v,__k),__z))',
+    '    end',
+    '    ' + ids.data + '=table.concat(' + ids.b + ')',
+    '  end',
+    '  local ' + ids.fn + '=loadstring(' + ids.data + ')',
+    '  if type(' + ids.fn + ')~="function" then return end',
+    '  return ' + ids.fn + '()',
+    'end'
+  ].join('\n');
+};
+
+
+// ========== QYREX EXTRA DELIVERY HARDENING (append-only) ==========
+// Additional layers designed to preserve the existing loader contract while
+// making every delivery polymorphic and less useful to passive dumpers.
+const QYREX_EXTRA = Object.freeze({
+  enabled: String(process.env.QYREX_EXTRA_HARDENING ?? 'true').toLowerCase() !== 'false',
+  maxDeliveryBytes: Math.max(64 * 1024, Number(process.env.QYREX_MAX_DELIVERY_BYTES || 4 * 1024 * 1024)),
+  replayTtlMs: 30 * 1000,
+  riskThreshold: Math.max(4, Number(process.env.QYREX_EXTRA_RISK_THRESHOLD || 8)),
+});
+
+const qyrexDeliveryState = new Map();
+function qyrexStateKey(req, scriptId) {
+  return String(scriptId || '') + '|' + clientIp(req) + '|' + deliveryFingerprint(clientIp(req), req.headers['user-agent'] || '');
+}
+function qyrexStateTouch(req, scriptId, event, weight = 1) {
+  const key = qyrexStateKey(req, scriptId);
+  const now = Date.now();
+  let st = qyrexDeliveryState.get(key);
+  if (!st || now - st.t > 90 * 1000) st = { t: now, score: 0, events: [] };
+  st.score += Math.max(1, Number(weight) || 1);
+  st.t = now;
+  if (event && st.events.length < 12) st.events.push(String(event).slice(0, 80));
+  qyrexDeliveryState.set(key, st);
+  return st.score;
+}
+
+function qyrexConstantTimeHex(a, b) {
+  try {
+    const aa = Buffer.from(String(a || ''), 'hex');
+    const bb = Buffer.from(String(b || ''), 'hex');
+    return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
+  } catch { return false; }
+}
+
+function qyrexPayloadTag(buf, context) {
+  return crypto.createHmac('sha256', JWT_SECRET)
+    .update(String(context || '') + '|')
+    .update(buf)
+    .digest('hex');
+}
+
+function qyrexByteMask(buf, mask, salt, round) {
+  const out = Buffer.allocUnsafe(buf.length);
+  for (let i = 0; i < buf.length; i++) {
+    const a = buf[i];
+    const b = mask[i % mask.length];
+    const c = salt[(i * 7 + round) % salt.length];
+    const d = (i * (83 + round * 13) + 29 + round * 17) & 0xff;
+    out[i] = a ^ b ^ c ^ d;
+  }
+  return out;
+}
+
+const qyrexLegacyPolymorphicWrap = wrapDeliveredScript;
+wrapDeliveredScript = function qyrexUltraWrapDeliveredScript(code, apiBase, scriptId) {
+  const base = qyrexLegacyPolymorphicWrap(code, apiBase, scriptId);
+  if (!QYREX_EXTRA.enabled || !base) return base;
+
+  const raw = Buffer.from(String(base), 'utf8');
+  if (raw.length > QYREX_EXTRA.maxDeliveryBytes) {
+    throw new Error('Delivery payload exceeds configured maximum');
+  }
+
+  const context = String(scriptId || '') + '|' + crypto.randomBytes(10).toString('hex');
+  const rounds = 3 + (crypto.randomBytes(1)[0] % 3);
+  const masks = [];
+  let transformed = raw;
+  for (let r = 0; r < rounds; r++) {
+    const mask = crypto.randomBytes(32 + (crypto.randomBytes(1)[0] % 17));
+    const salt = crypto.randomBytes(24);
+    masks.push({ mask, salt, round: r });
+    transformed = qyrexByteMask(transformed, mask, salt, r);
+  }
+
+  // Randomly reverse the transform order per delivery.
+  masks.reverse();
+
+  const escLuaBytes = (buf) => {
+    let out = '"';
+    for (const b of buf) out += '\\' + String(b).padStart(3, '0');
+    return out + '"';
+  };
+  const ident = (prefix) => {
+    let out = '__qx_' + prefix;
+    const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let i = 0; i < 10; i++) out += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
+    return out;
+  };
+  const ids = {
+    data: ident('d'), out: ident('o'), bx: ident('x'), i: ident('i'), r: ident('r'),
+    m: ident('m'), s: ident('s'), k: ident('k'), f: ident('f'), ok: ident('q'),
+    tag: ident('t'), ctx: ident('c')
+  };
+  const expectedTag = qyrexPayloadTag(raw, context).slice(0, 32);
+  const ctxLit = JSON.stringify(context).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const maskTable = masks.map(x => '{m=' + escLuaBytes(x.mask) + ',s=' + escLuaBytes(x.salt) + ',r=' + x.round + '}').join(',');
+  const transformedLit = escLuaBytes(transformed);
+
+  // The wrapper includes inert canaries and a soft suspicion score. The score is
+  // intentionally tolerant to avoid breaking legitimate execution environments.
+  const scoreNames = JSON.stringify([
+    'getgc','getreg','getconnections','getupvalues','getupvalue','getconstants',
+    'getconstant','getproto','getprotos','getscriptbytecode','dumpstring',
+    'saveinstance','getrawmetatable','hookfunction','hookmetamethod',
+    'isfunctionhooked','clonefunction','getloadedmodules'
+  ]);
+
+  return [
+    '-- Qyrex hardened delivery #' + expectedTag,
+    'do',
+    '  local __env=(getgenv and getgenv()) or _G',
+    '  local __score=0',
+    '  local __names=' + scoreNames,
+    '  for _,__n in ipairs(__names) do if type(__env[__n])=="function" then __score=__score+1 end end',
+    '  if type(getrawmetatable)=="function" and type(hookfunction)=="function" then __score=__score+1 end',
+    '  if type(clonefunction)=="function" and type(getscriptbytecode)=="function" then __score=__score+1 end',
+    '  if __score>=' + String(QYREX_EXTRA.riskThreshold) + ' then warn("skidder noob"); return end',
+    '  local ' + ids.ctx + '=' + JSON.stringify(context),
+    '  local __tag="' + expectedTag + '", __salted="' + crypto.randomBytes(12).toString('hex') + '"',
+    '  local ' + ids.m + '={' + maskTable + '}',
+    '  local ' + ids.data + '=' + transformedLit,
+    '  local ' + ids.bx + '=(bit32 and bit32.bxor) or function(a,b) local o,p,x,y=0,1,a,b for z=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
+    '  for ' + ids.r + '=1,#' + ids.m + ' do',
+    '    local ' + ids.k + '=' + ids.m + '[' + ids.r + ']',
+    '    local ' + ids.s + '=' + ids.k + '.s',
+    '    local ' + ids.f + '={}',
+    '    for ' + ids.i + '=1,#' + ids.data + ' do',
+    '      local __v=string.byte(' + ids.data + ',' + ids.i + ')',
+    '      local __mk=string.byte(' + ids.k + '.m,(((' + ids.i + '-1)%#' + ids.k + '.m)+1))',
+    '      local __ss=string.byte(' + ids.s + ',((((' + ids.i + '-1)*7+' + ids.k + '.r)%#' + ids.s + ')+1))',
+    '      local __z=(((' + ids.i + '-1)*(83+' + ids.k + '.r*13)+29+' + ids.k + '.r*17)%256)',
+    '      ' + ids.f + '[' + ids.i + ']=string.char(' + ids.bx + '(' + ids.bx + '(' + ids.bx + '(__v,__mk),__ss),__z))',
+    '    end',
+    '    ' + ids.data + '=table.concat(' + ids.f + ')',
+    '  end',
+    '  local __noise=' + JSON.stringify(crypto.randomBytes(24).toString('hex')),
+    '  if #__noise<16 or #' + ids.ctx + '<8 then return end',
+    '  local __load=(loadstring or load)',
+    '  if type(__load)~="function" then return end',
+    '  local ' + ids.out + ',__err=__load(' + ids.data + ',"@QyrexDelivery")',
+    '  if type(' + ids.out + ')~="function" then return end',
+    '  return ' + ids.out + '()',
+    'end'
+  ].join('\n');
+};
+
+// Add a very small per-IP/script issuance guard so a single client cannot
+// repeatedly mint delivery tokens in a tight loop.
+const qyrexIssueWindows = new Map();
+function qyrexIssueAllowed(req, scriptId) {
+  const key = qyrexStateKey(req, scriptId);
+  const now = Date.now();
+  let e = qyrexIssueWindows.get(key);
+  if (!e || now - e.t > 60 * 1000) e = { t: now, n: 0 };
+  e.n++;
+  qyrexIssueWindows.set(key, e);
+  return e.n <= 6;
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [k,v] of qyrexDeliveryState) if (!v || now - v.t > 3 * 60 * 1000) qyrexDeliveryState.delete(k);
+  for (const [k,v] of qyrexIssueWindows) if (!v || now - v.t > 3 * 60 * 1000) qyrexIssueWindows.delete(k);
+}, 30000).unref?.();
+
+// Periodic cleanup for the added ledgers.
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of qyrexDeliveryRisk) if (now - v.t > QYREX_DELIVERY_HARDENING.canaryWindowMs * 2) qyrexDeliveryRisk.delete(k);
+  for (const [k, v] of qyrexReplayLedger) if (now - v > QYREX_DELIVERY_HARDENING.replayWindowMs * 2) qyrexReplayLedger.delete(k);
+}, 30000).unref?.();
+
 function publicBase(req) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const proto = req.headers['x-forwarded-proto'] || 'https';
@@ -1097,6 +1461,7 @@ async function serveRealScript(req, res, scriptId) {
 
   const s = await Script.findOne({ id: scriptId });
   if (!s) return res.status(404).type('text/plain').send('-- not found');
+  qyrexStateTouch(req, scriptId, 'delivery', 1);
 
   s.executions = (s.executions || 0) + 1;
   await s.save();
@@ -1198,6 +1563,10 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
   const s = await Script.findOne({ id: req.params.id }).select('id');
   if (!s) return res.status(404).type('text/plain').send('-- not found');
 
+  if (!qyrexIssueAllowed(req, s.id)) {
+    qyrexMarkRisk(req, 'token-mint-burst', 2);
+    return qyrexDecoy200(res);
+  }
   const token = issueScriptToken(s.id, ip, ua);
   const base = publicBase(req);
   const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
@@ -1211,6 +1580,7 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
 
 app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api/raw/cache/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
   const ip = clientIp(req);
+  qyrexHardeningHeaders(res);
   const ua = req.headers['user-agent'] || '';
   const hits = trackAbuse(ip, ua);
   if (hits >= AUTO_BAN_THRESHOLD) {
@@ -1221,6 +1591,11 @@ app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api
 
   const token = String(req.query.t || req.headers['x-qrex-token'] || '');
   const ok = consumeScriptToken(req.params.id, token, ip, ua);
+  if (ok && qyrexReplaySeen(req, req.params.id, token)) {
+    qyrexMarkRisk(req, 'token-replay', 3);
+    if (qyrexRiskScore(req) >= QYREX_DELIVERY_HARDENING.suspiciousThreshold) banIp(ip, 'Replay detected on script delivery').catch(() => {});
+    return qyrexDecoy200(res);
+  }
   if (!ok) {
     if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
     res.setHeader('Cache-Control', 'no-store');
@@ -2178,7 +2553,7 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
     doc.lastUsedAt = new Date();
     await doc.save();
 
-    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req));
+    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req), req.headers['user-agent'] || '');
 
     fireWebhooks(doc.ownerId, 'key_verify', {
       key: kstr.slice(0, 8) + '...',
