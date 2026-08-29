@@ -1492,6 +1492,17 @@ local Players = game:GetService(&quot;Players&quot;)
             </div>
 
             <div class="card p-6">
+              <div class="text-sm font-semibold mb-1">Claim por defecto</div>
+              <div class="text-xs mb-4" style="color:#5a5a6e">Guarda un Claim URL predeterminado para usarlo cuando no configures uno específico en un provider.</div>
+              <div class="flex flex-wrap gap-2">
+                <input id="defaultClaimUrlInput" class="flex-1 min-w-[240px]" placeholder="https://qyrex.hopto.org/getkey/TU_PROVIDER_ID"/>
+                <button class="btn-primary" type="button" onclick="saveDefaultClaimUrl()">Guardar</button>
+                <button class="btn-ghost" type="button" onclick="copyDefaultClaimUrl()">Copiar</button>
+              </div>
+              <div class="text-[11px] mt-2" style="color:#6b6b80">Este valor se guarda en este navegador y se usa como respaldo si un provider no tiene Ad link.</div>
+            </div>
+
+            <div class="card p-6">
               <div class="text-sm font-semibold mb-1">Preferencias</div>
               <div class="text-xs mb-4" style="color:#5a5a6e">Opciones del panel</div>
               <label class="flex items-center justify-between py-2 cursor-pointer">
@@ -2056,7 +2067,7 @@ function go(p){
   if (p === 'overview') { loadStats(); loadAnalytics(); }
   if (p === 'executions') loadAnalytics();
   if (p === 'logs') loadLogs();
-  if (p === 'settings') { try { refreshVipStatus(); } catch(e) {} loadAccountData(); loadAccountSessions(); loadNotifications(); }
+  if (p === 'settings') { try { refreshVipStatus(); } catch(e) {} loadAccountData(); loadAccountSessions(); loadNotifications(); loadDefaultClaimUrl(); }
 }
 
 
@@ -2710,6 +2721,41 @@ async function delHub(id){
 }
 
 
+function getDefaultClaimUrl(){
+  return (localStorage.getItem('qrex_default_claim') || '').trim();
+}
+
+function saveDefaultClaimUrl(){
+  const el = document.getElementById('defaultClaimUrlInput');
+  const value = (el ? el.value : '').trim();
+  if (value && !/^https?:\/\//i.test(value)) {
+    toast('El Claim URL debe empezar con http:// o https://', 'err');
+    return;
+  }
+  localStorage.setItem('qrex_default_claim', value);
+  toast(value ? 'Claim por defecto guardado' : 'Claim por defecto eliminado');
+  loadProviders();
+}
+
+function copyDefaultClaimUrl(){
+  const value = getDefaultClaimUrl() || (document.getElementById('defaultClaimUrlInput')?.value || '').trim();
+  if (!value) {
+    toast('No hay Claim URL configurado', 'err');
+    return;
+  }
+  try {
+    navigator.clipboard.writeText(value);
+    toast('Claim URL copiado');
+  } catch {
+    toast('No se pudo copiar el Claim URL', 'err');
+  }
+}
+
+function loadDefaultClaimUrl(){
+  const el = document.getElementById('defaultClaimUrlInput');
+  if (el) el.value = getDefaultClaimUrl();
+}
+
 async function loadKeysPage(){
   await loadProviders();
   await loadKeysTable();
@@ -2746,7 +2792,8 @@ async function loadProviders(){
     
     sel.innerHTML = list.map(p => {
       const claim = location.origin + '/getkey/' + p._id;
-      const getKeyText = (p.adLink || claim || '').replace(/"/g, '&quot;');
+      const defaultClaim = (localStorage.getItem('qrex_default_claim') || '').trim();
+      const getKeyText = (p.adLink || defaultClaim || claim || '').replace(/"/g, '&quot;');
       const claimText = claim.replace(/"/g, '&quot;');
       const providerName = esc(p.name).replace(/"/g, '&quot;');
       return '<option value="'+p._id+'" data-provider-name="'+providerName+'" data-get-key="'+getKeyText+'" data-claim-url="'+claimText+'">'+esc(p.name)+'</option>';
@@ -2860,7 +2907,8 @@ function updateLoaderSnippet(){
   const option = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex] : null;
   const providerId = option ? (option.value || '') : '';
   const provName = option ? (option.dataset.providerName || option.text || 'MyProvider') : 'MyProvider';
-  const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + providerId)) : (base + '/getkey/PROVIDER_ID');
+  const defaultClaim = (localStorage.getItem('qrex_default_claim') || '').trim();
+  const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + providerId)) : (defaultClaim || (base + '/getkey/PROVIDER_ID'));
   const getKeyLink = option ? ((option.dataset.getKey || '').replace(/&quot;/g, '"') || claimUrl) : '';
   const safeProvider = provName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const safeClaim = claimUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
