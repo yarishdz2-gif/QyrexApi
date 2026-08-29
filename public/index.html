@@ -1009,9 +1009,9 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
                   <option value="none">Solo claim (sin ads)</option>
                 </select>
               </div>
-              <div><label class="field">Ad link (Linkvertise / Lootlabs / Work.ink)</label>
-                <input id="provAdLink" placeholder="https://linkvertise.com/... o https://work.ink/..."/>
-                <p class="text-[11px] mt-1" style="color:#5a5a6e">Destino final del anuncio debe ser tu claim URL (se muestra abajo al crear).</p>
+              <div><label class="field">Get Key link / texto (Linkvertise / Lootlabs / Work.ink)</label>
+                <input id="provAdLink" placeholder="https://linkvertise.com/... o https://loot-link.com/..."/>
+                <p class="text-[11px] mt-1" style="color:#5a5a6e">Este contenido se copiara al pulsar <b>Get Key</b>. Dejalo vacio para usar automaticamente el Claim URL de QyrexApi.</p>
               </div>
               <button class="btn-primary" onclick="createProvider()">Create Provider</button>
             </div>
@@ -1038,8 +1038,8 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
               <div id="provList" class="space-y-2 text-sm"></div>
             </div>
             <div class="card p-5">
-              <div class="text-sm font-semibold mb-2">Loader Lua (Ponlo en tu script)</div>
-              <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code></p>
+              <div class="text-sm font-semibold mb-2">Loader Lua (copia en tu script)</div>
+              <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. <b>Get Key</b> copia el link/texto configurado en tu provider. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code></p>
               <pre id="loaderSnippet" class="text-[10px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg font-mono" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
               <button class="btn-ghost text-xs mt-2" onclick="copyLs(document.getElementById('loaderSnippet').textContent)">Copiar loader</button>
             </div>
@@ -2664,9 +2664,16 @@ async function loadProviders(){
           '</div></div></div>';
     }).join('');
     
-    sel.innerHTML = list.map(p => '<option value="'+p._id+'">'+esc(p.name)+'</option>').join('');
+    sel.innerHTML = list.map(p => {
+      const claim = location.origin + '/getkey/' + p._id;
+      const getKeyText = (p.adLink || claim || '').replace(/"/g, '&quot;');
+      const providerName = esc(p.name).replace(/"/g, '&quot;');
+      return '<option value="'+p._id+'" data-provider-name="'+providerName+'" data-get-key="'+getKeyText+'">'+esc(p.name)+'</option>';
+    }).join('');
+    sel.onchange = updateLoaderSnippet;
     const hint = document.getElementById('claimUrlHint');
     if (hint && list[0]) hint.textContent = location.origin + '/getkey/' + list[0]._id;
+    updateLoaderSnippet();
   } catch(e) { console.error(e); }
 }
 
@@ -2769,38 +2776,1087 @@ async function delKey(id){
 function updateLoaderSnippet(){
   const base = location.origin;
   const sel = document.getElementById('keyProvSelect');
-  const provName = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : 'MyProvider';
-  const snip = `-- QrexApi Key Loader
-local HttpService = game:GetService("HttpService")
+  const option = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex] : null;
+  const provName = option ? (option.dataset.providerName || option.text || 'MyProvider') : 'MyProvider';
+  const claimUrl = option ? ((option.dataset.getKey || '').replace(/&quot;/g, '"') || (base + '/getkey/' + option.value)) : (base + '/getkey/PROVIDER_ID');
+  const safeProvider = provName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const safeClaim = claimUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+  const snip = `local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
+
+local function GetScreenCenter()
+	local camera = Workspace.CurrentCamera
+	if camera then
+		local size = camera.ViewportSize
+		if size.X > 0 and size.Y > 0 then
+			return Vector2.new(size.X / 2, size.Y / 2)
+		end
+	end
+	return Vector2.new(640, 360)
+end
+
+local function GetGuiParent()
+	local hOk, hui = pcall(function()
+		return gethui()
+	end)
+	if hOk and hui then
+		return hui
+	end
+
+	local cOk = pcall(function()
+		return CoreGui.Name
+	end)
+	if cOk then
+		return CoreGui
+	end
+
+	local player = Players.LocalPlayer
+	if player then
+		local pg = player:FindFirstChildOfClass("PlayerGui")
+		if pg then
+			return pg
+		end
+	end
+
+	return CoreGui
+end
+
+local QyrexAPI = {}
+
 local cfg = {
-  api = "${base}",
-  provider = "${provName.replace(/"/g, '')}",
+	title = "QyrexApi",
+	logo = "rbxassetid://94849727948862",
+	backgroundTexture = "rbxassetid://98670789980335",
+	accentA = Color3.fromRGB(168, 85, 247),
+	accentB = Color3.fromRGB(236, 72, 199),
+	accentC = Color3.fromRGB(96, 200, 255),
+	keyFile = "QyrexApi_Key.txt",
+	api = "${base}",
+	provider = "${safeProvider}",
+	getKeyLink = "${safeClaim}",
+	sounds = {
+		open = "rbxassetid://6655851046",
+		close = "rbxassetid://6655851046",
+		hover = "rbxassetid://6655851046",
+		click = "rbxassetid://6655851046",
+		notify = "rbxassetid://6655851046",
+		success = "rbxassetid://6655851046",
+		error = "rbxassetid://6655851046",
+	},
 }
+
+local function httpRequest(options)
+	local req = request or (syn and syn.request) or http_request
+	if not req then
+		return nil
+	end
+	local ok, response = pcall(req, options)
+	return ok and response or nil
+end
+
 local function getHwid()
-  local ok, id = pcall(function()
-    return game:GetService("RbxAnalyticsService"):GetClientId()
-  end)
-  return ok and id or tostring(game.Players.LocalPlayer.UserId)
+	local ok, id = pcall(function()
+		return game:GetService("RbxAnalyticsService"):GetClientId()
+	end)
+	return ok and id or tostring(Players.LocalPlayer.UserId)
 end
-local function verify(key)
-  local body = HttpService:JSONEncode({ key = key, hwid = getHwid(), provider = cfg.provider })
-  local res = request({
-    Url = cfg.api .. "/api/keys/verify",
-    Method = "POST",
-    Headers = { ["Content-Type"] = "application/json" },
-    Body = body
-  })
-  if not res or not res.Body then return false end
-  local ok, data = pcall(function() return HttpService:JSONDecode(res.Body) end)
-  return ok and data and data.success
+
+function QyrexAPI.VerifyKey(key)
+	local HttpService = game:GetService("HttpService")
+	local body = HttpService:JSONEncode({
+		key = key,
+		hwid = getHwid(),
+		provider = cfg.provider
+	})
+
+	local res = httpRequest({
+		Url = cfg.api .. "/api/keys/verify",
+		Method = "POST",
+		Headers = {
+			["Content-Type"] = "application/json"
+		},
+		Body = body
+	})
+
+	if not res or not res.Body then
+		return false
+	end
+
+	local ok, data = pcall(function()
+		return HttpService:JSONDecode(res.Body)
+	end)
+
+	return ok and data and data.success == true
 end
--- Ejemplo:
--- if verify("TU-KEY-AQUI") then
---   print("OK")
---   -- load tu script
--- else
---   warn("Key inválida")
--- end`
+
+function QyrexAPI.GetKeyLink()
+	return cfg.getKeyLink
+end
+
+local function PlaySound(key, volume, pitch)
+	local id = cfg.sounds and cfg.sounds[key]
+	if not id or id == "" then
+		return
+	end
+
+	local ok, sound = pcall(function()
+		local s = Instance.new("Sound")
+		s.SoundId = id
+		s.Volume = volume or 0.5
+		s.PlaybackSpeed = pitch or 1
+		s.Parent = SoundService
+		return s
+	end)
+
+	if not ok or not sound then
+		return
+	end
+
+	sound:Play()
+	sound.Ended:Connect(function()
+		sound:Destroy()
+	end)
+	task.delay(6, function()
+		if sound and sound.Parent then
+			sound:Destroy()
+		end
+	end)
+end
+
+local function AddCorner(radius, parent)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius)
+	c.Parent = parent
+	return c
+end
+
+local function AddGradient(parent, colorA, colorB, rotation)
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new(colorA, colorB)
+	g.Rotation = rotation or 0
+	g.Parent = parent
+	return g
+end
+
+local function AddTriGradient(parent, colorA, colorB, colorC, rotation)
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, colorA),
+		ColorSequenceKeypoint.new(0.5, colorB),
+		ColorSequenceKeypoint.new(1, colorC),
+	})
+	g.Rotation = rotation or 0
+	g.Parent = parent
+	return g
+end
+
+local function LoopPulse(obj, propTable, duration, style)
+	task.spawn(function()
+		local goingUp = true
+		while obj and obj.Parent do
+			local target = {}
+			for k, v in pairs(propTable) do
+				target[k] = goingUp and v[1] or v[2]
+			end
+			local tw = TweenService:Create(
+				obj,
+				TweenInfo.new(duration, style or Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+				target
+			)
+			tw:Play()
+			tw.Completed:Wait()
+			goingUp = not goingUp
+		end
+	end)
+end
+
+local function LoopRotate(gradient, duration)
+	task.spawn(function()
+		while gradient and gradient.Parent do
+			local tw = TweenService:Create(
+				gradient,
+				TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+				{ Rotation = gradient.Rotation + 360 }
+			)
+			tw:Play()
+			tw.Completed:Wait()
+		end
+	end)
+end
+
+local function LoopColorCycle(obj, prop, colors, duration)
+	task.spawn(function()
+		local i = 1
+		while obj and obj.Parent do
+			local nextI = (i % #colors) + 1
+			local tw = TweenService:Create(
+				obj,
+				TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+				{ [prop] = colors[nextI] }
+			)
+			tw:Play()
+			tw.Completed:Wait()
+			i = nextI
+		end
+	end)
+end
+
+local function PressPop(btn)
+	local baseX, baseY = btn.Size.X, btn.Size.Y
+	btn.MouseButton1Down:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.08, Enum.EasingStyle.Quad), {
+			Size = UDim2.new(baseX.Scale, baseX.Offset - 4, baseY.Scale, baseY.Offset - 3),
+		}):Play()
+	end)
+	local function restore()
+		TweenService:Create(btn, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.new(baseX.Scale, baseX.Offset, baseY.Scale, baseY.Offset),
+		}):Play()
+	end
+	btn.MouseButton1Up:Connect(restore)
+	btn.MouseLeave:Connect(restore)
+end
+
+local function StaggerReveal(items, startDelay, gap)
+	for idx, item in ipairs(items) do
+		local obj, origPos = item[1], item[2]
+		obj.Position = origPos + UDim2.fromOffset(0, 14)
+		task.delay(startDelay + (idx - 1) * gap, function()
+			if not obj or not obj.Parent then
+				return
+			end
+			TweenService:Create(obj, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Position = origPos,
+			}):Play()
+		end)
+	end
+end
+
+local function GenerateNotifId()
+	return tostring(math.floor(tick() * 1000)) .. "-" .. tostring(math.random(100000, 999999))
+end
+
+local notifActive = {}
+
+local function createNotification(kind, title, content, duration)
+	duration = duration or 3
+
+	local typeColors = {
+		Info = Color3.fromRGB(96, 165, 250),
+		Success = Color3.fromRGB(52, 211, 153),
+		Error = Color3.fromRGB(248, 113, 113),
+	}
+	local accent = typeColors[kind] or typeColors.Info
+
+	local pitchByKind = {
+		Info = 1,
+		Success = 1.15,
+		Error = 0.85,
+	}
+	PlaySound("notify", 0.35, pitchByKind[kind] or 1)
+
+	local screen = Instance.new("ScreenGui")
+	screen.Name = "QyrexApi_Notif"
+	screen.ResetOnSpawn = false
+	screen.DisplayOrder = 2147483647
+	screen.Parent = GetGuiParent()
+
+	local main = Instance.new("Frame")
+	main.Size = UDim2.new(0, 300, 0, 64)
+	main.Position = UDim2.new(1, -16, 1, -16)
+	main.AnchorPoint = Vector2.new(1, 1)
+	main.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
+	main.BackgroundTransparency = 0.05
+	main.BorderSizePixel = 0
+	main.ClipsDescendants = true
+	main.Parent = screen
+	AddCorner(11, main)
+
+	local bgGlow = Instance.new("Frame")
+	bgGlow.Size = UDim2.new(1, 0, 1, 0)
+	bgGlow.BackgroundColor3 = accent
+	bgGlow.BackgroundTransparency = 0.9
+	bgGlow.ZIndex = 0
+	bgGlow.Parent = main
+	AddCorner(11, bgGlow)
+	local bgGrad = AddTriGradient(bgGlow, cfg.accentA, accent, cfg.accentC, 0)
+	LoopRotate(bgGrad, 3)
+	LoopPulse(bgGlow, { BackgroundTransparency = { 0.85, 0.95 } }, 1)
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 1.2
+	stroke.Transparency = 0.15
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = main
+	local strokeGrad = AddTriGradient(stroke, cfg.accentA, accent, cfg.accentC, 0)
+	LoopRotate(strokeGrad, 2.2)
+	LoopPulse(stroke, { Transparency = { 0.05, 0.4 } }, 0.9)
+
+	local iconHolder = Instance.new("Frame")
+	iconHolder.Size = UDim2.fromOffset(30, 30)
+	iconHolder.Position = UDim2.new(0, 12, 0.5, -15)
+	iconHolder.BackgroundColor3 = accent
+	iconHolder.BackgroundTransparency = 0.7
+	iconHolder.ZIndex = 2
+	iconHolder.Parent = main
+	AddCorner(8, iconHolder)
+	local iconHolderGrad = AddTriGradient(iconHolder, cfg.accentA, accent, cfg.accentC, 0)
+	LoopRotate(iconHolderGrad, 1.8)
+	LoopPulse(iconHolder, { BackgroundTransparency = { 0.6, 0.8 } }, 0.8)
+
+	local iconImg = Instance.new("ImageLabel")
+	iconImg.Size = UDim2.fromOffset(0, 0)
+	iconImg.AnchorPoint = Vector2.new(0.5, 0.5)
+	iconImg.Position = UDim2.new(0.5, 0, 0.5, 0)
+	iconImg.BackgroundTransparency = 1
+	iconImg.ZIndex = 3
+	iconImg.Image = (kind == "Success" and "rbxassetid://87094841427580") or (kind == "Error" and "rbxassetid://78733624425654") or "rbxassetid://83281479437771"
+	iconImg.ImageColor3 = accent
+	iconImg.Parent = iconHolder
+
+	TweenService:Create(iconImg, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.fromOffset(16, 16),
+	}):Play()
+
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Text = title
+	titleLbl.Font = Enum.Font.BuilderSansBold
+	titleLbl.TextSize = 12.5
+	titleLbl.TextColor3 = Color3.fromRGB(240, 240, 245)
+	titleLbl.Position = UDim2.new(0, 52, 0, 10)
+	titleLbl.Size = UDim2.new(1, -64, 0, 16)
+	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.TextTransparency = 1
+	titleLbl.ZIndex = 2
+	titleLbl.Parent = main
+
+	local contentLbl = Instance.new("TextLabel")
+	contentLbl.Text = content
+	contentLbl.Font = Enum.Font.BuilderSansMedium
+	contentLbl.TextSize = 11
+	contentLbl.TextColor3 = Color3.fromRGB(170, 168, 182)
+	contentLbl.Position = UDim2.new(0, 52, 0, 28)
+	contentLbl.Size = UDim2.new(1, -64, 0, 26)
+	contentLbl.TextXAlignment = Enum.TextXAlignment.Left
+	contentLbl.TextWrapped = true
+	contentLbl.BackgroundTransparency = 1
+	contentLbl.TextTransparency = 1
+	contentLbl.ZIndex = 2
+	contentLbl.Parent = main
+
+	TweenService:Create(titleLbl, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
+	task.delay(0.08, function()
+		if contentLbl and contentLbl.Parent then
+			TweenService:Create(contentLbl, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
+		end
+	end)
+
+	local barTrack = Instance.new("Frame")
+	barTrack.Size = UDim2.new(1, 0, 0, 2.5)
+	barTrack.Position = UDim2.new(0, 0, 1, -2.5)
+	barTrack.BackgroundColor3 = accent
+	barTrack.BackgroundTransparency = 0.85
+	barTrack.BorderSizePixel = 0
+	barTrack.ZIndex = 2
+	barTrack.Parent = main
+
+	local barFill = Instance.new("Frame")
+	barFill.Size = UDim2.new(1, 0, 1, 0)
+	barFill.BackgroundColor3 = accent
+	barFill.BorderSizePixel = 0
+	barFill.ZIndex = 2
+	barFill.Parent = barTrack
+	local barGrad = AddTriGradient(barFill, cfg.accentA, accent, cfg.accentC, 0)
+	LoopRotate(barGrad, 1.4)
+
+	local id = GenerateNotifId()
+	table.insert(notifActive, { id = id, frame = main })
+
+	local function restack()
+		local spacing = 8
+		local yoff = 0
+		for i = #notifActive, 1, -1 do
+			local node = notifActive[i]
+			if node and node.frame and node.frame.Parent then
+				local targetY = -16 - yoff
+				TweenService:Create(
+					node.frame,
+					TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ Position = UDim2.new(1, -16, 1, targetY) }
+				):Play()
+				yoff = yoff + node.frame.Size.Y.Offset + spacing
+			end
+		end
+	end
+
+	main.Position = UDim2.new(1, 16, 1, -16)
+	restack()
+
+	local dismissed = false
+	local function dismiss()
+		if dismissed then
+			return
+		end
+		dismissed = true
+		for i = 1, #notifActive do
+			if notifActive[i].id == id then
+				table.remove(notifActive, i)
+				break
+			end
+		end
+		local outTween = TweenService:Create(
+			main,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ Position = UDim2.new(1, 16, main.Position.Y.Scale, main.Position.Y.Offset), BackgroundTransparency = 1 }
+		)
+		outTween:Play()
+		TweenService:Create(titleLbl, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
+		TweenService:Create(contentLbl, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
+		TweenService:Create(stroke, TweenInfo.new(0.25), { Transparency = 1 }):Play()
+		TweenService:Create(iconHolder, TweenInfo.new(0.25), { BackgroundTransparency = 1 }):Play()
+		TweenService:Create(bgGlow, TweenInfo.new(0.25), { BackgroundTransparency = 1 }):Play()
+		outTween.Completed:Connect(function()
+			screen:Destroy()
+			restack()
+		end)
+	end
+
+	local clicker = Instance.new("TextButton")
+	clicker.Size = UDim2.new(1, 0, 1, 0)
+	clicker.BackgroundTransparency = 1
+	clicker.Text = ""
+	clicker.ZIndex = 5
+	clicker.Parent = main
+	clicker.MouseButton1Click:Connect(dismiss)
+	clicker.MouseEnter:Connect(function()
+		TweenService:Create(main, TweenInfo.new(0.15), { BackgroundTransparency = 0 }):Play()
+		TweenService:Create(stroke, TweenInfo.new(0.15), { Thickness = 1.8 }):Play()
+		TweenService:Create(bgGlow, TweenInfo.new(0.15), { BackgroundTransparency = 0.75 }):Play()
+	end)
+	clicker.MouseLeave:Connect(function()
+		TweenService:Create(main, TweenInfo.new(0.15), { BackgroundTransparency = 0.05 }):Play()
+		TweenService:Create(stroke, TweenInfo.new(0.15), { Thickness = 1.2 }):Play()
+		TweenService:Create(bgGlow, TweenInfo.new(0.15), { BackgroundTransparency = 0.9 }):Play()
+	end)
+
+	TweenService:Create(
+		barFill,
+		TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+		{ Size = UDim2.new(0, 0, 1, 0) }
+	):Play()
+	task.delay(duration, dismiss)
+
+	TweenService:Create(
+		main,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Position = UDim2.new(1, -16, 1, -16) }
+	):Play()
+end
+
+local function saveKey(key)
+	if writefile then
+		pcall(writefile, cfg.keyFile, key)
+	end
+end
+
+local function loadKey()
+	if isfile and isfile(cfg.keyFile) then
+		local ok, data = pcall(readfile, cfg.keyFile)
+		if ok then
+			return data
+		end
+	end
+	return ""
+end
+
+local function buildUI()
+	local Screen = Instance.new("ScreenGui")
+	Screen.Name = "QyrexApi_KeySystem"
+	Screen.ResetOnSpawn = false
+	Screen.IgnoreGuiInset = true
+	Screen.Parent = GetGuiParent()
+
+	local windowWidth = 380
+	local windowHeight = 340
+
+	local Main = Instance.new("Frame")
+	Main.Size = UDim2.fromOffset(0, 0)
+	local screenCenter = GetScreenCenter()
+	Main.Position = UDim2.fromOffset(screenCenter.X, screenCenter.Y)
+	Main.AnchorPoint = Vector2.new(0.5, 0.5)
+	Main.BackgroundColor3 = Color3.fromRGB(6, 5, 10)
+	Main.BackgroundTransparency = 1
+	Main.ClipsDescendants = true
+	Main.Parent = Screen
+	AddCorner(20, Main)
+
+	local BackgroundTexture = Instance.new("ImageLabel")
+	BackgroundTexture.Size = UDim2.new(1, 0, 1, 0)
+	BackgroundTexture.BackgroundTransparency = 1
+	BackgroundTexture.Image = cfg.backgroundTexture
+	BackgroundTexture.ImageTransparency = 0.8
+	BackgroundTexture.ScaleType = Enum.ScaleType.Crop
+	BackgroundTexture.ZIndex = 0
+	BackgroundTexture.Parent = Main
+
+	local MainStroke = Instance.new("UIStroke")
+	MainStroke.Thickness = 1.4
+	MainStroke.Transparency = 0.2
+	MainStroke.LineJoinMode = Enum.LineJoinMode.Round
+	MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	MainStroke.Parent = Main
+
+	local MainStrokeGradient = AddTriGradient(MainStroke, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(MainStrokeGradient, 3.5)
+	LoopPulse(MainStroke, { Thickness = { 1.2, 2 } }, 1.4)
+
+	local Titlebar = Instance.new("Frame")
+	Titlebar.Size = UDim2.new(1, 0, 0, 36)
+	Titlebar.BackgroundColor3 = Color3.fromRGB(11, 9, 17)
+	Titlebar.BackgroundTransparency = 0.4
+	Titlebar.BorderSizePixel = 0
+	Titlebar.Active = true
+	Titlebar.Parent = Main
+	AddCorner(20, Titlebar)
+
+	local TitlebarCover = Instance.new("Frame")
+	TitlebarCover.Size = UDim2.new(1, 0, 0, 20)
+	TitlebarCover.Position = UDim2.new(0, 0, 1, -20)
+	TitlebarCover.BackgroundColor3 = Color3.fromRGB(11, 9, 17)
+	TitlebarCover.BackgroundTransparency = 0.4
+	TitlebarCover.BorderSizePixel = 0
+	TitlebarCover.Parent = Titlebar
+
+	local AccentLine = Instance.new("Frame")
+	AccentLine.Size = UDim2.new(1, 0, 0, 2)
+	AccentLine.Position = UDim2.new(0, 0, 1, 0)
+	AccentLine.BorderSizePixel = 0
+	AccentLine.Parent = Titlebar
+	local AccentLineGrad = AddTriGradient(AccentLine, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(AccentLineGrad, 2)
+
+	local LogoBadgeSmall = Instance.new("Frame")
+	LogoBadgeSmall.Size = UDim2.fromOffset(20, 20)
+	LogoBadgeSmall.Position = UDim2.new(0, 10, 0.5, -10)
+	LogoBadgeSmall.BackgroundColor3 = Color3.fromRGB(18, 14, 28)
+	LogoBadgeSmall.Parent = Titlebar
+	AddCorner(6, LogoBadgeSmall)
+
+	local LogoBadgeStroke = Instance.new("UIStroke")
+	LogoBadgeStroke.Thickness = 1.2
+	LogoBadgeStroke.Transparency = 0.2
+	LogoBadgeStroke.LineJoinMode = Enum.LineJoinMode.Round
+	LogoBadgeStroke.Parent = LogoBadgeSmall
+	local LogoBadgeGrad = AddTriGradient(LogoBadgeStroke, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(LogoBadgeGrad, 1.6)
+
+	local LogoIconSmall = Instance.new("TextLabel")
+	LogoIconSmall.Size = UDim2.fromScale(1, 1)
+	LogoIconSmall.BackgroundTransparency = 1
+	LogoIconSmall.Font = Enum.Font.BuilderSansBold
+	LogoIconSmall.TextSize = 12
+	LogoIconSmall.Text = "Q"
+	LogoIconSmall.TextColor3 = cfg.accentB
+	LogoIconSmall.Parent = LogoBadgeSmall
+	LoopColorCycle(LogoIconSmall, "TextColor3", { cfg.accentA, cfg.accentB, cfg.accentC }, 1.2)
+
+	local TitlebarText = Instance.new("TextLabel")
+	TitlebarText.Text = cfg.title .. " KeySystem"
+	TitlebarText.Font = Enum.Font.BuilderSansBold
+	TitlebarText.TextSize = 12.5
+	TitlebarText.TextColor3 = Color3.fromRGB(205, 200, 218)
+	TitlebarText.Position = UDim2.new(0, 40, 0, 0)
+	TitlebarText.Size = UDim2.new(1, -74, 1, 0)
+	TitlebarText.TextXAlignment = Enum.TextXAlignment.Left
+	TitlebarText.BackgroundTransparency = 1
+	TitlebarText.Parent = Titlebar
+
+	local CloseBtn = Instance.new("ImageButton")
+	CloseBtn.Size = UDim2.fromOffset(22, 22)
+	CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
+	CloseBtn.BackgroundColor3 = Color3.fromRGB(18, 14, 28)
+	CloseBtn.BackgroundTransparency = 0.3
+	CloseBtn.Image = "rbxassetid://122931434733842"
+	CloseBtn.ImageColor3 = Color3.fromRGB(190, 186, 202)
+	CloseBtn.ScaleType = Enum.ScaleType.Fit
+	CloseBtn.AutoButtonColor = false
+	CloseBtn.Parent = Titlebar
+	AddCorner(999, CloseBtn)
+
+	local CloseStroke = Instance.new("UIStroke")
+	CloseStroke.Thickness = 1
+	CloseStroke.Transparency = 0.3
+	CloseStroke.LineJoinMode = Enum.LineJoinMode.Round
+	CloseStroke.Parent = CloseBtn
+	local CloseGrad = AddTriGradient(CloseStroke, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(CloseGrad, 1.6)
+
+	CloseBtn.MouseEnter:Connect(function()
+		PlaySound("hover", 0.2, 0.9)
+		TweenService:Create(CloseBtn, TweenInfo.new(0.15), {
+			ImageColor3 = Color3.fromRGB(248, 113, 113),
+			Rotation = 90,
+			Size = UDim2.fromOffset(25, 25),
+			BackgroundTransparency = 0,
+		}):Play()
+	end)
+	CloseBtn.MouseLeave:Connect(function()
+		TweenService:Create(CloseBtn, TweenInfo.new(0.15), {
+			ImageColor3 = Color3.fromRGB(190, 186, 202),
+			Rotation = 0,
+			Size = UDim2.fromOffset(22, 22),
+			BackgroundTransparency = 0.3,
+		}):Play()
+	end)
+	CloseBtn.MouseButton1Down:Connect(function()
+		TweenService:Create(CloseBtn, TweenInfo.new(0.08), { Size = UDim2.fromOffset(19, 19) }):Play()
+	end)
+	CloseBtn.MouseButton1Up:Connect(function()
+		TweenService:Create(CloseBtn, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.fromOffset(25, 25),
+		}):Play()
+	end)
+
+	local GlowHolder = Instance.new("Frame")
+	GlowHolder.AnchorPoint = Vector2.new(0.5, 0)
+	GlowHolder.Position = UDim2.new(0.5, 0, 0, 45)
+	GlowHolder.Size = UDim2.fromOffset(96, 96)
+	GlowHolder.BackgroundTransparency = 1
+	GlowHolder.Parent = Main
+
+	local GlowOuter = Instance.new("Frame")
+	GlowOuter.AnchorPoint = Vector2.new(0.5, 0.5)
+	GlowOuter.Position = UDim2.fromScale(0.5, 0.5)
+	GlowOuter.Size = UDim2.fromOffset(96, 96)
+	GlowOuter.BackgroundColor3 = cfg.accentA
+	GlowOuter.BackgroundTransparency = 0.8
+	GlowOuter.Parent = GlowHolder
+	AddCorner(999, GlowOuter)
+	local GlowOuterGrad = AddTriGradient(GlowOuter, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(GlowOuterGrad, 3)
+	LoopPulse(GlowOuter, {
+		BackgroundTransparency = { 0.7, 0.9 },
+		Size = { UDim2.fromOffset(104, 104), UDim2.fromOffset(90, 90) },
+	}, 1.6)
+
+	local GlowMid = Instance.new("Frame")
+	GlowMid.AnchorPoint = Vector2.new(0.5, 0.5)
+	GlowMid.Position = UDim2.fromScale(0.5, 0.5)
+	GlowMid.Size = UDim2.fromOffset(70, 70)
+	GlowMid.BackgroundColor3 = cfg.accentB
+	GlowMid.BackgroundTransparency = 0.72
+	GlowMid.Parent = GlowHolder
+	AddCorner(999, GlowMid)
+	local GlowMidGrad = AddTriGradient(GlowMid, cfg.accentB, cfg.accentA, cfg.accentC, 0)
+	LoopRotate(GlowMidGrad, 1.8)
+	LoopPulse(GlowMid, { BackgroundTransparency = { 0.6, 0.82 } }, 1.1)
+
+	LoopPulse(GlowHolder, {
+		Position = { UDim2.new(0.5, 0, 0, 42), UDim2.new(0.5, 0, 0, 48) },
+	}, 1.8)
+
+	local IconBadge = Instance.new("Frame")
+	IconBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+	IconBadge.Position = UDim2.fromScale(0.5, 0.5)
+	IconBadge.Size = UDim2.fromOffset(56, 56)
+	IconBadge.BackgroundColor3 = Color3.fromRGB(16, 12, 24)
+	IconBadge.Parent = GlowHolder
+	AddCorner(999, IconBadge)
+
+	local IconBadgeStroke = Instance.new("UIStroke")
+	IconBadgeStroke.Thickness = 1.6
+	IconBadgeStroke.Transparency = 0
+	IconBadgeStroke.LineJoinMode = Enum.LineJoinMode.Round
+	IconBadgeStroke.Parent = IconBadge
+
+	local IconBadgeStrokeGradient = AddTriGradient(IconBadgeStroke, cfg.accentA, cfg.accentC, cfg.accentB, 45)
+	LoopRotate(IconBadgeStrokeGradient, 2.2)
+
+	local CenterCircleText = Instance.new("TextLabel")
+	CenterCircleText.Size = UDim2.new(1, 0, 1, 0)
+	CenterCircleText.BackgroundTransparency = 1
+	CenterCircleText.Font = Enum.Font.BuilderSansBold
+	CenterCircleText.TextSize = 10
+	CenterCircleText.Text = "QyrexApi"
+	CenterCircleText.TextColor3 = Color3.fromRGB(235, 225, 250)
+	CenterCircleText.TextXAlignment = Enum.TextXAlignment.Center
+	CenterCircleText.TextYAlignment = Enum.TextYAlignment.Center
+	CenterCircleText.Parent = IconBadge
+
+	local TitleLabel = Instance.new("TextLabel")
+	TitleLabel.Text = "Verificacion de acceso"
+	TitleLabel.Font = Enum.Font.BuilderSansBold
+	TitleLabel.TextSize = 16
+	TitleLabel.TextColor3 = Color3.fromRGB(244, 242, 250)
+	TitleLabel.Position = UDim2.new(0, 16, 0, 150)
+	TitleLabel.Size = UDim2.new(1, -32, 0, 20)
+	TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+	TitleLabel.BackgroundTransparency = 1
+	TitleLabel.Parent = Main
+
+	local SubtitleLabel = Instance.new("TextLabel")
+	SubtitleLabel.Text = "Ingresa tu key para continuar"
+	SubtitleLabel.Font = Enum.Font.BuilderSansMedium
+	SubtitleLabel.TextSize = 11.5
+	SubtitleLabel.TextColor3 = Color3.fromRGB(150, 145, 165)
+	SubtitleLabel.Position = UDim2.new(0, 16, 0, 172)
+	SubtitleLabel.Size = UDim2.new(1, -32, 0, 16)
+	SubtitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+	SubtitleLabel.BackgroundTransparency = 1
+	SubtitleLabel.Parent = Main
+
+	local InputFrame = Instance.new("Frame")
+	InputFrame.Size = UDim2.new(1, -32, 0, 44)
+	InputFrame.Position = UDim2.new(0, 16, 0, 200)
+	InputFrame.BackgroundColor3 = Color3.fromRGB(3, 2, 6)
+	InputFrame.BackgroundTransparency = 0.1
+	InputFrame.Parent = Main
+	AddCorner(10, InputFrame)
+
+	local InputStroke = Instance.new("UIStroke")
+	InputStroke.Thickness = 1.5
+	InputStroke.Transparency = 0.3
+	InputStroke.LineJoinMode = Enum.LineJoinMode.Round
+	InputStroke.Parent = InputFrame
+	local InputStrokeGrad = AddTriGradient(InputStroke, cfg.accentA, cfg.accentC, cfg.accentB, 0)
+	LoopRotate(InputStrokeGrad, 2)
+
+	local InputIcon = Instance.new("ImageLabel")
+	InputIcon.Size = UDim2.fromOffset(14, 14)
+	InputIcon.Position = UDim2.new(0, 12, 0.5, -7)
+	InputIcon.BackgroundTransparency = 1
+	InputIcon.Image = "rbxassetid://82094603330968"
+	InputIcon.ImageColor3 = Color3.fromRGB(140, 130, 165)
+	InputIcon.Parent = InputFrame
+
+	local KeyBox = Instance.new("TextBox")
+	KeyBox.Size = UDim2.new(1, -44, 1, 0)
+	KeyBox.Position = UDim2.new(0, 36, 0, 0)
+	KeyBox.BackgroundTransparency = 1
+	KeyBox.Text = loadKey()
+	KeyBox.PlaceholderText = "00000000-0000-0000-0000-000000000000"
+	KeyBox.PlaceholderColor3 = Color3.fromRGB(100, 96, 118)
+	KeyBox.TextColor3 = Color3.fromRGB(232, 228, 244)
+	KeyBox.TextSize = 13
+	KeyBox.Font = Enum.Font.Code
+	KeyBox.TextXAlignment = Enum.TextXAlignment.Left
+	KeyBox.ClearTextOnFocus = false
+	KeyBox.Parent = InputFrame
+
+	KeyBox.Focused:Connect(function()
+		TweenService:Create(InputStroke, TweenInfo.new(0.15), { Transparency = 0, Thickness = 2 }):Play()
+		TweenService:Create(InputIcon, TweenInfo.new(0.15), { ImageColor3 = cfg.accentB }):Play()
+		TweenService:Create(InputFrame, TweenInfo.new(0.15), { BackgroundTransparency = 0 }):Play()
+	end)
+	KeyBox.FocusLost:Connect(function()
+		TweenService:Create(InputStroke, TweenInfo.new(0.15), { Transparency = 0.3, Thickness = 1.5 }):Play()
+		TweenService:Create(InputIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(140, 130, 165) }):Play()
+		TweenService:Create(InputFrame, TweenInfo.new(0.15), { BackgroundTransparency = 0.1 }):Play()
+	end)
+
+	local ButtonsRow = Instance.new("Frame")
+	ButtonsRow.Size = UDim2.new(1, -32, 0, 42)
+	ButtonsRow.Position = UDim2.new(0, 16, 0, 254)
+	ButtonsRow.BackgroundTransparency = 1
+	ButtonsRow.Parent = Main
+
+	local GetKeyBtn = Instance.new("TextButton")
+	GetKeyBtn.Size = UDim2.new(0.42, -5, 1, 0)
+	GetKeyBtn.Position = UDim2.new(0, 0, 0, 0)
+	GetKeyBtn.BackgroundColor3 = Color3.fromRGB(16, 13, 24)
+	GetKeyBtn.Text = ""
+	GetKeyBtn.AutoButtonColor = false
+	GetKeyBtn.Parent = ButtonsRow
+	AddCorner(10, GetKeyBtn)
+
+	local GetKeyGrad = AddTriGradient(GetKeyBtn, cfg.accentA, cfg.accentC, cfg.accentB, 15)
+	LoopRotate(GetKeyGrad, 2)
+
+	local GetKeyIco = Instance.new("ImageLabel")
+	GetKeyIco.Size = UDim2.fromOffset(16, 16)
+	GetKeyIco.Position = UDim2.new(0, 12, 0.5, -8)
+	GetKeyIco.BackgroundTransparency = 1
+	GetKeyIco.Image = "rbxassetid://96510194465420"
+	GetKeyIco.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	GetKeyIco.Parent = GetKeyBtn
+
+	local GetKeyTxt = Instance.new("TextLabel")
+	GetKeyTxt.Size = UDim2.new(1, -32, 1, 0)
+	GetKeyTxt.Position = UDim2.new(0, 32, 0, 0)
+	GetKeyTxt.BackgroundTransparency = 1
+	GetKeyTxt.Text = "Get Key"
+	GetKeyTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+	GetKeyTxt.TextSize = 12.5
+	GetKeyTxt.Font = Enum.Font.BuilderSansBold
+	GetKeyTxt.TextXAlignment = Enum.TextXAlignment.Left
+	GetKeyTxt.Parent = GetKeyBtn
+
+	local GetKeyGlow = Instance.new("UIStroke")
+	GetKeyGlow.Thickness = 1.2
+	GetKeyGlow.Transparency = 0.3
+	GetKeyGlow.Color = Color3.fromRGB(255, 255, 255)
+	GetKeyGlow.LineJoinMode = Enum.LineJoinMode.Round
+	GetKeyGlow.Parent = GetKeyBtn
+	LoopPulse(GetKeyGlow, { Transparency = { 0.15, 0.55 } }, 1)
+
+	GetKeyBtn.MouseEnter:Connect(function()
+		PlaySound("hover", 0.2, 1.3)
+		TweenService:Create(GetKeyGlow, TweenInfo.new(0.15), { Transparency = 0.05, Thickness = 1.8 }):Play()
+		TweenService:Create(GetKeyBtn, TweenInfo.new(0.15), { Size = UDim2.new(0.42, -3, 1, 2) }):Play()
+		TweenService:Create(GetKeyIco, TweenInfo.new(0.2), { Rotation = 15 }):Play()
+	end)
+	GetKeyBtn.MouseLeave:Connect(function()
+		TweenService:Create(GetKeyGlow, TweenInfo.new(0.15), { Thickness = 1.2 }):Play()
+		TweenService:Create(GetKeyBtn, TweenInfo.new(0.15), { Size = UDim2.new(0.42, -5, 1, 0) }):Play()
+		TweenService:Create(GetKeyIco, TweenInfo.new(0.2), { Rotation = 0 }):Play()
+	end)
+	PressPop(GetKeyBtn)
+
+	local VerifyBtn = Instance.new("TextButton")
+	VerifyBtn.Size = UDim2.new(0.58, -5, 1, 0)
+	VerifyBtn.Position = UDim2.new(0.42, 5, 0, 0)
+	VerifyBtn.Text = ""
+	VerifyBtn.AutoButtonColor = false
+	VerifyBtn.Parent = ButtonsRow
+	AddCorner(10, VerifyBtn)
+	local VerifyGrad = AddTriGradient(VerifyBtn, cfg.accentA, cfg.accentC, cfg.accentB, 15)
+	LoopRotate(VerifyGrad, 2)
+
+	local VerifyIco = Instance.new("ImageLabel")
+	VerifyIco.Size = UDim2.fromOffset(16, 16)
+	VerifyIco.Position = UDim2.new(0, 12, 0.5, -8)
+	VerifyIco.BackgroundTransparency = 1
+	VerifyIco.Image = "rbxassetid://87354736164608"
+	VerifyIco.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	VerifyIco.Parent = VerifyBtn
+
+	local VerifyTxt = Instance.new("TextLabel")
+	VerifyTxt.Size = UDim2.new(1, -32, 1, 0)
+	VerifyTxt.Position = UDim2.new(0, 32, 0, 0)
+	VerifyTxt.BackgroundTransparency = 1
+	VerifyTxt.Text = "Verify"
+	VerifyTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+	VerifyTxt.TextSize = 13
+	VerifyTxt.Font = Enum.Font.BuilderSansBold
+	VerifyTxt.TextXAlignment = Enum.TextXAlignment.Left
+	VerifyTxt.Parent = VerifyBtn
+
+	local VerifyGlow = Instance.new("UIStroke")
+	VerifyGlow.Thickness = 1.2
+	VerifyGlow.Transparency = 0.3
+	VerifyGlow.Color = Color3.fromRGB(255, 255, 255)
+	VerifyGlow.LineJoinMode = Enum.LineJoinMode.Round
+	VerifyGlow.Parent = VerifyBtn
+	LoopPulse(VerifyGlow, { Transparency = { 0.15, 0.55 } }, 1)
+
+	VerifyBtn.MouseEnter:Connect(function()
+		PlaySound("hover", 0.2, 1.3)
+		TweenService:Create(VerifyGlow, TweenInfo.new(0.15), { Transparency = 0.05, Thickness = 1.8 }):Play()
+		TweenService:Create(VerifyBtn, TweenInfo.new(0.15), { Size = UDim2.new(0.58, -3, 1, 2) }):Play()
+		TweenService:Create(VerifyIco, TweenInfo.new(0.2), { Rotation = -12 }):Play()
+	end)
+	VerifyBtn.MouseLeave:Connect(function()
+		TweenService:Create(VerifyGlow, TweenInfo.new(0.15), { Thickness = 1.2 }):Play()
+		TweenService:Create(VerifyBtn, TweenInfo.new(0.15), { Size = UDim2.new(0.58, -5, 1, 0) }):Play()
+		TweenService:Create(VerifyIco, TweenInfo.new(0.2), { Rotation = 0 }):Play()
+	end)
+	PressPop(VerifyBtn)
+
+	local FooterLine = Instance.new("Frame")
+	FooterLine.Size = UDim2.new(1, -32, 0, 1)
+	FooterLine.Position = UDim2.new(0, 16, 0, 308)
+	FooterLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	FooterLine.BackgroundTransparency = 0.94
+	FooterLine.BorderSizePixel = 0
+	FooterLine.Parent = Main
+
+	local HintLabel = Instance.new("TextLabel")
+	HintLabel.Text = "La key se guarda localmente  ·  QyrexApi"
+	HintLabel.Font = Enum.Font.BuilderSansMedium
+	HintLabel.TextSize = 10
+	HintLabel.TextColor3 = Color3.fromRGB(110, 105, 128)
+	HintLabel.Position = UDim2.new(0, 16, 0, 316)
+	HintLabel.Size = UDim2.new(1, -32, 0, 16)
+	HintLabel.TextXAlignment = Enum.TextXAlignment.Center
+	HintLabel.BackgroundTransparency = 1
+	HintLabel.Parent = Main
+
+	StaggerReveal({
+		{ TitleLabel, TitleLabel.Position },
+		{ SubtitleLabel, SubtitleLabel.Position },
+		{ InputFrame, InputFrame.Position },
+		{ ButtonsRow, ButtonsRow.Position },
+		{ HintLabel, HintLabel.Position },
+	}, 0.2, 0.06)
+
+	return {
+		screen = Screen,
+		main = Main,
+		titlebar = Titlebar,
+		close = CloseBtn,
+		keyBox = KeyBox,
+		getKeyBtn = GetKeyBtn,
+		verifyBtn = VerifyBtn,
+		width = windowWidth,
+		height = windowHeight,
+	}
+end
+
+local function EnableDrag(ui)
+	local dragging = false
+	local dragStart, startPos
+
+	ui.titlebar.InputBegan:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
+			dragging = true
+			dragStart = input.Position
+			startPos = ui.main.Position
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if
+			dragging
+			and (
+				input.UserInputType == Enum.UserInputType.MouseMovement
+				or input.UserInputType == Enum.UserInputType.Touch
+			)
+		then
+			local delta = input.Position - dragStart
+			ui.main.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
+			dragging = false
+		end
+	end)
+end
+
+local function openKeySystem(config)
+	config = config or {}
+	local OnSuccess = config.OnSuccess or function() end
+
+	local ui = buildUI()
+	EnableDrag(ui)
+
+	task.defer(function()
+		if ui.main and ui.main.Parent then
+			local center = GetScreenCenter()
+			ui.main.Position = UDim2.fromOffset(center.X, center.Y)
+		end
+	end)
+
+	ui.main.Visible = true
+	PlaySound("open", 0.5, 1)
+	TweenService:Create(
+		ui.main,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Size = UDim2.fromOffset(ui.width, ui.height), BackgroundTransparency = 0.05 }
+	):Play()
+
+	local closing = false
+	local function closeUI()
+		if closing then
+			return
+		end
+		closing = true
+		PlaySound("close", 0.5, 1)
+		local outTween = TweenService:Create(
+			ui.main,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }
+		)
+		outTween:Play()
+		outTween.Completed:Connect(function()
+			ui.screen:Destroy()
+		end)
+	end
+
+	ui.close.MouseButton1Click:Connect(function()
+		closeUI()
+	end)
+
+	ui.getKeyBtn.MouseButton1Click:Connect(function()
+		PlaySound("click", 0.4, 1)
+		createNotification("Info", "Getting Key...", "Copiando tu link de key.", 2.5)
+		local link = QyrexAPI.GetKeyLink()
+		if link ~= "" then
+			if setclipboard then
+				setclipboard(link)
+			end
+			createNotification("Success", "Link Copied", "El link/texto se copio al portapapeles.", 3)
+		else
+			createNotification("Error", "No Disponible", "El sistema de keys no esta configurado todavia.", 3)
+		end
+	end)
+
+	local verifying = false
+
+	local function doVerify()
+		PlaySound("click", 0.4, 1)
+		if verifying then
+			return
+		end
+
+		local key = ui.keyBox.Text:gsub("%s+", "")
+		if key == "" then
+			createNotification("Error", "Key Required", "Ingresa una key para continuar.", 3)
+			return
+		end
+
+		verifying = true
+		createNotification("Info", "Checking...", "Validando tu key, espera un momento.", 2)
+
+		task.spawn(function()
+			task.wait(0.4)
+			local ok = QyrexAPI.VerifyKey(key)
+			verifying = false
+
+			if ok then
+				saveKey(key)
+				createNotification("Success", "Success!", "Key verificada correctamente.", 3)
+				closeUI()
+				task.wait(0.3)
+				OnSuccess()
+			else
+				createNotification("Error", "Invalid Key", "La key ingresada es incorrecta.", 3)
+			end
+		end)
+	end
+
+	ui.verifyBtn.MouseButton1Click:Connect(doVerify)
+
+	ui.keyBox.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			doVerify()
+		end
+	end)
+end
+
+openKeySystem({
+	OnSuccess = function()
+		createNotification("Success", "Bienvenido", "Acceso concedido a QyrexApi.", 3)
+	end,
+})`;
   const el = document.getElementById('loaderSnippet');
   if (el) el.textContent = snip;
 }
