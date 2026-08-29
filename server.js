@@ -173,11 +173,6 @@ setInterval(() => {
   for (const [k, v] of scriptTokens) {
     if (!v || now > (v.exp || 0) + 60000 || v.used) scriptTokens.delete(k);
   }
-  if (typeof fragmentSessions !== 'undefined') {
-    for (const [k, v] of fragmentSessions) {
-      if (!v || now > (v.exp || 0)) fragmentSessions.delete(k);
-    }
-  }
 }, 30000).unref?.();
 
 app.use(async (req, res, next) => {
@@ -325,39 +320,7 @@ const BlacklistIP = mongoose.models.QrexBlacklistIP || mongoose.model('QrexBlack
   createdAt: { type: Date, default: Date.now }
 }));
 
-const FREE_SCRIPT_LIMIT = 5;
-const QYREX_LIMITS = {
-  free: {
-    scripts: 5,
-    providers: 2,
-    keysPerDay: 25,
-    webhooks: 1,
-    logs: 50,
-    maxHwid: 1,
-    maxKeyHours: 24,
-    maxKeyBatch: 5,
-    versions: 1
-  },
-  vip: {
-    scripts: Infinity,
-    providers: Infinity,
-    keysPerDay: Infinity,
-    webhooks: Infinity,
-    logs: Infinity,
-    maxHwid: 5,
-    maxKeyHours: 24 * 30,
-    maxKeyBatch: 100,
-    versions: 15
-  }
-};
-function featureLimits(user) {
-  return isPremiumUser(user) ? QYREX_LIMITS.vip : QYREX_LIMITS.free;
-}
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  return d;
-}
+const FREE_SCRIPT_LIMIT = 15;
 
 async function fireWebhooks(ownerId, event, payload) {
   try {
@@ -887,10 +850,10 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
     if (!name || !source) return res.status(400).json({ error: 'name y source requeridos' });
 
     const me = await User.findById(req.user.sub);
-    const lim = featureLimits(me);
+    const prem = isPremiumUser(me);
     const count = await Script.countDocuments({ ownerId: req.user.sub });
-    if (Number.isFinite(lim.scripts) && count >= lim.scripts) {
-      return res.status(403).json({ error: 'Límite de ' + lim.scripts + ' scripts en FREE. Activa VIP/Premium para ilimitados.' });
+    if (!prem && count >= FREE_SCRIPT_LIMIT) {
+      return res.status(403).json({ error: 'Límite de ' + FREE_SCRIPT_LIMIT + ' scripts. Activa VIP/Premium para ilimitados.' });
     }
 
     let providerName = '';
@@ -954,11 +917,9 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         obfuscated: s.obfuscated,
         note: 'Auto-save before edit'
       });
-      const me = await User.findById(req.user.sub);
-      const lim = featureLimits(me);
       const vers = await ScriptVersion.find({ scriptId: s.id }).sort({ createdAt: -1 });
-      if (Number.isFinite(lim.versions) && vers.length > lim.versions) {
-        const drop = vers.slice(lim.versions);
+      if (vers.length > 15) {
+        const drop = vers.slice(15);
         await ScriptVersion.deleteMany({ _id: { $in: drop.map(v => v._id) } });
       }
     }
@@ -1073,202 +1034,111 @@ function buildExecReporterLua(apiBase, scriptId) {
 function wrapDeliveredScript(code, apiBase, scriptId) {
   const src = String(code || '');
   if (!src) return '';
+
+  const key = crypto.randomBytes(24);
+  const noise = crypto.randomBytes(18);
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const ident = (prefix) => {
     let out = prefix;
     for (let i = 0; i < 10; i++) out += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
     return out;
   };
-  const key = crypto.randomBytes(32);
-  const noise = crypto.randomBytes(24);
-  const raw = Buffer.from(src, 'utf8');
-  const enc = Buffer.allocUnsafe(raw.length);
-  for (let i = 0; i < raw.length; i++) enc[i] = raw[i] ^ key[i % key.length] ^ noise[i % noise.length] ^ ((i * 197 + 83) & 0xff);
   const luaString = (buf) => {
     let out = '"';
-    for (const b of buf) out += '\\' + String(b).padStart(3, '0');
+    for (const b of buf) {
+      if (b >= 32 && b <= 126 && b !== 34 && b !== 92) out += String.fromCharCode(b);
+      else out += '\\' + String(b).padStart(3, '0');
+    }
     return out + '"';
   };
-  const n = {k:ident('__k'), n:ident('__n'), b:ident('__b'), o:ident('__o'), i:ident('__i'), f:ident('__f')};
+
+  const raw = Buffer.from(src, 'utf8');
+  const enc = Buffer.allocUnsafe(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    const k = key[i % key.length];
+    const n = noise[i % noise.length];
+    enc[i] = raw[i] ^ k ^ n ^ ((i * 131 + 17) & 0xff);
+  }
+
+  const n = {
+    guard: ident('__g'),
+    score: ident('__s'),
+    dbg: ident('__d'),
+    hits: ident('__h'),
+    key: ident('__k'),
+    blob: ident('__b'),
+    noise: ident('__n'),
+    bxor: ident('__x'),
+    out: ident('__o'),
+    i: ident('__i'),
+    kb: ident('__kb'),
+    nb: ident('__nb'),
+    fn: ident('__f'),
+    err: ident('__e')
+  };
+
   return [
-    '-- Qyrex protected delivery', 'do',
-    '  local __qrx_env=(getgenv and getgenv()) or _G',
-    '  local __qrx_s=0',
-    '  for _,__q in ipairs({"getgc","getreg","getconnections","getupvalues","getconstants","getproto","getprotos","getsenv","getscriptbytecode","dumpstring","saveinstance","clonefunction"}) do if type(__qrx_env[__q])=="function" then __qrx_s=__qrx_s+1 end end',
-    '  if __qrx_s>=8 then warn("skidder noob"); return end',
-    '  local __qrx_ls=(loadstring or load)',
-    '  if type(__qrx_ls)~="function" then return end',
-    '  local ' + n.k + '=' + luaString(key),
-    '  local ' + n.n + '=' + luaString(noise),
-    '  local ' + n.b + '=' + luaString(enc),
-    '  local ' + n.o + '={}',
-    '  local bx=(bit32 and bit32.bxor) or function(a,b) local o,p,x,y=0,1,a,b for z=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
-    '  for ' + n.i + '=1,#' + n.b + ' do',
-    '    local kk=string.byte(' + n.k + ',((' + n.i + '-1)%#' + n.k + ')+1)',
-    '    local nn=string.byte(' + n.n + ',((' + n.i + '-1)%#' + n.n + ')+1)',
-    '    local z=((' + n.i + '-1)*197+83)%256',
-    '    local bb=string.byte(' + n.b + ',' + n.i + ')',
-    '    ' + n.o + '[' + n.i + ']=string.char(bx(bx(bx(bb,kk),nn),z))',
+    '-- Qyrex protected delivery',
+    'do',
+    '  local ' + n.guard + '=false',
+    '  local ' + n.score + '=0',
+    '  local ' + n.dbg + '=debug',
+    '  if type(getgc)=="function" then ' + n.score + '=' + n.score + '+1 end',
+    '  if type(getreg)=="function" then ' + n.score + '=' + n.score + '+1 end',
+    '  if type(getconnections)=="function" then ' + n.score + '=' + n.score + '+1 end',
+    '  if type(getrawmetatable)=="function" then ' + n.score + '=' + n.score + '+1 end',
+    '  if type(debug) == "table" and (type(debug.getupvalues)=="function" or type(debug.getregistry)=="function" or type(debug.getproto)=="function") then ' + n.score + '=' + n.score + '+1 end',
+    '  if ' + n.score + '>=4 then ' + n.guard + '=true end',
+    '  if ' + n.guard + ' then',
+    '    print("skidder noob")',
+    '    local q={"local _q=true","return function() return _q end","print(\\"protected\\")"}',
+    '    local _f=loadstring(table.concat(q,"\\n"))',
+    '    if type(_f)=="function" then pcall(_f) end',
+    '    return',
     '  end',
-    '  local ' + n.f + '=__qrx_ls(table.concat(' + n.o + '))',
-    '  if type(' + n.f + ')~="function" then error("Qyrex compile failed",0) end',
-    '  return ' + n.f + '()',
+    '  local ' + n.bxor + ' = (bit32 and bit32.bxor) or function(a,b)',
+    '    local o,p,x,y=0,1,a,b',
+    '    for z=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end',
+    '    return o',
+    '  end',
+    '  local ' + n.key + '=' + luaString(key),
+    '  local ' + n.noise + '=' + luaString(noise),
+    '  local ' + n.blob + '=' + luaString(enc),
+    '  local ' + n.out + '={}',
+    '  for ' + n.i + '=1,#' + n.blob + ' do',
+    '    local ' + n.kb + '=string.byte(' + n.key + ',((' + n.i + '-1)%#' + n.key + ')+1)',
+    '    local ' + n.nb + '=string.byte(' + n.noise + ',((' + n.i + '-1)%#' + n.noise + ')+1)',
+    '    local z=((' + n.i + '-1)*131+17)%256',
+    '    local b=string.byte(' + n.blob + ',' + n.i + ')',
+    '    ' + n.out + '[' + n.i + ']=string.char(' + n.bxor + '(' + n.bxor + '(' + n.bxor + '(b,' + n.kb + '),' + n.nb + '),z))',
+    '  end',
+    '  local ' + n.fn + ',' + n.err + '=(loadstring or load)(table.concat(' + n.out + '))',
+    '  if type(' + n.fn + ')~="function" then return end',
+    '  local ok=' + n.fn + '()',
+    '  if ok==false then return end',
     'end'
   ].join('\n');
 }
 
-// ========== FRAGMENTED DELIVERY + ANTI-SCRAPE ==========
-const fragmentSessions = new Map();
-function hex(buf) { return Buffer.from(buf).toString('hex'); }
-function safeEq(a, b) {
-  try {
-    const aa = Buffer.from(String(a || ''));
-    const bb = Buffer.from(String(b || ''));
-    return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
-  } catch { return false; }
-}
-function chunkDigest(buf) {
-  let h = 2166136261;
-  for (let i = 0; i < buf.length; i++) {
-    h = (h + (buf[i] * 16777619) + (i + 1)) >>> 0;
-  }
-  return h.toString(16).padStart(8, '0');
-}
-function xorChunk(buf, key, salt) {
-  const out = Buffer.allocUnsafe(buf.length);
-  for (let i = 0; i < buf.length; i++) out[i] = buf[i] ^ key[i % key.length] ^ salt[i % salt.length] ^ ((i * 97 + 29) & 0xff);
-  return out;
-}
-function makeFragmentSession(scriptId, payload, ip, ua) {
-  const id = crypto.randomBytes(18).toString('base64url');
-  const key = crypto.randomBytes(32);
-  const fp = deliveryFingerprint(ip, ua);
-  const raw = Buffer.from(payload, 'utf8');
-  const chunks = [];
-  let pos = 0;
-  while (pos < raw.length) {
-    const size = 4096 + (crypto.randomBytes(2).readUInt16BE(0) % 4097);
-    const part = raw.subarray(pos, Math.min(pos + size, raw.length));
-    const salt = crypto.randomBytes(16);
-    chunks.push({
-      salt: hex(salt),
-      data: hex(xorChunk(part, key, salt)),
-      digest: chunkDigest(part),
-      real: true
-    });
-    pos += part.length;
-  }
-  const decoys = Math.min(12, Math.max(3, Math.floor(chunks.length / 6)));
-  for (let i = 0; i < decoys; i++) {
-    const salt = crypto.randomBytes(16);
-    const fake = crypto.randomBytes(256 + (crypto.randomBytes(2).readUInt16BE(0) % 768));
-    chunks.push({
-      salt: hex(salt),
-      data: hex(xorChunk(fake, key, salt)),
-      digest: chunkDigest(fake),
-      real: false
-    });
-  }
-  for (let i = chunks.length - 1; i > 0; i--) {
-    const j = crypto.randomBytes(2).readUInt16BE(0) % (i + 1);
-    [chunks[i], chunks[j]] = [chunks[j], chunks[i]];
-  }
-  const order = chunks.map((c, i) => c.real ? i : -1).filter(i => i >= 0);
-  const chainSeed = crypto.randomBytes(24).toString('base64url');
-  const sig = crypto.createHmac('sha256', JWT_SECRET)
-    .update(scriptId + '.' + id + '.' + fp + '.' + JSON.stringify(order) + '.' + chainSeed)
-    .digest('hex').slice(0, 48);
-  const firstChain = crypto.createHmac('sha256', JWT_SECRET)
-    .update(id + '.chain.0.' + chainSeed)
-    .digest('hex').slice(0, 48);
-  fragmentSessions.set(id, {
-    id,
-    scriptId,
-    ip: String(ip || ''),
-    fp,
-    exp: Date.now() + 45000,
-    key: hex(key),
-    chunks,
-    order,
-    sig,
-    chainSeed,
-    chain: firstChain,
-    nextPos: 0,
-    manifestUsed: false,
-    used: new Set(),
-    hits: 0
-  });
-  return { id, key: hex(key), count: chunks.length, order, sig, firstChain };
-}
-function buildFragmentBootstrap(base, session) {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const ident = (p) => {
-    let s = '__QYREX_' + p;
-    for (let i = 0; i < 8; i++) s += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
-    return s;
-  };
-  const V = {
-    base: ident('B'), sid: ident('S'), key: ident('K'), sig: ident('G'), chain: ident('C'),
-    http: ident('H'), manifest: ident('M'), ok: ident('O'), item: ident('I'),
-    parts: ident('P'), idx: ident('X'), pos: ident('R'), body: ident('D'),
-    salt: ident('T'), raw: ident('W'), out: ident('U'), fn: ident('F'), err: ident('E'),
-    guard: ident('Z'), suspicious: ident('Y'), env: ident('V')
-  };
-  const esc = x => String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  const api = esc(base), sid = esc(session.id), key = esc(session.key), sig = esc(session.sig), firstChain = esc(session.firstChain);
-  return [
-    'local ' + V.base + '="' + api + '"',
-    'local ' + V.sid + '="' + sid + '"',
-    'local ' + V.key + '="' + key + '"',
-    'local ' + V.sig + '="' + sig + '"',
-    'local ' + V.chain + '="' + firstChain + '"',
-    'local ' + V.http + '=game:HttpGet',
-    'local ' + V.env +' = (getgenv and getgenv()) or _G',
-    'local ' + V.suspicious + '=0',
-    'local __QYREX_NAMES={"getgc","getreg","getconnections","getupvalues","getconstants","getproto","getprotos","getsenv","getscriptbytecode","dumpstring","saveinstance","getloadedmodules"}',
-    'for _,__n in ipairs(__QYREX_NAMES) do if type(' + V.env + '[__n])=="function" then ' + V.suspicious + '=' + V.suspicious + '+1 end end',
-    'if ' + V.suspicious + '>=8 then warn("skidder noob"); return end',
-    'local ' + V.ok + ',' + V.manifest + '=pcall(function() return ' + V.http + '(' + V.base + ' .. "/api/v1/luascripts/fragments/" .. ' + V.sid + ' .. "/manifest?k=" .. ' + V.key + ' .. "&s=" .. ' + V.sig + ' .. "&c=" .. ' + V.chain + '") end)',
-    'if not ' + V.ok + ' or type(' + V.manifest + ')~="string" then return end',
-    'local HttpService=game:GetService("HttpService")',
-    'local ok,manifest=pcall(function() return HttpService:JSONDecode(' + V.manifest + ') end)',
-    'if not ok or type(manifest)~="table" or type(manifest.order)~="table" or type(manifest.chains)~="table" then return end',
-    'local function hx(s) local out={} for i=1,#s,2 do out[#out+1]=string.char(tonumber(s:sub(i,i+1),16) or 0) end return table.concat(out) end',
-    'local function bxor(a,b) local o,p,x,y=0,1,a,b for q=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
-    'local function dec(enc,key,salt) local out={} for i=1,#enc do local A=string.byte(enc,i) or 0 local B=string.byte(key,((i-1)%#key)+1) or 0 local C=string.byte(salt,((i-1)%#salt)+1) or 0 local z=((i-1)*97+29)%256 out[i]=string.char(bxor(bxor(bxor(A,B),C),z)) end return table.concat(out) end',
-    'local function hash16(s) local h=2166136261 for i=1,#s do h=(h+((string.byte(s,i) or 0)*16777619)+i)%4294967296 end return string.format("%08x",h) end',
-    'local parts={}',
-    'for p=1,#manifest.order do',
-    '  local idx=manifest.order[p]',
-    '  local chainToken=' + V.chain,
-    '  if manifest.chains[p] and manifest.chains[p]~=chainToken then return end',
-    '  local ' + V.ok + ',' + V.body + '=pcall(function() return ' + V.http + '(' + V.base + ' .. "/api/v1/luascripts/fragments/" .. ' + V.sid + ' .. "/chunk/" .. tostring(idx) .. "?k=" .. ' + V.key + ' .. "&s=" .. ' + V.sig + ' .. "&p=" .. tostring(p) .. "&c=" .. chainToken) end)',
-    '  if not ' + V.ok + ' or type(' + V.body + ')~="string" then return end',
-    '  local item=HttpService:JSONDecode(' + V.body + ')',
-    '  if item.decoy or type(item.next)~="string" then return end',
-    '  local raw=dec(hx(item.data or ""),hx(' + V.key + '),hx(item.salt or ""))',
-    '  if item.digest and hash16(raw)~=item.digest then warn("Qyrex integrity failure"); return end',
-    '  parts[#parts+1]=raw',
-    '  ' + V.chain + '=item.next',
-    'end',
-    'local ' + V.fn + ',' + V.err +'=(loadstring or load)(table.concat(parts))',
-    'if type(' + V.fn + ')~="function" then return end',
-    'return ' + V.fn + '()'
-  ].join('\n');
-}
+// ========== DOUBLE LINK + ANTI-SCRAPE ==========
 function buildDoubleLinkStub(cacheUrl) {
-  const u=String(cacheUrl).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+  const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return [
-    'local __QYREX_URL="'+u+'"',
+    'local __QYREX_URL = "' + u + '"',
     'local __QYREX_SRC',
-    'local __QYREX_OK=pcall(function() __QYREX_SRC=game:HttpGet(__QYREX_URL) end)',
-    'if not __QYREX_OK or type(__QYREX_SRC)~="string" or #__QYREX_SRC<8 then return end',
-    'local __QYREX_FN=loadstring(__QYREX_SRC)',
-    'if type(__QYREX_FN)~="function" then return end',
+    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
+    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
+    'end)',
+    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
+    '  error(__QYREX_ERR or "Qyrex delivery failed")',
+    'end',
+    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
+    'if type(__QYREX_FN) ~= "function" then',
+    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
+    'end',
     'return __QYREX_FN()'
   ].join('\n');
 }
-
 function publicBase(req) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const proto = req.headers['x-forwarded-proto'] || 'https';
@@ -1442,82 +1312,7 @@ app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api
     res.setHeader('X-Qrex-Layer', 'cache');
     return res.status(403).type('text/plain').send(decoyLua());
   }
-  const s = await Script.findOne({ id: req.params.id });
-  if (!s) return res.status(404).type('text/plain').send('-- not found');
-  if (!s.obfuscated && s.keyMode !== 'key') return res.status(404).type('text/plain').send('-- empty');
-  s.executions = (s.executions || 0) + 1;
-  await s.save();
-  try {
-    await Execution.create({scriptId:s.id,scriptName:s.name,ownerId:s.ownerId,ip,userAgent:ua});
-    fireWebhooks(s.ownerId, 'script_exec', {scriptId:s.id,name:s.name,ip:String(ip).split(',')[0]});
-  } catch {}
-  let payload = s.obfuscated || '';
-  if (s.keyMode === 'key' && s.providerId) {
-    try {
-      const prov = await Provider.findById(s.providerId);
-      const base = publicBase(req);
-      const claimUrl = base + '/getkey/' + s.providerId;
-      const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
-      payload = buildKeyGateLua({ apiBase: base, providerName: (prov && prov.name) || s.providerName || 'Qrex', getKeyLink, scriptId: s.id });
-    } catch (e) { console.error('key gate wrap', e); }
-  }
-  try { payload = wrapDeliveredScript(payload, publicBase(req), s.id); } catch (e) { console.error('wrapDeliveredScript', e.message); }
-  const sess = makeFragmentSession(s.id, payload, ip, ua);
-  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
-  res.setHeader('X-Qrex-Layer','fragment');
-  return res.type('text/plain').send(buildFragmentBootstrap(publicBase(req), sess));
-});
-
-
-app.get('/api/v1/luascripts/fragments/:sid/manifest', async (req,res)=>{
-  const sid=String(req.params.sid||''); const rec=fragmentSessions.get(sid);
-  if(!rec || Date.now()>rec.exp) return res.status(403).json({error:'expired'});
-  const ip=clientIp(req), ua=req.headers['user-agent']||'';
-  if(deliveryFingerprint(ip,ua)!==rec.fp) return res.status(403).json({error:'fingerprint'});
-  if(String(req.query.k||'')!==rec.key || !safeEq(String(req.query.s||''),rec.sig)) return res.status(403).json({error:'signature'});
-  if(rec.manifestUsed) return res.status(410).json({error:'manifest_used'});
-  if(!safeEq(String(req.query.c||''), rec.chain)) return res.status(403).json({error:'chain'});
-  const expected=crypto.createHmac('sha256',JWT_SECRET).update(rec.scriptId+'.'+sid+'.'+rec.fp+'.'+JSON.stringify(rec.order)+'.'+rec.chainSeed).digest('hex').slice(0,48);
-  if(!safeEq(expected,rec.sig)) return res.status(403).json({error:'integrity'});
-  rec.manifestUsed=true;
-  const chains=[];
-  let next=rec.chain;
-  for(let p=0;p<rec.order.length;p++){
-    chains.push(next);
-    next=crypto.createHmac('sha256',JWT_SECRET).update(rec.id+'.step.'+(p+1)+'.'+next).digest('hex').slice(0,48);
-  }
-  rec.nextChain=next;
-  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
-  res.setHeader('Pragma','no-cache');
-  res.setHeader('X-Content-Type-Options','nosniff');
-  res.json({count:rec.chunks.length,order:rec.order,chains,expiresAt:rec.exp,session:sid});
-});
-
-app.get('/api/v1/luascripts/fragments/:sid/chunk/:idx', async (req,res)=>{
-  const sid=String(req.params.sid||''); const rec=fragmentSessions.get(sid);
-  if(!rec || Date.now()>rec.exp) return res.status(403).json({error:'expired'});
-  const ip=clientIp(req), ua=req.headers['user-agent']||'';
-  if(deliveryFingerprint(ip,ua)!==rec.fp) return res.status(403).json({error:'fingerprint'});
-  if(String(req.query.k||'')!==rec.key || !safeEq(String(req.query.s||''),rec.sig)) return res.status(403).json({error:'signature'});
-  const idx=Number(req.params.idx); const pos=Number(req.query.p);
-  if(!Number.isInteger(idx)||idx<0||idx>=rec.chunks.length) return res.status(404).json({error:'chunk'});
-  if(!Number.isInteger(pos)||pos<1||pos>rec.order.length) return res.status(400).json({error:'position'});
-  if(pos!==rec.nextPos+1 || rec.order[pos-1]!==idx) return res.status(409).json({error:'sequence'});
-  const suppliedChain=String(req.query.c||'');
-  if(!safeEq(suppliedChain,rec.chain)) return res.status(403).json({error:'chain'});
-  if(rec.hits>=rec.order.length) return res.status(429).json({error:'complete'});
-  const chunk=rec.chunks[idx];
-  if(!chunk || !chunk.real) return res.status(404).json({error:'chunk'});
-  if(rec.used.has(idx)) return res.status(410).json({error:'used'});
-  rec.used.add(idx); rec.hits++;
-  rec.nextPos=pos;
-  rec.chain=crypto.createHmac('sha256',JWT_SECRET).update(rec.id+'.step.'+pos+'.'+suppliedChain).digest('hex').slice(0,48);
-  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
-  res.setHeader('Pragma','no-cache');
-  res.setHeader('X-Content-Type-Options','nosniff');
-  res.setHeader('X-Qrex-Fragment',String(pos)+'/'+String(rec.order.length));
-  res.json({data:chunk.data,salt:chunk.salt,digest:chunk.digest,next:rec.chain});
-  if(rec.hits>=rec.order.length) setTimeout(()=>fragmentSessions.delete(sid),250);
+  return serveRealScript(req, res, req.params.id);
 });
 
 // ========== VIP REDEEM ==========
@@ -1626,10 +1421,7 @@ app.get('/api/stats', auth, needMongo, async (req, res) => {
 });
 
 app.get('/api/executions', auth, needMongo, async (req, res) => {
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
-  const query = Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 });
-  const logs = Number.isFinite(lim.logs) ? await query.limit(lim.logs) : await query;
+  const logs = await Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).limit(100);
   res.json(logs);
 });
 
@@ -1727,10 +1519,7 @@ app.post('/api/ban/hwid', auth, needMongo, async (req, res) => {
 });
 
 app.get('/api/logs', auth, needMongo, async (req, res) => {
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
-  const query = Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).lean();
-  const logs = Number.isFinite(lim.logs) ? await query.limit(lim.logs) : await query;
+  const logs = await Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).limit(150).lean();
   res.json(logs);
 });
 
@@ -1906,22 +1695,14 @@ app.post('/api/providers', auth, needMongo, async (req, res) => {
     const { name, keyValidityHours, hwidLimit, linkType, adLink } = req.body || {};
     const n = (name || '').trim();
     if (!n || n.length < 2) return res.status(400).json({ error: 'Nombre requerido' });
-    const me = await User.findById(req.user.sub);
-    const lim = featureLimits(me);
-    const providerCount = await Provider.countDocuments({ ownerId: req.user.sub });
-    if (Number.isFinite(lim.providers) && providerCount >= lim.providers) {
-      return res.status(403).json({ error: `Límite de ${lim.providers} providers en FREE. Activa VIP para ilimitados.` });
-    }
     const exists = await Provider.findOne({ ownerId: req.user.sub, name: n });
     if (exists) return res.status(400).json({ error: 'Ya tienes un provider con ese nombre' });
     const lt = ['linkvertise','lootlabs','workink','custom','none'].includes(linkType) ? linkType : 'custom';
-    const requestedHours = Math.max(1, Number(keyValidityHours) || 24);
-    const requestedHwid = Math.max(1, Math.min(10, Number(hwidLimit) || 1));
     const doc = await Provider.create({
       name: n,
       ownerId: req.user.sub,
-      keyValidityHours: Math.min(requestedHours, lim.maxKeyHours),
-      hwidLimit: Math.min(requestedHwid, lim.maxHwid),
+      keyValidityHours: Math.max(1, Number(keyValidityHours) || 24),
+      hwidLimit: Math.max(1, Math.min(10, Number(hwidLimit) || 1)),
       linkType: lt,
       adLink: String(adLink || '').trim().slice(0, 500)
     });
@@ -1935,11 +1716,9 @@ app.put('/api/providers/:id', auth, needMongo, async (req, res) => {
   const p = await Provider.findOne({ _id: req.params.id, ownerId: req.user.sub });
   if (!p) return res.status(404).json({ error: 'No encontrado' });
   const { name, keyValidityHours, hwidLimit, enabled, linkType, adLink } = req.body || {};
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
   if (name) p.name = name.trim();
-  if (keyValidityHours !== undefined) p.keyValidityHours = Math.min(Math.max(1, Number(keyValidityHours) || 24), lim.maxKeyHours);
-  if (hwidLimit !== undefined) p.hwidLimit = Math.min(Math.max(1, Math.min(10, Number(hwidLimit) || 1)), lim.maxHwid);
+  if (keyValidityHours !== undefined) p.keyValidityHours = Math.max(1, Number(keyValidityHours) || 24);
+  if (hwidLimit !== undefined) p.hwidLimit = Math.max(1, Math.min(10, Number(hwidLimit) || 1));
   if (enabled !== undefined) p.enabled = !!enabled;
   if (linkType && ['linkvertise','lootlabs','workink','custom','none'].includes(linkType)) p.linkType = linkType;
   if (adLink !== undefined) p.adLink = String(adLink || '').trim().slice(0, 500);
@@ -2339,18 +2118,7 @@ app.get('/getkey/:providerId', needMongo, async (req, res) => {
     global.__claimHits.set(ck, e);
     if (e.n > 8) return res.status(429).type('html').send('<h1>Demasiadas keys. Espera unos minutos.</h1>');
 
-    const owner = await User.findById(prov.ownerId);
-    const lim = featureLimits(owner);
-    if (Number.isFinite(lim.keysPerDay)) {
-      const claimedToday = await LicenseKey.countDocuments({
-        ownerId: prov.ownerId,
-        createdAt: { $gte: startOfToday() }
-      });
-      if (claimedToday >= lim.keysPerDay) {
-        return res.status(429).type('html').send(`<h1>Límite diario alcanzado</h1><p>Este provider ha alcanzado las ${lim.keysPerDay} keys diarias del plan FREE.</p>`);
-      }
-    }
-    const hours = Math.min(Math.max(1, prov.keyValidityHours || 24), lim.maxKeyHours);
+    const hours = prov.keyValidityHours || 24;
     let expiresAt = null;
     if (hours > 0) {
       expiresAt = new Date();
@@ -2361,7 +2129,7 @@ app.get('/getkey/:providerId', needMongo, async (req, res) => {
       providerId: String(prov._id),
       providerName: prov.name,
       ownerId: prov.ownerId,
-      hwidLimit: Math.min(lim.maxHwid, prov.hwidLimit || 1),
+      hwidLimit: prov.hwidLimit || 1,
       expiresAt,
       note: 'claimed:' + String(ip).split(',')[0]
     });
@@ -2401,19 +2169,9 @@ app.post('/api/keys', auth, needMongo, async (req, res) => {
     const { providerId, amount, note, hwidLimit, validityHours } = req.body || {};
     const prov = await Provider.findOne({ _id: providerId, ownerId: req.user.sub });
     if (!prov) return res.status(404).json({ error: 'Provider no encontrado' });
-    const me = await User.findById(req.user.sub);
-    const lim = featureLimits(me);
-    const requested = Math.max(1, Number(amount) || 1);
-    const n = Math.min(lim.maxKeyBatch, requested);
-    const dayCount = Number.isFinite(lim.keysPerDay)
-      ? await LicenseKey.countDocuments({ ownerId: req.user.sub, createdAt: { $gte: startOfToday() } })
-      : 0;
-    if (Number.isFinite(lim.keysPerDay) && dayCount + n > lim.keysPerDay) {
-      return res.status(403).json({ error: `FREE permite ${lim.keysPerDay} keys por día. Te quedan ${Math.max(0, lim.keysPerDay - dayCount)}.` });
-    }
-    const requestedHours = validityHours !== undefined ? Number(validityHours) : prov.keyValidityHours;
-    const hours = Math.max(0, Math.min(Number.isFinite(lim.maxKeyHours) ? lim.maxKeyHours : requestedHours, requestedHours));
-    const limit = Math.min(lim.maxHwid, Math.max(1, Number(hwidLimit !== undefined ? hwidLimit : prov.hwidLimit) || 1));
+    const n = Math.min(50, Math.max(1, Number(amount) || 1));
+    const hours = validityHours !== undefined ? Number(validityHours) : prov.keyValidityHours;
+    const limit = hwidLimit !== undefined ? Number(hwidLimit) : prov.hwidLimit;
     const created = [];
     for (let i = 0; i < n; i++) {
       let expiresAt = null;
@@ -2435,18 +2193,6 @@ app.post('/api/keys', auth, needMongo, async (req, res) => {
     res.json({ keys: created });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Error' });
-  }
-});
-
-app.get('/api/keys/export', auth, needMongo, async (req, res) => {
-  try {
-    const keys = await LicenseKey.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).lean();
-    const me = await User.findById(req.user.sub);
-    if (!isPremiumUser(me)) return res.status(403).json({ error: 'Exportar keys es una función VIP.' });
-    const text = keys.map(k => k.key).join('\n');
-    res.type('text/plain').send(text);
-  } catch (e) {
-    res.status(500).json({ error: e.message || 'Error exportando keys' });
   }
 });
 
@@ -2474,7 +2220,7 @@ app.post('/api/keys/:id/toggle', auth, needMongo, async (req, res) => {
 // Verificación pública (Roblox / executors)
 app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
   try {
-    const { key, hwid, provider, providerId } = req.body || {};
+    const { key, hwid, provider } = req.body || {};
     const kstr = (key || '').trim();
     if (!kstr) return res.status(400).json({ success: false, error: 'Key requerida' });
 
@@ -2482,11 +2228,11 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
     if (!doc) return res.status(401).json({ success: false, error: 'Key inválida' });
     if (!doc.enabled) return res.status(401).json({ success: false, error: 'Key desactivada' });
 
-    if (provider && (doc.providerName || '').toLowerCase() !== String(provider).trim().toLowerCase()) {
-      return res.status(401).json({ success: false, error: 'Provider no coincide' });
-    }
-    if (providerId && String(doc.providerId) !== String(providerId)) {
-      return res.status(401).json({ success: false, error: 'Provider ID no coincide' });
+    if (provider) {
+      const provName = String(provider).trim().toLowerCase();
+      if ((doc.providerName || '').toLowerCase() !== provName) {
+        return res.status(401).json({ success: false, error: 'Provider no coincide' });
+      }
     }
 
     const prov = await Provider.findById(doc.providerId);
@@ -2517,7 +2263,7 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
     doc.lastUsedAt = new Date();
     await doc.save();
 
-    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req), req.headers['user-agent'] || '');
+    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req));
 
     fireWebhooks(doc.ownerId, 'key_verify', {
       key: kstr.slice(0, 8) + '...',
@@ -2545,9 +2291,7 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
 app.get('/api/scripts/:id/versions', auth, needMongo, async (req, res) => {
   const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
   if (!s) return res.status(404).json({ error: 'No encontrado' });
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
-  const list = await ScriptVersion.find({ scriptId: s.id, ownerId: req.user.sub }).sort({ createdAt: -1 }).select('-source -obfuscated').limit(lim.versions);
+  const list = await ScriptVersion.find({ scriptId: s.id, ownerId: req.user.sub }).sort({ createdAt: -1 }).select('-source -obfuscated').limit(20);
   res.json(list);
 });
 
@@ -2556,19 +2300,10 @@ app.post('/api/scripts/:id/versions/:vid/restore', auth, needMongo, async (req, 
   if (!s) return res.status(404).json({ error: 'No encontrado' });
   const v = await ScriptVersion.findOne({ _id: req.params.vid, scriptId: s.id, ownerId: req.user.sub });
   if (!v) return res.status(404).json({ error: 'Versión no encontrada' });
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
-  if (!Number.isFinite(lim.versions) || lim.versions > 0) {
-    await ScriptVersion.create({ scriptId: s.id, ownerId: req.user.sub, name: s.name, source: s.source, obfuscated: s.obfuscated, note: 'Before restore' });
-  }
+  await ScriptVersion.create({ scriptId: s.id, ownerId: req.user.sub, name: s.name, source: s.source, obfuscated: s.obfuscated, note: 'Before restore' });
   s.source = v.source;
   s.obfuscated = v.obfuscated;
   if (v.name) s.name = v.name;
-  const versionsAfterRestore = await ScriptVersion.find({ scriptId: s.id }).sort({ createdAt: -1 });
-  if (Number.isFinite(lim.versions) && versionsAfterRestore.length > lim.versions) {
-    const drop = versionsAfterRestore.slice(lim.versions);
-    await ScriptVersion.deleteMany({ _id: { $in: drop.map(x => x._id) } });
-  }
   await s.save();
   res.json({ success: true });
 });
@@ -2581,12 +2316,6 @@ app.get('/api/webhooks', auth, needMongo, async (req, res) => {
 app.post('/api/webhooks', auth, needMongo, async (req, res) => {
   const { url, events } = req.body || {};
   if (!url || !String(url).startsWith('https://')) return res.status(400).json({ error: 'URL Discord inválida (https)' });
-  const me = await User.findById(req.user.sub);
-  const lim = featureLimits(me);
-  const webhookCount = await Webhook.countDocuments({ ownerId: req.user.sub });
-  if (Number.isFinite(lim.webhooks) && webhookCount >= lim.webhooks) {
-    return res.status(403).json({ error: `FREE permite ${lim.webhooks} webhook. Activa VIP para ilimitados.` });
-  }
   const doc = await Webhook.create({
     ownerId: req.user.sub,
     url: String(url).trim(),
@@ -2680,7 +2409,6 @@ app.get('/api/status', async (req, res) => {
     mongoPingMs: mongoMs,
     uptime: process.uptime(),
     freeScriptLimit: FREE_SCRIPT_LIMIT,
-    limits: QYREX_LIMITS,
     security: {
       rawPerIpPerMin: 20,
       rawBurstPer10s: 8,
