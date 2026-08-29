@@ -2747,8 +2747,9 @@ async function loadProviders(){
     sel.innerHTML = list.map(p => {
       const claim = location.origin + '/getkey/' + p._id;
       const getKeyText = (p.adLink || claim || '').replace(/"/g, '&quot;');
+      const claimText = claim.replace(/"/g, '&quot;');
       const providerName = esc(p.name).replace(/"/g, '&quot;');
-      return '<option value="'+p._id+'" data-provider-name="'+providerName+'" data-get-key="'+getKeyText+'">'+esc(p.name)+'</option>';
+      return '<option value="'+p._id+'" data-provider-name="'+providerName+'" data-get-key="'+getKeyText+'" data-claim-url="'+claimText+'">'+esc(p.name)+'</option>';
     }).join('');
     sel.onchange = updateLoaderSnippet;
     const hint = document.getElementById('claimUrlHint');
@@ -2858,7 +2859,7 @@ function updateLoaderSnippet(){
   const sel = document.getElementById('keyProvSelect');
   const option = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex] : null;
   const provName = option ? (option.dataset.providerName || option.text || 'MyProvider') : 'MyProvider';
-  const claimUrl = option ? ((option.dataset.getKey || '').replace(/&quot;/g, '"') || (base + '/getkey/' + option.value)) : (base + '/getkey/PROVIDER_ID');
+  const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + option.value)) : (base + '/getkey/PROVIDER_ID');
   const safeProvider = provName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const safeClaim = claimUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
@@ -2952,7 +2953,7 @@ function QyrexAPI.VerifyKey(key)
 	local body = HttpService:JSONEncode({
 		key = key,
 		hwid = getHwid(),
-		provider = cfg.provider
+		provider = cfg.providerId ~= "" and cfg.providerId or cfg.provider
 	})
 
 	local res = httpRequest({
