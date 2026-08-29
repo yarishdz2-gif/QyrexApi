@@ -1039,7 +1039,7 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
             </div>
             <div class="card p-5">
               <div class="text-sm font-semibold mb-2">Loader Lua (copia en tu script)</div>
-              <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. <b>Get Key</b> copia el link/texto configurado en tu provider. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code></p>
+              <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. <b>Get Key</b> copia tu link de Linkvertise/Lootlabs/Work.ink. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code><br/><span style="color:#6d6d85">Este link dalo en Lootlabs, Work.ink o Linkvertise para que tu usuario llegue al claim de su script y pueda generar la key.</span></p>
               <pre id="loaderSnippet" class="text-[10px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg font-mono" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
               <button class="btn-ghost text-xs mt-2" onclick="copyLs(document.getElementById('loaderSnippet').textContent)">Copiar loader</button>
             </div>
@@ -1088,7 +1088,7 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="field">Access mode</label>
-                  <select id="sKeyMode" onchange="document.getElementById('sProvWrap').style.display=this.value==='key'?'block':'none'">
+                  <select id="sKeyMode" onchange="syncKeyModeFields()">
                     <option value="keyless">Keyless (sin key)</option>
                     <option value="key">Con Key System</option>
                   </select>
@@ -1096,7 +1096,18 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
                 <div id="sProvWrap" style="display:none">
                   <label class="field">Provider</label>
                   <select id="sProvider"></select>
+                  <p class="text-[11px] mt-1" style="color:#5a5a6e">Auto crea un provider exclusivo para este script, con su propio Claim URL.</p>
                 </div>
+              </div>
+              <div id="sKeyLinkWrap" style="display:none">
+                <label class="field">Link de Get Key <span style="color:#5a5a6e">(Linkvertise / Lootlabs / Work.ink)</span></label>
+                <input id="sKeyLink" placeholder="https://linkvertise.com/... o https://loot-link.com/..."/>
+                <p class="text-[11px] mt-1" style="color:#5a5a6e">Al pulsar <b>Get Key</b> en el Loader Lua se copiara este link. Si queda vacio, copiara automaticamente el Claim URL del script.</p>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div><label class="field">Key validity (hours)</label><input id="sProviderHours" type="number" value="24" min="1"/></div>
+                  <div><label class="field">HWID limit</label><input id="sProviderHwid" type="number" value="1" min="1" max="10"/></div>
+                </div>
+              </div>
               </div>
               <div>
                 <label class="field">Protección del código</label>
@@ -2307,6 +2318,14 @@ async function editScript(id){
     document.getElementById('sSource').value = s.source || '';
     const om = document.getElementById('sObfMode');
     if (om) om.value = s.obfMode || (s.doObfuscate === false ? 'none' : 'qyrex');
+    const km = document.getElementById('sKeyMode');
+    if (km) km.value = s.keyMode || 'keyless';
+    await fillCreateProviders();
+    const ps = document.getElementById('sProvider');
+    if (ps && s.providerId) ps.value = s.providerId;
+    const kw = document.getElementById('sKeyLink');
+    if (kw) kw.value = s.adLink || s.getKeyLink || '';
+    syncKeyModeFields();
     document.getElementById('createTitle').textContent = 'Edit Script';
     document.getElementById('createSubtitle').textContent = 'Modificando · ' + (s.name || id);
     document.getElementById('createBtnLabel').textContent = 'Save changes';
@@ -2330,7 +2349,55 @@ function resetCreateForm(){
   document.getElementById('createBtnLabel').textContent = 'Create';
   document.getElementById('createOutWrap').classList.add('hidden');
   const om2 = document.getElementById('sObfMode'); if (om2) om2.value = 'qyrex';
+  const km2 = document.getElementById('sKeyMode'); if (km2) km2.value = 'keyless';
+  const sk2 = document.getElementById('sKeyLink'); if (sk2) sk2.value = '';
+  const ph2 = document.getElementById('sProviderHours'); if (ph2) ph2.value = '24';
+  const hw2 = document.getElementById('sProviderHwid'); if (hw2) hw2.value = '1';
+  syncKeyModeFields();
   updateLines();
+}
+
+function syncKeyModeFields(){
+  const mode = (document.getElementById('sKeyMode') || {}).value || 'keyless';
+  const show = mode === 'key';
+  const provWrap = document.getElementById('sProvWrap');
+  const linkWrap = document.getElementById('sKeyLinkWrap');
+  if (provWrap) provWrap.style.display = show ? 'block' : 'none';
+  if (linkWrap) linkWrap.style.display = show ? 'block' : 'none';
+  if (show) {
+    const sel = document.getElementById('sProvider');
+    if (sel && !sel.value) sel.value = '__auto__';
+  }
+}
+
+function getSelectedProvider(){
+  const sel = document.getElementById('sProvider');
+  if (!sel || !sel.options.length) return null;
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return null;
+  return { id: opt.value, name: opt.textContent || '', auto: opt.value === '__auto__' };
+}
+
+async function ensureScriptProvider(scriptName){
+  const selected = getSelectedProvider();
+  if (selected && !selected.auto) return selected.id;
+
+  const adLink = (document.getElementById('sKeyLink') || {}).value || '';
+  const hours = Number((document.getElementById('sProviderHours') || {}).value || 24);
+  const hwid = Number((document.getElementById('sProviderHwid') || {}).value || 1);
+  const payload = {
+    name: scriptName || 'MyScript',
+    keyValidityHours: Number.isFinite(hours) && hours >= 1 ? hours : 24,
+    hwidLimit: Number.isFinite(hwid) && hwid >= 1 ? hwid : 1,
+    linkType: adLink ? 'linkvertise' : 'custom',
+    adLink
+  };
+  const r = await fetch('/api/providers', {
+    method:'POST', headers:headers(), body:JSON.stringify(payload)
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'No se pudo crear el provider del script');
+  return d.provider?._id || d._id || d.id;
 }
 
 async function createScript(){
@@ -2348,9 +2415,14 @@ async function createScript(){
   try {
     let r, d;
     if (editId) {
+      const keyMode = (document.getElementById('sKeyMode')||{}).value || 'keyless';
+      let providerId = (document.getElementById('sProvider')||{}).value || '';
+      if (keyMode === 'key' && providerId === '__auto__') {
+        providerId = await ensureScriptProvider(name);
+      }
       r = await fetch('/api/scripts/' + editId, {
         method: 'PUT', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
+        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode, providerId })
       });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error al guardar');
@@ -2364,9 +2436,17 @@ async function createScript(){
       loadScripts(); loadStats();
       go('scripts');
     } else {
+      const keyMode = (document.getElementById('sKeyMode')||{}).value || 'keyless';
+      let providerId = (document.getElementById('sProvider')||{}).value || '';
+      if (keyMode === 'key' && providerId === '__auto__') {
+        providerId = await ensureScriptProvider(name);
+      }
+      if (keyMode === 'key' && !providerId) {
+        providerId = await ensureScriptProvider(name);
+      }
       r = await fetch('/api/scripts', {
         method:'POST', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
+        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode, providerId })
       });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error');
@@ -2838,6 +2918,7 @@ local cfg = {
 	keyFile = "QyrexApi_Key.txt",
 	api = "${base}",
 	provider = "${safeProvider}",
+	providerId = "${option ? option.value : ''}",
 	getKeyLink = "${safeClaim}",
 	sounds = {
 		open = "rbxassetid://6655851046",
@@ -3881,7 +3962,8 @@ async function fillCreateProviders(){
     const r = await fetch('/api/providers', { headers: headers() });
     if (!r.ok) return;
     const list = await r.json();
-    sel.innerHTML = list.length ? list.map(p => '<option value="'+p._id+'">'+esc(p.name)+'</option>').join('') : '<option value="">Sin providers</option>';
+    sel.innerHTML = '<option value="__auto__">Auto — provider exclusivo por script</option>' + (list||[]).map(p => '<option value="'+p._id+'">'+esc(p.name)+'</option>').join('');
+    syncKeyModeFields();
   } catch {}
 }
 
