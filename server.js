@@ -1,405 +1,2886 @@
-'use strict';
-
 const express = require('express');
-const helmet = require('helmet');
+const mongoose = require('mongoose');
 const crypto = require('crypto');
-const fs = require('fs');
+const { obfuscate: qyrexObfuscate } = require('./obfuscate');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
-app.disable('x-powered-by');
-app.set('trust proxy', false);
+app.set('trust proxy', 1);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'cambia-este-secret-por-uno-largo';
+const MONGO_URI = process.env.MONGO_URI || '';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/auto';
+
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491';
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
+
+const PORT = process.env.PORT || 10000;
+
 app.use(helmet({
   contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false,
-  crossOriginResourcePolicy: false,
+  frameguard: { action: 'deny' },
+  referrerPolicy: { policy: 'no-referrer' },
+  hidePoweredBy: true
 }));
-app.use(express.json({ limit: '64kb', strict: true }));
+app.disable('x-powered-by');
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json({ limit: '2mb' }));
 
-const PORT = Number(process.env.PORT || 3000);
-const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://127.0.0.1:${PORT}`;
-const MASTER_SECRET = process.env.QYREX_MASTER_SECRET || 'CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_32B+';
-const ADMIN_TOKEN = process.env.QYREX_ADMIN_TOKEN || 'CHANGE_THIS_ADMIN_TOKEN';
-const SESSION_TTL_MS = 25_000;
-const MAX_SESSIONS = 10_000;
-const MIN_CHUNK = 3_000;
-const MAX_CHUNK = 8_000;
-const DECOY_RATIO = 0.18;
-
-if (MASTER_SECRET.length < 32 || MASTER_SECRET.startsWith('CHANGE_THIS')) {
-  console.warn('[WARN] Set QYREX_MASTER_SECRET to a random secret of at least 32 characters.');
-}
-if (ADMIN_TOKEN.startsWith('CHANGE_THIS')) {
-  console.warn('[WARN] Set QYREX_ADMIN_TOKEN before exposing admin endpoints.');
-}
-
-const scripts = new Map();
-const sessions = new Map();
-const keyStore = new Map();
-const rateBuckets = new Map();
-
-function now() { return Date.now(); }
-function b64(buf) { return Buffer.from(buf).toString('base64url'); }
-function unb64(v) { return Buffer.from(v, 'base64url'); }
-function sha256(data) { return crypto.createHash('sha256').update(data).digest('hex'); }
-function randomHex(bytes = 16) { return crypto.randomBytes(bytes).toString('hex'); }
-function hmac(data, secret = MASTER_SECRET) { return crypto.createHmac('sha256', secret).update(data).digest('hex'); }
-function timingSafeEqualHex(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  const aa = Buffer.from(a, 'hex');
-  const bb = Buffer.from(b, 'hex');
-  return aa.length === bb.length && aa.length > 0 && crypto.timingSafeEqual(aa, bb);
-}
 function clientIp(req) {
-  const ip = req.socket.remoteAddress || '';
-  return ip.replace(/^::ffff:/, '');
+  const xf = req.headers['x-forwarded-for'];
+  if (xf) return String(xf).split(',')[0].trim();
+  return (req.socket?.remoteAddress || req.ip || '?').replace(/^::ffff:/, '');
 }
-function fingerprint(req) {
-  return sha256(`${clientIp(req)}\n${req.get('user-agent') || ''}`);
-}
-function securityHeaders(res) {
-  res.set({
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-    'X-Content-Type-Options': 'nosniff',
-    'Content-Security-Policy': "default-src 'none'",
-    'Referrer-Policy': 'no-referrer',
-  });
-}
-function decoyLua() {
-  const lines = [
-    '-- Qyrex protected delivery',
-    'local __qyrex_decoy = true',
-    'local __n = 0',
-    'for i = 1, 7 do __n = __n + i end',
-    'if __qyrex_decoy and __n == 28 then',
-    '    print("skidder noob")',
-    'end',
-  ];
-  return lines.join('\n');
-}
-function jsonStable(obj) {
-  return JSON.stringify(obj, Object.keys(obj).sort());
-}
-function xorBuffer(data, key) {
-  const out = Buffer.allocUnsafe(data.length);
-  for (let i = 0; i < data.length; i++) out[i] = data[i] ^ key[i % key.length];
-  return out;
-}
-function deriveChunkKey(sessionKey, salt) {
-  return crypto.hkdfSync('sha256', sessionKey, salt, Buffer.from('QyrexApi/A-D/v3/chunk'), 32);
-}
-function aesEncrypt(plaintext, key, aad) {
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(aad);
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return { iv, tag, ciphertext };
-}
-function aesDecrypt(ciphertext, key, iv, tag, aad) {
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  decipher.setAAD(aad);
-  decipher.setAuthTag(tag);
-  return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-}
-function chooseChunkSize() {
-  return Math.floor(MIN_CHUNK + Math.random() * (MAX_CHUNK - MIN_CHUNK + 1));
-}
-function splitPayload(source) {
-  const src = Buffer.from(source, 'utf8');
-  const chunks = [];
-  let pos = 0;
-  while (pos < src.length) {
-    const size = Math.min(chooseChunkSize(), src.length - pos);
-    chunks.push(src.subarray(pos, pos + size));
-    pos += size;
-  }
-  return chunks;
-}
-function ensureScript(scriptId) {
-  const script = scripts.get(scriptId);
-  if (!script) throw new Error('script_not_found');
-  return script;
-}
-function buildProtectedScript(source) {
-  const realChunks = splitPayload(source);
-  const out = [];
-  let realIndex = 0;
-  for (const chunk of realChunks) {
-    out.push({ type: 'real', index: realIndex++, data: chunk });
-    if (Math.random() < DECOY_RATIO) {
-      const decoy = Buffer.from(`-- decoy-${randomHex(5)}\nlocal __d${randomHex(3)}=${Math.floor(Math.random() * 999999)}\n`);
-      out.push({ type: 'decoy', index: -1, data: decoy });
-    }
-  }
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return { realChunks, deliveryChunks: out };
-}
-function makeChainToken(sessionId, seq, nonce) {
-  const payload = `${sessionId}.${seq}.${nonce}`;
-  return `${payload}.${hmac(payload)}`;
-}
-function parseChainToken(token) {
-  if (typeof token !== 'string') return null;
-  const parts = token.split('.');
-  if (parts.length !== 4) return null;
-  const [sessionId, seqText, nonce, mac] = parts;
-  const seq = Number(seqText);
-  if (!sessionId || !nonce || !Number.isInteger(seq)) return null;
-  const payload = `${sessionId}.${seq}.${nonce}`;
-  if (!timingSafeEqualHex(hmac(payload), mac)) return null;
-  return { sessionId, seq, nonce };
-}
-function issueSignedChallenge(session, seq) {
-  const nonce = randomHex(12);
-  return makeChainToken(session.id, seq, nonce);
-}
-function punishSession(session, reason) {
-  if (!session) return;
-  session.destroyed = true;
-  session.destroyReason = reason;
-  sessions.delete(session.id);
-}
-function genericDecoyResponse(res) {
-  securityHeaders(res);
-  res.status(200).type('text/plain').send(decoyLua());
-}
-function requireJsonBody(req, keys) {
-  if (!req.body || typeof req.body !== 'object') return false;
-  return keys.every(k => typeof req.body[k] === 'string' && req.body[k].length > 0);
-}
-function rateLimit(key, limit, windowMs) {
-  const t = now();
-  let b = rateBuckets.get(key);
-  if (!b || t - b.start >= windowMs) {
-    b = { start: t, count: 0 };
-    rateBuckets.set(key, b);
-  }
-  b.count += 1;
-  return b.count <= limit;
-}
-function cleanup() {
-  const t = now();
-  for (const [id, s] of sessions) if (s.expiresAt <= t || s.destroyed) sessions.delete(id);
-  for (const [k, b] of rateBuckets) if (t - b.start > 10 * 60_000) rateBuckets.delete(k);
-  if (sessions.size > MAX_SESSIONS) {
-    const oldest = [...sessions.values()].sort((a, b) => a.createdAt - b.createdAt);
-    for (let i = 0; i < Math.floor(sessions.size * 0.1); i++) sessions.delete(oldest[i].id);
-  }
-}
-setInterval(cleanup, 5_000).unref();
 
-function loadDemoScript() {
-  const demo = [
-    'local function __qyrex_entry()',
-    '    print("Protected script loaded")',
-    'end',
-    '__qyrex_entry()',
-  ].join('\n');
-  scripts.set('demo', { id: 'demo', source: demo, updatedAt: now() });
-}
-loadDemoScript();
+// --- Rate limits por capa ---
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIp(req),
+  message: { error: 'Demasiadas peticiones. Espera un poco.' }
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  keyGenerator: (req) => clientIp(req),
+  message: { error: 'Demasiados intentos de login/registro' }
+});
+const rawLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20, // max 20 hits / minuto / IP al raw
+  keyGenerator: (req) => clientIp(req),
+  message: { error: 'Rate limit raw: máx 20/min por IP' }
+});
+const rawBurstLimiter = rateLimit({
+  windowMs: 10 * 1000,
+  max: 8, // anti-burst 8 / 10s
+  keyGenerator: (req) => clientIp(req),
+  message: { error: 'Burst bloqueado' }
+});
+const verifyLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  keyGenerator: (req) => clientIp(req),
+  message: { success: false, error: 'Rate limit verify' }
+});
 
-// Optional persistent key loading. Format: [{"key":"...","scriptId":"...","expiresAt":null,"usesLeft":null}]
-function loadKeysFromFile() {
-  const file = process.env.QYREX_KEYS_FILE;
-  if (!file || !fs.existsSync(file)) return;
+app.use('/api/', apiLimiter);
+app.use('/api/auth/', authLimiter);
+
+// Contadores en memoria para auto-ban
+const abuseHits = new Map(); // ip -> { n, t, uas }
+const scriptTokens = new Map(); // nonce -> { scriptId, ip, exp, used }
+const AUTO_BAN_THRESHOLD = 45;
+const AUTO_BAN_WINDOW = 2 * 60 * 1000;
+const TOKEN_TTL_MS = 25 * 1000;
+const SCRAPER_UA_RE = /curl|wget|python|requests|axios|node-fetch|got\/|httpclient|libwww|scrapy|postman|insomnia|go-http|java\/|okhttp|httpie|discord|bot|crawler|spider/i;
+
+function trackAbuse(ip, ua) {
+  const now = Date.now();
+  let e = abuseHits.get(ip);
+  if (!e || now - e.t > AUTO_BAN_WINDOW) e = { n: 0, t: now, uas: new Set() };
+  e.n += 1;
+  if (ua) e.uas.add(String(ua).slice(0, 80).toLowerCase());
+  e.t = e.t || now;
+  abuseHits.set(ip, e);
+  if (e.uas && e.uas.size >= 4 && e.n >= 6) e.n = Math.max(e.n, AUTO_BAN_THRESHOLD);
+  return e.n;
+}
+
+async function banIp(ip, reason) {
   try {
-    const list = JSON.parse(fs.readFileSync(file, 'utf8'));
-    if (!Array.isArray(list)) throw new Error('keys file must be array');
-    for (const item of list) {
-      if (item?.key && item?.scriptId) keyStore.set(item.key, {
-        scriptId: item.scriptId,
-        expiresAt: item.expiresAt ? new Date(item.expiresAt).getTime() : null,
-        usesLeft: Number.isFinite(item.usesLeft) ? item.usesLeft : null,
-      });
+    if (mongoose.connection.readyState === 1 && mongoose.models.QrexBlacklistIP) {
+      await mongoose.models.QrexBlacklistIP.findOneAndUpdate(
+        { ip },
+        { ip, reason: String(reason || 'abuse').slice(0, 200), createdBy: 'system' },
+        { upsert: true }
+      );
     }
-  } catch (err) {
-    console.error('[KEYS] failed to load:', err.message);
-  }
+  } catch {}
 }
-loadKeysFromFile();
 
-function validateAccessKey(key, scriptId) {
-  const record = keyStore.get(key);
-  if (!record) return false;
-  if (record.scriptId !== scriptId) return false;
-  if (record.expiresAt && record.expiresAt <= now()) return false;
-  if (record.usesLeft !== null && record.usesLeft <= 0) return false;
+function deliveryFingerprint(ip, ua) {
+  return crypto.createHash('sha256')
+    .update(String(ip || '') + '\n' + String(ua || '').slice(0, 220))
+    .digest('hex')
+    .slice(0, 24);
+}
+
+function issueScriptToken(scriptId, ip, ua) {
+  const nonce = crypto.randomBytes(18).toString('base64url');
+  const exp = Date.now() + TOKEN_TTL_MS;
+  const fp = deliveryFingerprint(ip, ua);
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
+  const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
+  const token = exp.toString(36) + '.' + nonce + '.' + sig;
+  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, exp, used: false });
+  return token;
+}
+
+function consumeScriptToken(scriptId, token, ip, ua) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 3) return false;
+  const exp = parseInt(parts[0], 36);
+  const nonce = parts[1];
+  const sig = parts[2];
+  if (!exp || !nonce || !sig) return false;
+  const now = Date.now();
+  if (now > exp) return false;
+  const rec = scriptTokens.get(nonce);
+  if (!rec || rec.used || rec.scriptId !== scriptId) return false;
+  if (now > rec.exp) return false;
+  const fp = deliveryFingerprint(ip, ua);
+  if (fp !== rec.fp) return false;
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
+  const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
+  if (expected.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig))) return false;
+  rec.used = true;
+  scriptTokens.set(nonce, rec);
   return true;
 }
 
-function adminOnly(req, res, next) {
-  const supplied = req.get('x-qyrex-admin') || '';
-  if (!timingSafeEqualHex(hmac(supplied), hmac(ADMIN_TOKEN))) {
-    return res.status(404).end();
+function isScraperUa(ua) {
+  const u = String(ua || '');
+  if (!u.trim()) return true;
+  return SCRAPER_UA_RE.test(u);
+}
+
+function decoyLua() {
+  const n = crypto.randomBytes(4).toString('hex');
+  return [
+    '-- access denied',
+    'local _' + n + ' = true',
+    'error("protected")',
+    'return nil'
+  ].join('\n');
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, e] of abuseHits) {
+    if (now - e.t > AUTO_BAN_WINDOW * 2) abuseHits.delete(ip);
+  }
+  for (const [k, v] of scriptTokens) {
+    if (!v || now > (v.exp || 0) + 60000 || v.used) scriptTokens.delete(k);
+  }
+  if (typeof fragmentSessions !== 'undefined') {
+    for (const [k, v] of fragmentSessions) {
+      if (!v || now > (v.exp || 0)) fragmentSessions.delete(k);
+    }
+  }
+}, 30000).unref?.();
+
+app.use(async (req, res, next) => {
+  try {
+    if (!req.path.startsWith('/api') && !req.originalUrl.startsWith('/api')) return next();
+    const ip = clientIp(req);
+    if (!ip || ip === '?') return next();
+    if (mongoose.connection.readyState === 1) {
+      const Model = mongoose.models.QrexBlacklistIP;
+      if (Model) {
+        const banned = await Model.findOne({ ip }).lean();
+        if (banned) return res.status(403).json({ error: 'IP bloqueada', reason: banned.reason || 'abuse' });
+      }
+    }
+    next();
+  } catch { next(); }
+});
+
+
+let mongoReady = false;
+
+async function connectMongo() {
+  if (!MONGO_URI) {
+    console.error('FATAL: MONGO_URI no esta configurado en Environment Variables');
+    return;
+  }
+  try {
+    await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 10000
+    });
+    mongoReady = true;
+    console.log('Mongo OK');
+  } catch (err) {
+    mongoReady = false;
+    console.error('Mongo error:', err.message);
+  }
+}
+connectMongo();
+
+mongoose.connection.on('connected', () => { mongoReady = true; console.log('Mongo connected'); });
+mongoose.connection.on('disconnected', () => { mongoReady = false; console.log('Mongo disconnected'); });
+mongoose.connection.on('error', (e) => { mongoReady = false; console.error('Mongo conn error:', e.message); });
+
+const User = mongoose.models.QrexUser || mongoose.model('QrexUser', new mongoose.Schema({
+  username: { type: String, unique: true, required: true, lowercase: true, trim: true },
+  passwordHash: { type: String, required: true },
+  discordId: { type: String, default: null, index: true },
+  avatar: { type: String, default: '' },
+  banner: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  displayName: { type: String, default: '' },
+  role: { type: String, default: 'user' }, // user | admin
+  premium: { type: Boolean, default: false },
+  premiumUntil: { type: Date, default: null },
+  lastVipRedeemAt: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now },
+  lastLoginAt: { type: Date, default: null }
+}));
+
+const Session = mongoose.models.QrexSession || mongoose.model('QrexSession', new mongoose.Schema({
+  userId: { type: String, index: true, required: true },
+  sessionId: { type: String, unique: true, index: true, required: true },
+  userAgent: { type: String, default: '' },
+  ip: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now },
+  lastSeenAt: { type: Date, default: Date.now },
+  revokedAt: { type: Date, default: null }
+}));
+
+const Notification = mongoose.models.QrexNotification || mongoose.model('QrexNotification', new mongoose.Schema({
+  userId: { type: String, index: true, required: true },
+  type: { type: String, default: 'info' },
+  title: { type: String, required: true },
+  message: { type: String, default: '' },
+  read: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+function isPremiumUser(u) {
+  if (!u) return false;
+  if (u.role === 'admin') return true;
+  if (!u.premium) return false;
+  if (u.premiumUntil && new Date(u.premiumUntil) < new Date()) return false;
+  return true;
+}
+
+async function ensureOwnerAdmin() {
+  try {
+    const u = await User.findOne({ username: 'owner' });
+    if (u && u.role !== 'admin') {
+      u.role = 'admin';
+      u.premium = true;
+      await u.save();
+      console.log('OWNER promoted to admin');
+    }
+  } catch (e) {}
+}
+mongoose.connection.on('connected', () => { ensureOwnerAdmin(); });
+
+const Script = mongoose.models.QrexScript || mongoose.model('QrexScript', new mongoose.Schema({
+  id: { type: String, default: () => crypto.randomBytes(12).toString('hex') },
+  ownerId: String,
+  name: String,
+  description: { type: String, default: '' },
+  source: String,
+  obfuscated: String,
+  executions: { type: Number, default: 0 },
+  keyMode: { type: String, default: 'keyless' }, // keyless | key
+  providerId: { type: String, default: '' },
+  providerName: { type: String, default: '' },
+  doObfuscate: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const ScriptVersion = mongoose.models.QrexScriptVersion || mongoose.model('QrexScriptVersion', new mongoose.Schema({
+  scriptId: String,
+  ownerId: String,
+  name: String,
+  source: String,
+  obfuscated: String,
+  note: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const Webhook = mongoose.models.QrexWebhook || mongoose.model('QrexWebhook', new mongoose.Schema({
+  ownerId: String,
+  url: String,
+  events: { type: [String], default: ['key_verify', 'script_exec'] },
+  enabled: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const Asset = mongoose.models.QrexAsset || mongoose.model('QrexAsset', new mongoose.Schema({
+  ownerId: String,
+  name: String,
+  type: { type: String, default: 'text' }, // text | url | image
+  content: String,
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const BlacklistIP = mongoose.models.QrexBlacklistIP || mongoose.model('QrexBlacklistIP', new mongoose.Schema({
+  ip: { type: String, unique: true },
+  reason: { type: String, default: '' },
+  createdBy: String,
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const FREE_SCRIPT_LIMIT = 5;
+const QYREX_LIMITS = {
+  free: {
+    scripts: 5,
+    providers: 2,
+    keysPerDay: 25,
+    webhooks: 1,
+    logs: 50,
+    maxHwid: 1,
+    maxKeyHours: 24,
+    maxKeyBatch: 5,
+    versions: 1
+  },
+  vip: {
+    scripts: Infinity,
+    providers: Infinity,
+    keysPerDay: Infinity,
+    webhooks: Infinity,
+    logs: Infinity,
+    maxHwid: 5,
+    maxKeyHours: 24 * 30,
+    maxKeyBatch: 100,
+    versions: 15
+  }
+};
+function featureLimits(user) {
+  return isPremiumUser(user) ? QYREX_LIMITS.vip : QYREX_LIMITS.free;
+}
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+async function fireWebhooks(ownerId, event, payload) {
+  try {
+    const hooks = await Webhook.find({ ownerId, enabled: true, events: event });
+    const body = JSON.stringify({
+      content: null,
+      embeds: [{
+        title: event === 'key_verify' ? 'Key verificada' : event === 'script_exec' ? 'Script ejecutado' : event,
+        description: '```json\n' + JSON.stringify(payload, null, 2).slice(0, 1500) + '\n```',
+        color: event === 'key_verify' ? 0x7c3aed : 0x34d399,
+        timestamp: new Date().toISOString()
+      }]
+    });
+    await Promise.all(hooks.map(h =>
+      fetch(h.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }).catch(() => {})
+    ));
+  } catch (e) { console.error('webhook', e.message); }
+}
+
+const Execution = mongoose.models.QrexExecution || mongoose.model('QrexExecution', new mongoose.Schema({
+  scriptId: String,
+  scriptName: String,
+  ownerId: String,
+  ip: String,
+  userAgent: String,
+  username: { type: String, default: '' },
+  userId: { type: String, default: '' },
+  hwid: { type: String, default: '' },
+  executor: { type: String, default: '' },
+  placeId: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const BlacklistHWID = mongoose.models.QrexBlacklistHWID || mongoose.model('QrexBlacklistHWID', new mongoose.Schema({
+  hwid: { type: String, unique: true, required: true },
+  reason: { type: String, default: '' },
+  ownerId: String,
+  createdBy: String,
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const HubScript = mongoose.models.QrexHubScript || mongoose.model('QrexHubScript', new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, default: '' },
+  loadstring: { type: String, required: true },
+  scriptId: String,
+  ownerId: String,
+  ownerUsername: String,
+  executionsAtPublish: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const Provider = mongoose.models.QrexProvider || mongoose.model('QrexProvider', new mongoose.Schema({
+  name: { type: String, required: true },
+  ownerId: { type: String, required: true },
+  keyValidityHours: { type: Number, default: 24 },
+  hwidLimit: { type: Number, default: 1 },
+  enabled: { type: Boolean, default: true },
+  // linkvertise | lootlabs | workink | custom | none
+  linkType: { type: String, default: 'custom' },
+  // URL del anuncio (Linkvertise / Lootlabs / Work.ink). Debe redirigir a /getkey/:providerId
+  adLink: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const LicenseKey = mongoose.models.QrexLicenseKey || mongoose.model('QrexLicenseKey', new mongoose.Schema({
+  key: { type: String, unique: true, required: true },
+  providerId: { type: String, required: true },
+  providerName: String,
+  ownerId: { type: String, required: true },
+  hwidLimit: { type: Number, default: 1 },
+  hwids: { type: [String], default: [] },
+  expiresAt: { type: Date, default: null },
+  enabled: { type: Boolean, default: true },
+  note: { type: String, default: '' },
+  uses: { type: Number, default: 0 },
+  lastUsedAt: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+
+const VipCode = mongoose.models.QrexVipCode || mongoose.model('QrexVipCode', new mongoose.Schema({
+  code: { type: String, unique: true, required: true, uppercase: true, trim: true },
+  days: { type: Number, default: 10 },
+  used: { type: Boolean, default: false },
+  usedBy: { type: String, default: null },
+  usedAt: { type: Date, default: null },
+  createdBy: { type: String, default: 'system' },
+  note: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+}));
+
+const BOOTSTRAP_VIP_KEYS = [
+  "QYREX-VIP-E13F-520E-164079",
+  "QYREX-VIP-4EC0-79EE-C72E92",
+  "QYREX-VIP-B1FC-1CFB-928515",
+  "QYREX-VIP-1BAB-2B17-E385B8",
+  "QYREX-VIP-D567-E462-7B586A",
+  "QYREX-VIP-E02B-C3AA-EAA997",
+  "QYREX-VIP-5F4A-B79E-093EC1",
+  "QYREX-VIP-705A-0FBE-F807A9",
+  "QYREX-VIP-B72D-EC5C-25EE03",
+  "QYREX-VIP-0357-C159-B37CAB",
+  "QYREX-VIP-6845-6F86-A6AA32",
+  "QYREX-VIP-CA88-B276-7AD428",
+  "QYREX-VIP-957A-8576-3005B1",
+  "QYREX-VIP-D9C8-404C-84374A",
+  "QYREX-VIP-B48C-511B-42069C",
+  "QYREX-VIP-2A97-76F0-DA3DAD",
+  "QYREX-VIP-37EA-A4DE-04F9CC",
+  "QYREX-VIP-51CE-DCDA-FE352C",
+  "QYREX-VIP-72F0-07BF-E27516",
+  "QYREX-VIP-51E8-954E-06A868",
+  "QYREX-VIP-7BAF-CE84-E9F4E9",
+  "QYREX-VIP-F062-E538-9CE073",
+  "QYREX-VIP-6CEC-4362-694B38",
+  "QYREX-VIP-6B16-BADE-FEEC7F",
+  "QYREX-VIP-A24C-CF36-F986A8",
+  "QYREX-VIP-F1E1-C28A-C1783B",
+  "QYREX-VIP-6257-6E1A-977A02",
+  "QYREX-VIP-7BF7-6E70-B9DD8B",
+  "QYREX-VIP-D1D9-942F-21883B",
+  "QYREX-VIP-3881-4939-143D40",
+  "QYREX-VIP-FA48-7E1B-4B5B46",
+  "QYREX-VIP-9580-EC09-A36C4E",
+  "QYREX-VIP-F956-FE91-0DA808",
+  "QYREX-VIP-F420-8961-E26A8A",
+  "QYREX-VIP-7A6A-826B-A3EB2E",
+  "QYREX-VIP-E8DB-1DFD-BD1F75",
+  "QYREX-VIP-DFBE-1551-F2D4EB",
+  "QYREX-VIP-6C8B-AAA9-F05A61",
+  "QYREX-VIP-7FFE-1676-3AD751",
+  "QYREX-VIP-814E-7BB8-080F11",
+  "QYREX-VIP-5FAE-B230-6419A9",
+  "QYREX-VIP-6A6A-C171-095C8D",
+  "QYREX-VIP-518A-D491-EEA75E",
+  "QYREX-VIP-4B53-B67B-C90B60",
+  "QYREX-VIP-427E-6264-1E8A12",
+  "QYREX-VIP-64AC-46DC-BAF4A9",
+  "QYREX-VIP-DAF5-C082-F3F0A0",
+  "QYREX-VIP-B595-BCB7-F9E64A",
+  "QYREX-VIP-57D6-79C1-8EFB99",
+  "QYREX-VIP-55FF-14BD-3FFB06"
+];
+
+async function seedVipKeysIfEmpty() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const count = await VipCode.countDocuments();
+    if (count > 0) return;
+    const docs = BOOTSTRAP_VIP_KEYS.map(code => ({
+      code: code.toUpperCase(),
+      days: 10,
+      note: 'batch-50-bootstrap',
+      createdBy: 'system'
+    }));
+    await VipCode.insertMany(docs, { ordered: false }).catch(() => {});
+    console.log('VIP keys seeded:', docs.length);
+  } catch (e) {
+    console.error('VIP seed error', e.message);
+  }
+}
+mongoose.connection.on('connected', () => { seedVipKeysIfEmpty(); });
+
+function genKey() {
+  return crypto.randomUUID ? crypto.randomUUID() : [
+    crypto.randomBytes(4).toString('hex'),
+    crypto.randomBytes(2).toString('hex'),
+    crypto.randomBytes(2).toString('hex'),
+    crypto.randomBytes(2).toString('hex'),
+    crypto.randomBytes(6).toString('hex')
+  ].join('-');
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return salt + ':' + hash;
+}
+
+function verifyPassword(password, stored) {
+  const [salt, hash] = (stored || '').split(':');
+  if (!salt || !hash) return false;
+  try {
+    const test = crypto.scryptSync(password, salt, 64).toString('hex');
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(test, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
+async function signToken(user, req) {
+  const sessionId = crypto.randomBytes(18).toString('hex');
+  await Session.create({ userId: user._id.toString(), sessionId, userAgent: String(req?.headers?.['user-agent'] || '').slice(0, 300), ip: clientIp(req || {}) });
+  return jwt.sign({ sub: user._id.toString(), username: user.username, sid: sessionId }, JWT_SECRET, { expiresIn: '30d' });
+}
+
+function auth(req, res, next) {
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  if (!token) return res.status(401).json({ error: 'No autorizado' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    if (req.user.sid) {
+      Session.findOne({ sessionId: req.user.sid, userId: req.user.sub, revokedAt: null }).then(sess => {
+        if (!sess) return res.status(401).json({ error: 'Sesión cerrada o inválida' });
+        sess.lastSeenAt = new Date(); sess.save().catch(() => {});
+        next();
+      }).catch(() => res.status(401).json({ error: 'Sesión inválida' }));
+      return;
+    }
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Token invalido' });
+  }
+}
+
+function needMongo(req, res, next) {
+  if (!MONGO_URI) {
+    return res.status(503).json({ error: 'MONGO_URI no configurado en Render Environment' });
+  }
+  if (!mongoReady && mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: 'MongoDB no conectado. Revisa MONGO_URI y Network Access en Atlas (0.0.0.0/0)' });
   }
   next();
 }
 
-app.get('/health', (req, res) => {
-  securityHeaders(res);
-  res.json({ ok: true, service: 'QyrexApi Anti-Dump v3' });
-});
+async function obfuscateWithQyrexObf(code) {
+  throw new Error('QyrexObf eliminado — usa QyrexObf local');
+}
 
-// Admin: publish/replace a script in memory.
-app.post('/api/v3/admin/scripts', adminOnly, (req, res) => {
-  if (!requireJsonBody(req, ['scriptId', 'source'])) return res.status(400).json({ error: 'invalid_body' });
-  if (req.body.scriptId.length > 80 || req.body.source.length > 5_000_000) return res.status(413).json({ error: 'too_large' });
-  scripts.set(req.body.scriptId, { id: req.body.scriptId, source: req.body.source, updatedAt: now() });
-  securityHeaders(res);
-  res.json({ ok: true, scriptId: req.body.scriptId, sha256: sha256(req.body.source) });
-});
+function xorBytes(buf, key) {
+  const out = Buffer.alloc(buf.length);
+  for (let i = 0; i < buf.length; i++) out[i] = buf[i] ^ key[i % key.length];
+  return out;
+}
 
-// Admin: add a key mapping. In a production deployment use your existing key DB here.
-app.post('/api/v3/admin/keys', adminOnly, (req, res) => {
-  if (!requireJsonBody(req, ['key', 'scriptId'])) return res.status(400).json({ error: 'invalid_body' });
-  keyStore.set(req.body.key, {
-    scriptId: req.body.scriptId,
-    expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt).getTime() : null,
-    usesLeft: req.body.usesLeft === undefined ? null : Number(req.body.usesLeft),
+/** 5 capas: XOR aleatorio + Base64 repetido (Lua decoder al final) */
+const ENV_GATE_LUA = "--[[ Qrex Env Logger + anti-steal ]]\nlocal function __qrexEnvGate()\n  local _ok = true\n  local function fail() _ok = false end\n\n  -- 1) getgenv / debug\n  do\n    local a = true\n    local b = getgenv\n    local c = debug\n    local d = c and c.getinfo\n    local e = c and (c.getupvalue or c.getupvalues)\n    local f = getmetatable\n    local g = iscclosure\n    if not b or not d then\n      a = false\n    else\n      local h = b()\n      if f(h) and (f(h).__index or f(h).__newindex or f(h).__metatable) then a = false end\n      local k = d(b)\n      if not k or k.what ~= \"C\" or k.source ~= \"=[C]\" then a = false end\n      if g and not g(b) then a = false end\n      if e then\n        local l, m = pcall(e, b, 1)\n        if l and m ~= nil then a = false end\n      end\n      local x = \"_t\"\n      h[x] = 1\n      if rawget(h, x) ~= 1 then a = false end\n      h[x] = nil\n    end\n    if not a then fail() end\n  end\n\n  -- 2) TerrainRegion\n  do\n    local success = pcall(function()\n      local c = Instance.new(\"TerrainRegion\")\n      assert(typeof(c) == \"Instance\")\n      assert(c.ClassName == \"TerrainRegion\")\n      assert(c:IsA(\"TerrainRegion\"))\n      assert(c:IsA(\"Instance\"))\n      local workspaceTerrain = workspace:FindFirstChildOfClass(\"Terrain\")\n      if workspaceTerrain then\n        local ok, region = pcall(function()\n          return workspaceTerrain:CopyRegion(Region3.new(Vector3.new(0,0,0), Vector3.new(4,4,4)))\n        end)\n        if ok and region then\n          assert(typeof(region) == \"TerrainRegion\")\n          assert(region.ClassName == \"TerrainRegion\")\n          local size = region.Size\n          assert(typeof(size) == \"Vector3int16\")\n        end\n      end\n      local part = Instance.new(\"Part\")\n      local _ = part.Position\n      part:Destroy()\n    end)\n    if not success then fail() end\n  end\n\n  -- 3) DataModel check (NO infinite loop - that bricks legit users)\n  do\n    if game.ClassName ~= \"DataModel\" then fail() end\n  end\n\n  -- 4) OverlapParams\n  do\n    local w = workspace\n    local a = Instance.new(\"Part\")\n    local b = Instance.new(\"Part\")\n    a.Anchored = true\n    b.Anchored = true\n    a.CFrame = CFrame.new(0,0,0)\n    b.CFrame = CFrame.new(0,0,0)\n    a.Parent = w\n    b.Parent = w\n    local q = OverlapParams.new()\n    q.IncludeInstances = {a, b}\n    local x = w:GetPartBoundsInBox(CFrame.new(), Vector3.new(4,4,4), q)\n    q.ExcludeInstances = {b}\n    local y = w:GetPartBoundsInBox(CFrame.new(), Vector3.new(4,4,4), q)\n    q.IncludeInstances = {}\n    local z = w:GetPartBoundsInBox(CFrame.new(), Vector3.new(4,4,4), q)\n    local function has(t, inst)\n      for _, v in t do if v == inst then return true end end\n      return false\n    end\n    local ok = has(x,a) and has(x,b) and has(y,a) and not has(y,b) and #z == 0\n    a:Destroy(); b:Destroy()\n    if not ok then fail() end\n  end\n\n  -- 5) TweenService\n  do\n    local ok = pcall(function()\n      local ts = game:GetService(\"TweenService\")\n      local obj = Instance.new(\"NumberValue\")\n      obj.Value = 0\n      obj.Parent = workspace\n      local tween = ts:Create(obj, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Value = 1})\n      tween:Play()\n      task.wait(0.5)\n      local mid = obj.Value\n      if mid <= 0 or mid >= 1 or mid < 0.3 or mid > 0.7 then error(\"dtc\") end\n      tween.Completed:Wait()\n      if obj.Value ~= 1 then error(\"dtc\") end\n      obj:Destroy()\n    end)\n    if not ok then fail() end\n  end\n\n  if not _ok then\n    error(\"dtc bro\")\n  end\nend\n__qrexEnvGate()\n";
+
+function wrapWithEnvLogger(source) {
+  return ENV_GATE_LUA + "\n" + String(source || "");
+}
+
+async function resolveObfuscated(source, mode) {
+  const src = String(source || "");
+  if (!src.trim()) throw new Error("Código vacío");
+  const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
+  if (m === "none" || m === "false" || m === "plain") {
+    return { code: src, doObfuscate: false, obfMode: "none" };
+  }
+  try {
+    // Stability-first: do not rewrite Lua tokens or inject independent chunks.
+    const result = qyrexObfuscate(src, { vm: true });
+    const code = result && result.code ? result.code : String(result || "");
+    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
+    return { code, doObfuscate: true, obfMode: "qrex" };
+  } catch (e) {
+    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación falló: " + (e.message || "error"));
+  }
+}
+
+function localObfuscate(code) {
+  const raw = String(code || '');
+  if (!raw) return '-- empty';
+  if (raw.length > 1500000) throw new Error('Script demasiado grande para ofuscar');
+  const src = Buffer.from(raw, 'utf8');
+  let data = src;
+  const keys = [];
+  for (let layer = 0; layer < 5; layer++) {
+    const key = crypto.randomBytes(16);
+    keys.push(key);
+    data = xorBytes(data, key);
+    data = Buffer.from(data.toString('base64'), 'utf8');
+  }
+  const keyLits = keys.map(k => '{' + Array.from(k).join(',') + '}').join(',');
+  const payload = data.toString('utf8').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const lines = [
+    '-- Qrex local protect (5x XOR+B64)',
+    'local _k={' + keyLits + '}',
+    'local _d="' + payload + '"',
+    'local function _xb(s,key)',
+    '  local t={}',
+    '  for i=1,#s do t[i]=string.char(bit32.bxor(string.byte(s,i), key[((i-1)%#key)+1])) end',
+    '  return table.concat(t)',
+    'end',
+    'local function _b64(data)',
+    "  local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'",
+    "  data=string.gsub(data,'[^'..b..'=]','')",
+    "  return (data:gsub('.',function(x)",
+    "    if x=='=' then return '' end",
+    "    local r,f='',(b:find(x)-1)",
+    "    for i=6,1,-1 do r=r..(f%2^i - f%2^(i-1) > 0 and '1' or '0') end",
+    '    return r',
+    "  end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)",
+    '    if #x~=8 then return \'\' end',
+    '    local c=0',
+    "    for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end",
+    '    return string.char(c)',
+    '  end))',
+    'end',
+    'for i=5,1,-1 do',
+    '  _d=_b64(_d)',
+    '  _d=_xb(_d,_k[i])',
+    'end',
+    'assert((loadstring or load)(_d))()'
+  ];
+  return lines.join('\n');
+}
+
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    service: 'QrexApi',
+    mongo: mongoReady || mongoose.connection.readyState === 1,
+    mongoState: mongoose.connection.readyState // 0=off 1=on 2=connecting 3=disconnecting
   });
-  securityHeaders(res);
-  res.json({ ok: true });
 });
 
-// One-time handshake. Access is bound to IP + UA and the returned token expires rapidly.
-app.post('/api/v3/handshake', (req, res) => {
+app.post('/api/auth/register', needMongo, async (req, res) => {
+  try {
+    const { username, password } = req.body || {};
+    const user = (username || '').trim().toLowerCase();
+    const pass = password || '';
+
+    if (!user || user.length < 3) {
+      return res.status(400).json({ error: 'Usuario minimo 3 caracteres' });
+    }
+    if (!/^[a-z0-9_]+$/.test(user)) {
+      return res.status(400).json({ error: 'Solo letras, numeros y _' });
+    }
+    if (pass.length < 4) {
+      return res.status(400).json({ error: 'Contraseña minimo 4 caracteres' });
+    }
+
+    const exists = await User.findOne({ username: user });
+    if (exists) {
+      return res.status(400).json({ error: 'Ese usuario ya existe' });
+    }
+
+    const isOwnerName = user === 'owner';
+    const doc = await User.create({
+      username: user,
+      passwordHash: hashPassword(pass),
+      role: isOwnerName ? 'admin' : 'user',
+      premium: isOwnerName ? true : false
+    });
+
+    const token = await signToken(doc, req);
+    Notification.create({userId:String(doc._id),type:'success',title:'Nuevo inicio de sesión',message:'Se inició sesión correctamente en QrexApi.'}).catch(()=>{});
+    res.json({
+      token,
+      user: {
+        id: doc._id,
+        username: doc.username,
+        role: doc.role,
+        premium: isPremiumUser(doc)
+      }
+    });
+  } catch (e) {
+    console.error('register', e);
+    if (e.code === 11000) {
+      return res.status(400).json({ error: 'Ese usuario ya existe' });
+    }
+    res.status(500).json({ error: 'Error al registrar: ' + (e.message || 'desconocido') });
+  }
+});
+
+app.post('/api/auth/login', needMongo, async (req, res) => {
+  try {
+    const { username, password } = req.body || {};
+    const user = (username || '').trim().toLowerCase();
+    const pass = password || '';
+
+    if (!user || !pass) {
+      return res.status(400).json({ error: 'Falta usuario o contraseña' });
+    }
+
+    const doc = await User.findOne({ username: user });
+    if (!doc || !verifyPassword(pass, doc.passwordHash)) {
+      return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+    }
+
+    if (doc.username === 'owner' && doc.role !== 'admin') {
+      doc.role = 'admin';
+      doc.premium = true;
+      await doc.save();
+    }
+
+    doc.lastLoginAt = new Date();
+    await doc.save();
+    const token = await signToken(doc, req);
+    res.json({
+      token,
+      user: {
+        id: doc._id,
+        username: doc.username,
+        role: doc.role || 'user',
+        premium: isPremiumUser(doc),
+        avatar: doc.avatar || '',
+        discordId: doc.discordId || null
+      }
+    });
+  } catch (e) {
+    console.error('login', e);
+    res.status(500).json({ error: 'Error al iniciar sesion: ' + (e.message || 'desconocido') });
+  }
+});
+
+app.get('/api/me', auth, needMongo, async (req, res) => {
+  const user = await User.findById(req.user.sub);
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+  if (user.username === 'owner' && user.role !== 'admin') {
+    user.role = 'admin';
+    user.premium = true;
+    await user.save();
+  }
+  res.json({
+    id: user._id,
+    username: user.username,
+    displayName: user.displayName || user.username,
+    bio: user.bio || '',
+    banner: user.banner || '',
+    role: user.role || 'user',
+    premium: isPremiumUser(user),
+    avatar: user.avatar || '',
+    discordId: user.discordId || null,
+    createdAt: user.createdAt || null,
+    lastLoginAt: user.lastLoginAt || null
+  });
+});
+
+// --- Cuenta, seguridad y sesiones ---
+function safeSession(s, currentSid) {
+  const ua = String(s.userAgent || 'Dispositivo desconocido');
+  return { id: s.sessionId, current: s.sessionId === currentSid, device: ua.slice(0, 120), createdAt: s.createdAt, lastSeenAt: s.lastSeenAt };
+}
+app.get('/api/account', auth, needMongo, async (req, res) => {
+  const u = await User.findById(req.user.sub);
+  if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json({ username:u.username, displayName:u.displayName || u.username, bio:u.bio || '', banner:u.banner || '', role:u.role || 'user', premium:isPremiumUser(u), avatar:u.avatar || '', discordId:u.discordId || null, createdAt:u.createdAt, lastLoginAt:u.lastLoginAt || null });
+});
+app.patch('/api/account/profile', auth, needMongo, async (req, res) => {
+  const u = await User.findById(req.user.sub); if (!u) return res.status(404).json({error:'Usuario no encontrado'});
+  const username = typeof req.body?.username === 'string' ? req.body.username.trim().toLowerCase() : u.username;
+  const avatar = typeof req.body?.avatar === 'string' ? req.body.avatar.trim() : u.avatar;
+  const banner = typeof req.body?.banner === 'string' ? req.body.banner.trim() : u.banner;
+  const bio = typeof req.body?.bio === 'string' ? req.body.bio.trim().slice(0,160) : u.bio;
+  const displayName = typeof req.body?.displayName === 'string' ? req.body.displayName.trim().slice(0,32) : (u.displayName || username);
+  if (!username || username.length < 3 || !/^[a-z0-9_]+$/.test(username)) return res.status(400).json({error:'Usuario inválido: usa 3+ caracteres, letras, números o _'});
+  if (displayName.length < 2) return res.status(400).json({error:'Nombre visible demasiado corto'});
+  if (username !== u.username && await User.exists({username, _id:{$ne:u._id}})) return res.status(400).json({error:'Ese usuario ya existe'});
+  for (const [name, value] of [['avatar',avatar],['banner',banner]]) {
+    if (value && !/^https?:\/\/|^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(value)) return res.status(400).json({error:name+' debe ser una URL o imagen subida'});
+    if (value.startsWith('data:image/') && value.length > 700000) return res.status(400).json({error:name+' es demasiado grande (máx. ~700 KB)'});
+  }
+  u.username=username; u.avatar=avatar; u.banner=banner; u.bio=bio; u.displayName=displayName; await u.save();
+  res.json({message:'Perfil actualizado', username:u.username, displayName:u.displayName, bio:u.bio || '', banner:u.banner || '', avatar:u.avatar || ''});
+});
+
+app.get('/api/notifications', auth, needMongo, async (req,res)=>{
+  const uid=String(req.user.sub), now=Date.now();
+  const stored=await Notification.find({userId:uid}).sort({createdAt:-1}).limit(30).lean();
+  const dynamic=[{_id:'update-2026',type:'success',title:'QrexApi actualizado',message:'Perfil, banners, notificaciones y páginas públicas de scripts fueron mejorados.',read:false,createdAt:new Date(now-300000)}];
+  try {
+    const keys=await LicenseKey.find({ownerId:uid,enabled:true}).select('expiresAt').lean();
+    const soon=keys.filter(k=>k.expiresAt&&new Date(k.expiresAt).getTime()>now&&new Date(k.expiresAt).getTime()<now+72*3600*1000);
+    if(soon.length) dynamic.unshift({_id:'key-expiry',type:'warning',title:'API Key próxima a expirar',message:soon.length+' key(s) vencen dentro de 72 horas.',read:false,createdAt:new Date()});
+  } catch {}
+  res.json({notifications:dynamic.concat(stored).slice(0,30)});
+});
+app.post('/api/notifications/read-all', auth, needMongo, async (req,res)=>{ await Notification.updateMany({userId:String(req.user.sub),read:false},{$set:{read:true}}); res.json({ok:true}); });
+app.post('/api/account/password', auth, needMongo, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {}; const u=await User.findById(req.user.sub);
+  if (!u || !verifyPassword(String(currentPassword||''),u.passwordHash)) return res.status(401).json({error:'La contraseña actual no es correcta'});
+  if (String(newPassword||'').length < 8) return res.status(400).json({error:'La nueva contraseña debe tener al menos 8 caracteres'});
+  u.passwordHash=hashPassword(newPassword); await u.save();
+  await Session.updateMany({userId:u._id.toString(), sessionId:{$ne:req.user.sid}, revokedAt:null}, {$set:{revokedAt:new Date()}});
+  res.json({message:'Contraseña actualizada. Se cerraron las demás sesiones.'});
+});
+app.get('/api/account/sessions', auth, needMongo, async (req,res)=>{
+  const list=await Session.find({userId:req.user.sub, revokedAt:null}).sort({lastSeenAt:-1}).limit(50).lean();
+  res.json({sessions:list.map(s=>safeSession(s,req.user.sid))});
+});
+app.delete('/api/account/sessions/:id', auth, needMongo, async (req,res)=>{
+  const s=await Session.findOneAndUpdate({userId:req.user.sub,sessionId:req.params.id,revokedAt:null},{$set:{revokedAt:new Date()}},{new:true});
+  if(!s) return res.status(404).json({error:'Sesión no encontrada'}); res.json({message:'Sesión cerrada'});
+});
+app.post('/api/account/sessions/logout-others', auth, needMongo, async (req,res)=>{
+  await Session.updateMany({userId:req.user.sub,sessionId:{$ne:req.user.sid},revokedAt:null},{$set:{revokedAt:new Date()}}); res.json({message:'Las demás sesiones fueron cerradas'});
+});
+app.delete('/api/account', auth, needMongo, async (req,res)=>{
+  const {password, confirmation}=req.body||{}; const u=await User.findById(req.user.sub);
+  if(!u || !verifyPassword(String(password||''),u.passwordHash)) return res.status(401).json({error:'Contraseña incorrecta'});
+  if(String(confirmation||'') !== 'ELIMINAR') return res.status(400).json({error:'Escribe ELIMINAR para confirmar'});
+  const id=u._id.toString(); await Promise.all([Script.deleteMany({ownerId:id}), ScriptVersion.deleteMany({ownerId:id}), Webhook.deleteMany({ownerId:id}), Asset.deleteMany({ownerId:id}), Provider.deleteMany({ownerId:id}), LicenseKey.deleteMany({ownerId:id}), Session.updateMany({userId:id,revokedAt:null},{$set:{revokedAt:new Date()}})]); await User.deleteOne({_id:u._id});
+  res.json({message:'Cuenta eliminada'});
+});
+
+function requireAdmin(req, res, next) {
+  User.findById(req.user.sub).then(u => {
+    if (!u || u.role !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+    req.adminUser = u;
+    next();
+  }).catch(() => res.status(403).json({ error: 'Solo admin' }));
+}
+
+app.get('/api/scripts', auth, needMongo, async (req, res) => {
+  const list = await Script.find({ ownerId: req.user.sub })
+    .sort({ createdAt: -1 })
+    .select('-source -obfuscated');
+  res.json(list);
+});
+
+app.get('/api/scripts/:id', auth, needMongo, async (req, res) => {
+  const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
+  if (!s) return res.status(404).json({ error: 'No encontrado' });
+  res.json(s);
+});
+
+app.post('/api/scripts', auth, needMongo, async (req, res) => {
+  try {
+    const { name, description, source, keyMode, providerId } = req.body || {};
+    if (!name || !source) return res.status(400).json({ error: 'name y source requeridos' });
+
+    const me = await User.findById(req.user.sub);
+    const lim = featureLimits(me);
+    const count = await Script.countDocuments({ ownerId: req.user.sub });
+    if (Number.isFinite(lim.scripts) && count >= lim.scripts) {
+      return res.status(403).json({ error: 'Límite de ' + lim.scripts + ' scripts en FREE. Activa VIP/Premium para ilimitados.' });
+    }
+
+    let providerName = '';
+    let pid = '';
+    const mode = keyMode === 'key' ? 'key' : 'keyless';
+    if (mode === 'key' && providerId) {
+      const prov = await Provider.findOne({ _id: providerId, ownerId: req.user.sub });
+      if (!prov) return res.status(400).json({ error: 'Provider inválido' });
+      providerName = prov.name;
+      pid = String(prov._id);
+    }
+
+    let obfMode = (req.body?.obfMode || '').toString();
+    if (!obfMode) {
+      const wantObf = req.body?.doObfuscate !== false && req.body?.doObfuscate !== 'false';
+      obfMode = wantObf ? 'qrex' : 'none';
+    }
+    if (obfMode === 'qyrex') obfMode = 'qrex';
+    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'qrex';
+    const resolved = await resolveObfuscated(source, obfMode);
+    const doc = await Script.create({
+      ownerId: req.user.sub,
+      name,
+      description: description || '',
+      source,
+      obfuscated: resolved.code,
+      doObfuscate: resolved.doObfuscate,
+      obfMode: resolved.obfMode,
+      keyMode: mode,
+      providerId: pid,
+      providerName
+    });
+
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+
+    res.json({
+      id: doc.id,
+      name: doc.name,
+      loadstring: `loadstring(game:HttpGet("${proto}://${host}/api/v1/luascripts/public/${doc.id}/download"))()`
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message || 'Error al crear' });
+  }
+});
+
+app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
+  try {
+    const { name, description, source, keyMode, providerId } = req.body || {};
+    const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
+    if (!s) return res.status(404).json({ error: 'No encontrado' });
+
+    // version snapshot before change
+    if (source || name || description !== undefined) {
+      await ScriptVersion.create({
+        scriptId: s.id,
+        ownerId: req.user.sub,
+        name: s.name,
+        source: s.source,
+        obfuscated: s.obfuscated,
+        note: 'Auto-save before edit'
+      });
+      const me = await User.findById(req.user.sub);
+      const lim = featureLimits(me);
+      const vers = await ScriptVersion.find({ scriptId: s.id }).sort({ createdAt: -1 });
+      if (Number.isFinite(lim.versions) && vers.length > lim.versions) {
+        const drop = vers.slice(lim.versions);
+        await ScriptVersion.deleteMany({ _id: { $in: drop.map(v => v._id) } });
+      }
+    }
+
+    if (name) s.name = name;
+    if (description !== undefined) s.description = description;
+    if (keyMode === 'key' || keyMode === 'keyless') {
+      s.keyMode = keyMode;
+      if (keyMode === 'key' && providerId) {
+        const prov = await Provider.findOne({ _id: providerId, ownerId: req.user.sub });
+        if (prov) { s.providerId = String(prov._id); s.providerName = prov.name; }
+      } else if (keyMode === 'keyless') {
+        s.providerId = ''; s.providerName = '';
+      }
+    }
+    if (req.body?.obfMode && ['none','qrex','qyrex','local'].includes(req.body.obfMode)) {
+      s.obfMode = req.body.obfMode;
+      s.doObfuscate = s.obfMode !== 'none';
+    } else if (req.body?.doObfuscate !== undefined) {
+      s.doObfuscate = req.body.doObfuscate !== false && req.body.doObfuscate !== 'false';
+      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' ? 'local' : 'qrex') : 'none';
+    }
+    if (source) {
+      s.source = source;
+      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex');
+      s.obfuscated = resolved.code;
+      s.doObfuscate = resolved.doObfuscate;
+      s.obfMode = resolved.obfMode;
+      s.obfMode = resolved.obfMode;
+    } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
+      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
+      s.obfuscated = resolved.code;
+      s.doObfuscate = resolved.doObfuscate;
+      s.obfMode = resolved.obfMode;
+      s.obfMode = resolved.obfMode;
+    }
+    await s.save();
+    res.json({ success: true, id: s.id });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.delete('/api/scripts/:id', auth, needMongo, async (req, res) => {
+  await Script.deleteOne({ id: req.params.id, ownerId: req.user.sub });
+  res.json({ success: true });
+});
+
+
+
+// ========== PROTECTIONS (DTC + OP Guard) ==========
+let DTC_LUA = '';
+let OP_GUARD_LUA = '';
+try {
+  const pDir = path.join(__dirname, 'protections');
+  DTC_LUA = fs.readFileSync(path.join(pDir, 'dtc.lua'), 'utf8');
+  OP_GUARD_LUA = fs.readFileSync(path.join(pDir, 'op_guard.lua'), 'utf8')
+    .replace(/local debug_mode = true/, 'local debug_mode = false')
+    .replace(/local require_executor_hint = true/, 'local require_executor_hint = false');
+  console.log('Protections loaded: DTC', DTC_LUA.length, 'OP', OP_GUARD_LUA.length);
+} catch (e) {
+  console.error('Could not load protections/', e.message);
+}
+
+function buildExecReporterLua(apiBase, scriptId) {
+  const base = String(apiBase || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const sid = String(scriptId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return [
+    '--[[ Qyrex exec reporter ]]',
+    'local function __qyrexReport()',
+    '  pcall(function()',
+    '    local HttpService = game:GetService("HttpService")',
+    '    local Players = game:GetService("Players")',
+    '    local lp = Players.LocalPlayer',
+    '    local username = (lp and lp.Name) or "?"',
+    '    local userId = (lp and tostring(lp.UserId)) or "0"',
+    '    local placeId = tostring(game.PlaceId or 0)',
+    '    local hwid = ""',
+    '    pcall(function()',
+    '      if gethwid then hwid = tostring(gethwid())',
+    '      elseif gethivehardwareid then hwid = tostring(gethivehardwareid())',
+    '      else',
+    '        local ok, svc = pcall(function() return game:GetService("RbxAnalyticsService") end)',
+    '        if ok and svc then hwid = tostring(svc:GetClientId()) end',
+    '      end',
+    '    end)',
+    '    local executor = "unknown"',
+    '    pcall(function()',
+    '      if identifyexecutor then executor = tostring(identifyexecutor())',
+    '      elseif getexecutorname then executor = tostring(getexecutorname()) end',
+    '    end)',
+    '    local body = HttpService:JSONEncode({',
+    '      scriptId = "' + sid + '",',
+    '      username = username,',
+    '      userId = userId,',
+    '      hwid = hwid,',
+    '      executor = executor,',
+    '      placeId = placeId',
+    '    })',
+    '    local url = "' + base + '/api/exec-ping"',
+    '    local req = (syn and syn.request) or http_request or request or (http and http.request)',
+    '    if req then',
+    '      req({ Url = url, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })',
+    '    end',
+    '  end)',
+    'end',
+    'task.spawn(__qyrexReport)',
+    ''
+  ].join('\n');
+}
+
+function wrapDeliveredScript(code, apiBase, scriptId) {
+  const src = String(code || '');
+  if (!src) return '';
+  const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const ident = (prefix) => {
+    let out = prefix;
+    for (let i = 0; i < 10; i++) out += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
+    return out;
+  };
+  const key = crypto.randomBytes(32);
+  const noise = crypto.randomBytes(24);
+  const raw = Buffer.from(src, 'utf8');
+  const enc = Buffer.allocUnsafe(raw.length);
+  for (let i = 0; i < raw.length; i++) enc[i] = raw[i] ^ key[i % key.length] ^ noise[i % noise.length] ^ ((i * 197 + 83) & 0xff);
+  const luaString = (buf) => {
+    let out = '"';
+    for (const b of buf) out += '\\' + String(b).padStart(3, '0');
+    return out + '"';
+  };
+  const n = {k:ident('__k'), n:ident('__n'), b:ident('__b'), o:ident('__o'), i:ident('__i'), f:ident('__f')};
+  return [
+    '-- Qyrex protected delivery', 'do',
+    '  local __qrx_env=(getgenv and getgenv()) or _G',
+    '  local __qrx_s=0',
+    '  for _,__q in ipairs({"getgc","getreg","getconnections","getupvalues","getconstants","getproto","getprotos","getsenv","getscriptbytecode","dumpstring","saveinstance","clonefunction"}) do if type(__qrx_env[__q])=="function" then __qrx_s=__qrx_s+1 end end',
+    '  if __qrx_s>=8 then warn("skidder noob"); return end',
+    '  local __qrx_ls=(loadstring or load)',
+    '  if type(__qrx_ls)~="function" then return end',
+    '  local ' + n.k + '=' + luaString(key),
+    '  local ' + n.n + '=' + luaString(noise),
+    '  local ' + n.b + '=' + luaString(enc),
+    '  local ' + n.o + '={}',
+    '  local bx=(bit32 and bit32.bxor) or function(a,b) local o,p,x,y=0,1,a,b for z=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
+    '  for ' + n.i + '=1,#' + n.b + ' do',
+    '    local kk=string.byte(' + n.k + ',((' + n.i + '-1)%#' + n.k + ')+1)',
+    '    local nn=string.byte(' + n.n + ',((' + n.i + '-1)%#' + n.n + ')+1)',
+    '    local z=((' + n.i + '-1)*197+83)%256',
+    '    local bb=string.byte(' + n.b + ',' + n.i + ')',
+    '    ' + n.o + '[' + n.i + ']=string.char(bx(bx(bx(bb,kk),nn),z))',
+    '  end',
+    '  local ' + n.f + '=__qrx_ls(table.concat(' + n.o + '))',
+    '  if type(' + n.f + ')~="function" then error("Qyrex compile failed",0) end',
+    '  return ' + n.f + '()',
+    'end'
+  ].join('\n');
+}
+
+// ========== FRAGMENTED DELIVERY + ANTI-SCRAPE ==========
+const fragmentSessions = new Map();
+function hex(buf) { return Buffer.from(buf).toString('hex'); }
+function safeEq(a, b) {
+  try {
+    const aa = Buffer.from(String(a || ''));
+    const bb = Buffer.from(String(b || ''));
+    return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
+  } catch { return false; }
+}
+function chunkDigest(buf) {
+  let h = 2166136261;
+  for (let i = 0; i < buf.length; i++) {
+    h = (h + (buf[i] * 16777619) + (i + 1)) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+function xorChunk(buf, key, salt) {
+  const out = Buffer.allocUnsafe(buf.length);
+  for (let i = 0; i < buf.length; i++) out[i] = buf[i] ^ key[i % key.length] ^ salt[i % salt.length] ^ ((i * 97 + 29) & 0xff);
+  return out;
+}
+function makeFragmentSession(scriptId, payload, ip, ua) {
+  const id = crypto.randomBytes(18).toString('base64url');
+  const key = crypto.randomBytes(32);
+  const fp = deliveryFingerprint(ip, ua);
+  const raw = Buffer.from(payload, 'utf8');
+  const chunks = [];
+  let pos = 0;
+  while (pos < raw.length) {
+    const size = 4096 + (crypto.randomBytes(2).readUInt16BE(0) % 4097);
+    const part = raw.subarray(pos, Math.min(pos + size, raw.length));
+    const salt = crypto.randomBytes(16);
+    chunks.push({
+      salt: hex(salt),
+      data: hex(xorChunk(part, key, salt)),
+      digest: chunkDigest(part),
+      real: true
+    });
+    pos += part.length;
+  }
+  const decoys = Math.min(12, Math.max(3, Math.floor(chunks.length / 6)));
+  for (let i = 0; i < decoys; i++) {
+    const salt = crypto.randomBytes(16);
+    const fake = crypto.randomBytes(256 + (crypto.randomBytes(2).readUInt16BE(0) % 768));
+    chunks.push({
+      salt: hex(salt),
+      data: hex(xorChunk(fake, key, salt)),
+      digest: chunkDigest(fake),
+      real: false
+    });
+  }
+  for (let i = chunks.length - 1; i > 0; i--) {
+    const j = crypto.randomBytes(2).readUInt16BE(0) % (i + 1);
+    [chunks[i], chunks[j]] = [chunks[j], chunks[i]];
+  }
+  const order = chunks.map((c, i) => c.real ? i : -1).filter(i => i >= 0);
+  const chainSeed = crypto.randomBytes(24).toString('base64url');
+  const sig = crypto.createHmac('sha256', JWT_SECRET)
+    .update(scriptId + '.' + id + '.' + fp + '.' + JSON.stringify(order) + '.' + chainSeed)
+    .digest('hex').slice(0, 48);
+  const firstChain = crypto.createHmac('sha256', JWT_SECRET)
+    .update(id + '.chain.0.' + chainSeed)
+    .digest('hex').slice(0, 48);
+  fragmentSessions.set(id, {
+    id,
+    scriptId,
+    ip: String(ip || ''),
+    fp,
+    exp: Date.now() + 45000,
+    key: hex(key),
+    chunks,
+    order,
+    sig,
+    chainSeed,
+    chain: firstChain,
+    nextPos: 0,
+    manifestUsed: false,
+    used: new Set(),
+    hits: 0
+  });
+  return { id, key: hex(key), count: chunks.length, order, sig, firstChain };
+}
+function buildFragmentBootstrap(base, session) {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const ident = (p) => {
+    let s = '__QYREX_' + p;
+    for (let i = 0; i < 8; i++) s += alphabet[crypto.randomBytes(1)[0] % alphabet.length];
+    return s;
+  };
+  const V = {
+    base: ident('B'), sid: ident('S'), key: ident('K'), sig: ident('G'), chain: ident('C'),
+    http: ident('H'), manifest: ident('M'), ok: ident('O'), item: ident('I'),
+    parts: ident('P'), idx: ident('X'), pos: ident('R'), body: ident('D'),
+    salt: ident('T'), raw: ident('W'), out: ident('U'), fn: ident('F'), err: ident('E'),
+    guard: ident('Z'), suspicious: ident('Y'), env: ident('V')
+  };
+  const esc = x => String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const api = esc(base), sid = esc(session.id), key = esc(session.key), sig = esc(session.sig), firstChain = esc(session.firstChain);
+  return [
+    'local ' + V.base + '="' + api + '"',
+    'local ' + V.sid + '="' + sid + '"',
+    'local ' + V.key + '="' + key + '"',
+    'local ' + V.sig + '="' + sig + '"',
+    'local ' + V.chain + '="' + firstChain + '"',
+    'local ' + V.http + '=game:HttpGet',
+    'local ' + V.env +' = (getgenv and getgenv()) or _G',
+    'local ' + V.suspicious + '=0',
+    'local __QYREX_NAMES={"getgc","getreg","getconnections","getupvalues","getconstants","getproto","getprotos","getsenv","getscriptbytecode","dumpstring","saveinstance","getloadedmodules"}',
+    'for _,__n in ipairs(__QYREX_NAMES) do if type(' + V.env + '[__n])=="function" then ' + V.suspicious + '=' + V.suspicious + '+1 end end',
+    'if ' + V.suspicious + '>=8 then warn("skidder noob"); return end',
+    'local ' + V.ok + ',' + V.manifest + '=pcall(function() return ' + V.http + '(' + V.base + ' .. "/api/v1/luascripts/fragments/" .. ' + V.sid + ' .. "/manifest?k=" .. ' + V.key + ' .. "&s=" .. ' + V.sig + ' .. "&c=" .. ' + V.chain + '") end)',
+    'if not ' + V.ok + ' or type(' + V.manifest + ')~="string" then return end',
+    'local HttpService=game:GetService("HttpService")',
+    'local ok,manifest=pcall(function() return HttpService:JSONDecode(' + V.manifest + ') end)',
+    'if not ok or type(manifest)~="table" or type(manifest.order)~="table" or type(manifest.chains)~="table" then return end',
+    'local function hx(s) local out={} for i=1,#s,2 do out[#out+1]=string.char(tonumber(s:sub(i,i+1),16) or 0) end return table.concat(out) end',
+    'local function bxor(a,b) local o,p,x,y=0,1,a,b for q=1,8 do local aa,bb=x%2,y%2 if aa~=bb then o=o+p end x=(x-aa)/2 y=(y-bb)/2 p=p*2 end return o end',
+    'local function dec(enc,key,salt) local out={} for i=1,#enc do local A=string.byte(enc,i) or 0 local B=string.byte(key,((i-1)%#key)+1) or 0 local C=string.byte(salt,((i-1)%#salt)+1) or 0 local z=((i-1)*97+29)%256 out[i]=string.char(bxor(bxor(bxor(A,B),C),z)) end return table.concat(out) end',
+    'local function hash16(s) local h=2166136261 for i=1,#s do h=(h+((string.byte(s,i) or 0)*16777619)+i)%4294967296 end return string.format("%08x",h) end',
+    'local parts={}',
+    'for p=1,#manifest.order do',
+    '  local idx=manifest.order[p]',
+    '  local chainToken=' + V.chain,
+    '  if manifest.chains[p] and manifest.chains[p]~=chainToken then return end',
+    '  local ' + V.ok + ',' + V.body + '=pcall(function() return ' + V.http + '(' + V.base + ' .. "/api/v1/luascripts/fragments/" .. ' + V.sid + ' .. "/chunk/" .. tostring(idx) .. "?k=" .. ' + V.key + ' .. "&s=" .. ' + V.sig + ' .. "&p=" .. tostring(p) .. "&c=" .. chainToken) end)',
+    '  if not ' + V.ok + ' or type(' + V.body + ')~="string" then return end',
+    '  local item=HttpService:JSONDecode(' + V.body + ')',
+    '  if item.decoy or type(item.next)~="string" then return end',
+    '  local raw=dec(hx(item.data or ""),hx(' + V.key + '),hx(item.salt or ""))',
+    '  if item.digest and hash16(raw)~=item.digest then warn("Qyrex integrity failure"); return end',
+    '  parts[#parts+1]=raw',
+    '  ' + V.chain + '=item.next',
+    'end',
+    'local ' + V.fn + ',' + V.err +'=(loadstring or load)(table.concat(parts))',
+    'if type(' + V.fn + ')~="function" then return end',
+    'return ' + V.fn + '()'
+  ].join('\n');
+}
+function buildDoubleLinkStub(cacheUrl) {
+  const u=String(cacheUrl).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+  return [
+    'local __QYREX_URL="'+u+'"',
+    'local __QYREX_SRC',
+    'local __QYREX_OK=pcall(function() __QYREX_SRC=game:HttpGet(__QYREX_URL) end)',
+    'if not __QYREX_OK or type(__QYREX_SRC)~="string" or #__QYREX_SRC<8 then return end',
+    'local __QYREX_FN=loadstring(__QYREX_SRC)',
+    'if type(__QYREX_FN)~="function" then return end',
+    'return __QYREX_FN()'
+  ].join('\n');
+}
+
+function publicBase(req) {
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return proto + '://' + host;
+}
+
+function isBrowserReq(req) {
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  const accept = (req.headers['accept'] || '').toLowerCase();
+  if (accept.includes('text/html') && /mozilla|chrome|firefox|safari|edg/i.test(ua) &&
+      !/roblox|executor|synapse|fluxus|solara|wave|delta/i.test(ua)) return true;
+  if (accept.includes('text/html') && accept.includes('application/xhtml')) return true;
+  return false;
+}
+
+const DENY_HTML = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Access Denied</title>
+<style>
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;font-family:system-ui;color:#e4e4ed}
+.card{background:#111118;border:1px solid #1e1e2a;border-radius:20px;padding:40px;max-width:480px}
+.badge{color:#f87171;font-size:12px;font-weight:700;margin-bottom:12px}
+</style></head><body><div class="card"><div class="badge">ACCESS DENIED</div>
+<h1>Protected script</h1>
+<p>This resource cannot be viewed in a browser.</p>
+</div></body></html>`;
+
+async function serveRealScript(req, res, scriptId) {
   const ip = clientIp(req);
-  const ua = req.get('user-agent') || '';
-  if (!rateLimit(`hs:${ip}`, 12, 60_000)) return genericDecoyResponse(res);
-  if (ua.length < 4 || ua.length > 512) return genericDecoyResponse(res);
-  if (!requireJsonBody(req, ['scriptId', 'key'])) return genericDecoyResponse(res);
-  if (!validateAccessKey(req.body.key, req.body.scriptId)) return genericDecoyResponse(res);
-  if (sessions.size >= MAX_SESSIONS) return genericDecoyResponse(res);
+  if (!mongoReady && mongoose.connection.readyState !== 1) {
+    return res.status(503).type('text/plain').send('-- offline');
+  }
+  const sk = 'cache:' + ip + ':' + scriptId;
+  const now = Date.now();
+  if (!global.__rawScriptHits) global.__rawScriptHits = new Map();
+  let se = global.__rawScriptHits.get(sk);
+  if (!se || now - se.t > 60000) se = { n: 0, t: now };
+  se.n++;
+  global.__rawScriptHits.set(sk, se);
+  if (se.n > 30) return res.status(429).type('text/plain').send('-- slow down');
 
-  let script;
-  try { script = ensureScript(req.body.scriptId); } catch { return genericDecoyResponse(res); }
+  const s = await Script.findOne({ id: scriptId });
+  if (!s) return res.status(404).type('text/plain').send('-- not found');
 
-  const { deliveryChunks } = buildProtectedScript(script.source);
-  const sessionKey = crypto.randomBytes(32);
-  const sessionId = randomHex(18);
-  const session = {
-    id: sessionId,
-    createdAt: now(),
-    expiresAt: now() + SESSION_TTL_MS,
-    boundFingerprint: fingerprint(req),
-    key: req.body.key,
-    scriptId: req.body.scriptId,
-    sessionKey,
-    expectedSeq: 0,
-    nextChunkCursor: 0,
-    deliveryChunks,
-    usedChunkRequests: new Set(),
-    destroyed: false,
-  };
-  sessions.set(sessionId, session);
+  s.executions = (s.executions || 0) + 1;
+  await s.save();
+  await Execution.create({
+    scriptId: s.id,
+    scriptName: s.name,
+    ownerId: s.ownerId,
+    ip,
+    userAgent: req.headers['user-agent'] || ''
+  });
+  fireWebhooks(s.ownerId, 'script_exec', { scriptId: s.id, name: s.name, ip: String(ip).split(',')[0] });
 
-  // Session-specific wrapping key for each chunk is derived from this ephemeral secret.
-  // The loader receives the session key encoded as base64url; transport confidentiality is
-  // supplied by HTTPS. The server never exposes its MASTER_SECRET or chain MAC secret.
-  const manifestId = randomHex(12);
-  const manifest = {
-    v: 3,
-    sessionId,
-    scriptId: req.body.scriptId,
-    manifestId,
-    ttlMs: SESSION_TTL_MS,
-    total: deliveryChunks.length,
-    realCount: deliveryChunks.filter(c => c.type === 'real').length,
-    firstChallenge: issueSignedChallenge(session, 0),
-    sessionKey: b64(sessionKey),
-    sourceSha256: sha256(script.source),
-  };
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('X-Qrex-Layer', 'cache');
+  res.setHeader('Referrer-Policy', 'no-referrer');
 
-  securityHeaders(res);
-  res.json(manifest);
+  let payload = s.obfuscated || '';
+  if (s.keyMode === 'key' && s.providerId) {
+    try {
+      const prov = await Provider.findById(s.providerId);
+      const base = publicBase(req);
+      const claimUrl = base + '/getkey/' + s.providerId;
+      const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
+      payload = buildKeyGateLua({
+        apiBase: base,
+        providerName: (prov && prov.name) || s.providerName || 'Qrex',
+        getKeyLink,
+        scriptId: s.id
+      });
+    } catch (e) {
+      console.error('key gate wrap', e);
+    }
+  }
+  try {
+    payload = wrapDeliveredScript(payload, publicBase(req), s.id);
+  } catch (e) {
+    console.error('wrapDeliveredScript', e.message);
+  }
+  res.type('text/plain').send(payload);
+}
+
+app.get('/api/public/script/:id', async (req,res)=>{
+  const s=await Script.findOne({id:req.params.id}).select('id name description keyMode providerName executions createdAt ownerId').lean();
+  if(!s) return res.status(404).json({error:'Script no encontrado'});
+  const owner=await User.findById(s.ownerId).select('username displayName avatar').lean(); const base=publicBase(req);
+  res.json({id:s.id,name:s.name,description:s.description||'',keyMode:s.keyMode||'keyless',providerName:s.providerName||'',executions:s.executions||0,createdAt:s.createdAt,owner:owner?{username:owner.username,displayName:owner.displayName||owner.username,avatar:owner.avatar||''}:null,publicUrl:base+'/script/'+s.id,downloadUrl:base+'/api/v1/luascripts/public/'+s.id+'/download',loadstring:'loadstring(game:HttpGet(\"'+base+'/api/v1/luascripts/public/'+s.id+'/download\"))()'});
+});
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function renderPublicScriptPage(s, owner, base) {
+  const name = escapeHtml(s.name || 'Qyrex Script');
+  const desc = escapeHtml(s.description || 'Script protegido servido por Qyrex.');
+  const ownerName = escapeHtml(owner?.displayName || owner?.username || 'Qyrex');
+  const ownerUser = escapeHtml(owner?.username ? '@' + owner.username : '@qyrex');
+  const avatar = owner?.avatar ? escapeHtml(owner.avatar) : '';
+  const endpoint = base + '/api/v1/luascripts/public/' + encodeURIComponent(s.id) + '/download';
+  const loadstring = 'loadstring(game:HttpGet("' + endpoint + '"))()';
+  const mode = s.keyMode === 'key' ? 'Key System' : 'Keyless';
+  const provider = escapeHtml(s.providerName || 'Qyrex API');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#08080d"><title>${name} · Qyrex</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:#f5f5f7;background:#06070b;font:14px Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body:before{content:"";position:fixed;inset:-20%;pointer-events:none;background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.24),transparent 30%),radial-gradient(circle at 90% 10%,rgba(0,212,255,.12),transparent 25%);filter:blur(12px)}.shell{position:relative;max-width:1120px;margin:auto;padding:28px 20px 60px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:18px}.mark{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#7c5cff,#31d7ff);box-shadow:0 0 35px rgba(124,92,255,.3)}.brand small{display:block;color:#77798a;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.nav a,.btn{border:1px solid #292c39;background:#10121a;color:#f4f5f7;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer}.hero,.panel{border:1px solid #282b38;background:rgba(13,14,20,.9);box-shadow:0 28px 100px rgba(0,0,0,.35)}.hero{border-radius:28px;padding:34px;overflow:hidden;position:relative}.eyebrow{font-size:11px;color:#85889b;letter-spacing:.18em;text-transform:uppercase;font-weight:800}.title{font-size:clamp(40px,7vw,78px);line-height:.98;letter-spacing:-.05em;margin:10px 0 15px;max-width:900px}.desc{color:#a8abba;line-height:1.8;max-width:820px;font-size:15px}.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.badge{border:1px solid #2b2f3d;background:#0d0f15;border-radius:999px;padding:7px 10px;color:#adb2c5;font-size:11px;font-weight:700}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.primary{background:#f4f5f7;color:#08090d;border-color:#fff}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.panel{border-radius:22px;padding:22px}.panel h2{font-size:15px;margin:0 0 5px}.muted{font-size:12px;color:#717489}.loadbox{display:flex;gap:8px;align-items:center;margin-top:14px}.load{min-width:0;flex:1;overflow:auto;padding:14px;border-radius:14px;border:1px solid #282c39;background:#080a0f;color:#a5edcb;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.stat{border:1px solid #272b37;background:#0b0d13;border-radius:15px;padding:14px}.stat span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6e7184}.stat strong{display:block;margin-top:6px;font-size:18px}.owner{display:flex;align-items:center;gap:12px;margin-top:16px}.avatar{width:44px;height:44px;border-radius:14px;overflow:hidden;background:#151821;border:1px solid #292d39;display:grid;place-items:center;font-weight:800}.avatar img{width:100%;height:100%;object-fit:cover}.owner b{display:block;font-size:13px}.owner span{font-size:11px;color:#686b7e}.notice{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid #263b33;background:#0d1210;color:#83d9b3;font-size:11px}.foot{text-align:center;color:#55596c;font-size:11px;margin-top:18px}@media(max-width:820px){.grid{grid-template-columns:1fr}.hero{padding:24px}.loadbox{flex-direction:column;align-items:stretch}.statgrid{grid-template-columns:1fr}.copybtn{width:100%}}
+</style></head><body><main class="shell"><nav class="nav"><div class="brand"><div class="mark">Q</div><div>Qyrex<small>Protected API</small></div></div><a href="/">Dashboard</a></nav><section class="hero"><div class="eyebrow">Public endpoint</div><h1 class="title">${name}</h1><div class="desc">${desc}</div><div class="badges"><span class="badge">${provider}</span><span class="badge">${mode}</span><span class="badge">ID ${escapeHtml(s.id)}</span><span class="badge">● Online</span></div><div class="actions"><button class="btn primary" id="copy">Copiar Loadstring</button><a class="btn" href="${endpoint}">Abrir recurso</a></div></section><section class="grid"><div class="panel"><h2>Loadstring</h2><div class="muted">Esta página es la vista pública del endpoint. El código servido se mantiene fuera de esta interfaz.</div><div class="loadbox"><div class="load">${escapeHtml(loadstring)}</div><button class="btn copybtn" id="copy2">Copiar</button></div><div class="notice">🔒 El enlace de ejecución sigue funcionando por separado para clientes compatibles.</div></div><div class="panel"><h2>Detalles</h2><div class="statgrid"><div class="stat"><span>Ejecuciones</span><strong>${Number(s.executions||0).toLocaleString('en-US')}</strong></div><div class="stat"><span>Modo</span><strong>${mode}</strong></div><div class="stat"><span>Proveedor</span><strong>${provider}</strong></div></div><div class="owner"><div class="avatar">${avatar ? '<img src="'+avatar+'" alt="">' : 'Q'}</div><div><b>${ownerName}</b><span>${ownerUser}</span></div></div></div></section><div class="foot">Qyrex · Página pública del script</div></main><script>const load=${JSON.stringify(loadstring)};async function cp(){try{await navigator.clipboard.writeText(load)}catch{const t=document.createElement('textarea');t.value=load;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}for(const id of ['copy','copy2']){const b=document.getElementById(id);if(b){const old=b.textContent;b.textContent='✓ Copiado';setTimeout(()=>b.textContent=old,1500)}}}document.getElementById('copy').onclick=cp;document.getElementById('copy2').onclick=cp;</script></body></html>`;
+}
+
+app.get('/script/:id', async (req,res)=>{
+  try {
+    const s=await Script.findOne({id:req.params.id}).select('id name description keyMode providerName executions createdAt ownerId').lean();
+    if(!s) return res.status(404).send('<!doctype html><title>Qyrex</title><body style="margin:0;background:#07070c;color:#fff;font:16px system-ui;display:grid;place-items:center;height:100vh">Script no encontrado</body>');
+    const owner=await User.findById(s.ownerId).select('username displayName avatar').lean();
+    res.type('html').send(renderPublicScriptPage(s, owner, publicBase(req)));
+  } catch { res.status(500).send('Qyrex error'); }
 });
 
-// Sequential chunk endpoint. A valid server-signed challenge is consumed once and advances the chain.
-app.post('/api/v3/chunk', (req, res) => {
+app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luascripts/public/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
   const ip = clientIp(req);
-  if (!rateLimit(`chunk:${ip}`, 300, 60_000)) return genericDecoyResponse(res);
-  if (!requireJsonBody(req, ['sessionId', 'challenge'])) return genericDecoyResponse(res);
+  const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer1');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
+  if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
 
-  const parsed = parseChainToken(req.body.challenge);
-  if (!parsed) return genericDecoyResponse(res);
-  const session = sessions.get(parsed.sessionId);
-  if (!session || session.destroyed || session.expiresAt <= now()) return genericDecoyResponse(res);
-  if (session.boundFingerprint !== fingerprint(req)) {
-    punishSession(session, 'fingerprint_mismatch');
-    return genericDecoyResponse(res);
-  }
-  if (parsed.seq !== session.expectedSeq) {
-    punishSession(session, 'out_of_order');
-    return genericDecoyResponse(res);
-  }
-  const requestKey = `${parsed.seq}:${parsed.nonce}`;
-  if (session.usedChunkRequests.has(requestKey)) {
-    punishSession(session, 'duplicate');
-    return genericDecoyResponse(res);
-  }
-  session.usedChunkRequests.add(requestKey);
-
-  const chunk = session.deliveryChunks[session.nextChunkCursor];
-  if (!chunk) {
-    session.expectedSeq += 1;
-    const finalChallenge = issueSignedChallenge(session, session.expectedSeq);
-    const mac = hmac(`${session.id}|complete|${sha256(session.scriptId)}`);
-    sessions.delete(session.id);
-    securityHeaders(res);
-    return res.json({ done: true, challenge: finalChallenge, mac });
+  if (isScraperUa(ua) && !/roblox/i.test(ua)) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'public');
+    return res.type('text/plain').send(decoyLua());
   }
 
-  const aad = Buffer.from(`${session.id}|${session.nextChunkCursor}|${chunk.type}|${chunk.index}`, 'utf8');
-  const salt = crypto.randomBytes(16);
-  const chunkKey = deriveChunkKey(session.sessionKey, salt);
-  const encrypted = aesEncrypt(chunk.data, chunkKey, aad);
-  const transportMask = crypto.createHash('sha256').update(session.sessionKey).update(salt).digest();
-  const maskedCipher = xorBuffer(encrypted.ciphertext, transportMask);
+  if (!mongoReady && mongoose.connection.readyState !== 1) {
+    return res.status(503).type('text/plain').send('-- offline');
+  }
 
-  const response = {
-    done: false,
-    cursor: session.nextChunkCursor,
-    type: chunk.type,
-    index: chunk.index,
-    salt: b64(salt),
-    iv: b64(encrypted.iv),
-    tag: b64(encrypted.tag),
-    aad: b64(aad),
-    ciphertext: b64(maskedCipher),
-    ciphertextSha256: sha256(maskedCipher),
-    sha256: sha256(chunk.data),
-    challenge: issueSignedChallenge(session, session.expectedSeq + 1),
-  };
+  const s = await Script.findOne({ id: req.params.id }).select('id');
+  if (!s) return res.status(404).type('text/plain').send('-- not found');
 
-  session.nextChunkCursor += 1;
-  session.expectedSeq += 1;
-  if (session.usedChunkRequests.size > session.deliveryChunks.length + 5) punishSession(session, 'too_many_requests');
+  const token = issueScriptToken(s.id, ip, ua);
+  const base = publicBase(req);
+  const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
 
-  securityHeaders(res);
-  res.json(response);
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('X-Qrex-Layer', 'public');
+  res.type('text/plain').send(buildDoubleLinkStub(cacheUrl));
 });
 
-// Public fallback endpoint intentionally returns decoy only. Do not expose a direct source route.
-app.get('/api/v3/public/:scriptId', (req, res) => genericDecoyResponse(res));
-app.get('/api/v3/cache/public/:scriptId/download', (req, res) => genericDecoyResponse(res));
+app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api/raw/cache/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
+  const ip = clientIp(req);
+  const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer2');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
+  if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
 
+  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
+  const ok = consumeScriptToken(req.params.id, token, ip, ua);
+  if (!ok) {
+    if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'cache');
+    return res.status(403).type('text/plain').send(decoyLua());
+  }
+  const s = await Script.findOne({ id: req.params.id });
+  if (!s) return res.status(404).type('text/plain').send('-- not found');
+  if (!s.obfuscated && s.keyMode !== 'key') return res.status(404).type('text/plain').send('-- empty');
+  s.executions = (s.executions || 0) + 1;
+  await s.save();
+  try {
+    await Execution.create({scriptId:s.id,scriptName:s.name,ownerId:s.ownerId,ip,userAgent:ua});
+    fireWebhooks(s.ownerId, 'script_exec', {scriptId:s.id,name:s.name,ip:String(ip).split(',')[0]});
+  } catch {}
+  let payload = s.obfuscated || '';
+  if (s.keyMode === 'key' && s.providerId) {
+    try {
+      const prov = await Provider.findById(s.providerId);
+      const base = publicBase(req);
+      const claimUrl = base + '/getkey/' + s.providerId;
+      const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
+      payload = buildKeyGateLua({ apiBase: base, providerName: (prov && prov.name) || s.providerName || 'Qrex', getKeyLink, scriptId: s.id });
+    } catch (e) { console.error('key gate wrap', e); }
+  }
+  try { payload = wrapDeliveredScript(payload, publicBase(req), s.id); } catch (e) { console.error('wrapDeliveredScript', e.message); }
+  const sess = makeFragmentSession(s.id, payload, ip, ua);
+  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
+  res.setHeader('X-Qrex-Layer','fragment');
+  return res.type('text/plain').send(buildFragmentBootstrap(publicBase(req), sess));
+});
+
+
+app.get('/api/v1/luascripts/fragments/:sid/manifest', async (req,res)=>{
+  const sid=String(req.params.sid||''); const rec=fragmentSessions.get(sid);
+  if(!rec || Date.now()>rec.exp) return res.status(403).json({error:'expired'});
+  const ip=clientIp(req), ua=req.headers['user-agent']||'';
+  if(deliveryFingerprint(ip,ua)!==rec.fp) return res.status(403).json({error:'fingerprint'});
+  if(String(req.query.k||'')!==rec.key || !safeEq(String(req.query.s||''),rec.sig)) return res.status(403).json({error:'signature'});
+  if(rec.manifestUsed) return res.status(410).json({error:'manifest_used'});
+  if(!safeEq(String(req.query.c||''), rec.chain)) return res.status(403).json({error:'chain'});
+  const expected=crypto.createHmac('sha256',JWT_SECRET).update(rec.scriptId+'.'+sid+'.'+rec.fp+'.'+JSON.stringify(rec.order)+'.'+rec.chainSeed).digest('hex').slice(0,48);
+  if(!safeEq(expected,rec.sig)) return res.status(403).json({error:'integrity'});
+  rec.manifestUsed=true;
+  const chains=[];
+  let next=rec.chain;
+  for(let p=0;p<rec.order.length;p++){
+    chains.push(next);
+    next=crypto.createHmac('sha256',JWT_SECRET).update(rec.id+'.step.'+(p+1)+'.'+next).digest('hex').slice(0,48);
+  }
+  rec.nextChain=next;
+  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
+  res.setHeader('Pragma','no-cache');
+  res.setHeader('X-Content-Type-Options','nosniff');
+  res.json({count:rec.chunks.length,order:rec.order,chains,expiresAt:rec.exp,session:sid});
+});
+
+app.get('/api/v1/luascripts/fragments/:sid/chunk/:idx', async (req,res)=>{
+  const sid=String(req.params.sid||''); const rec=fragmentSessions.get(sid);
+  if(!rec || Date.now()>rec.exp) return res.status(403).json({error:'expired'});
+  const ip=clientIp(req), ua=req.headers['user-agent']||'';
+  if(deliveryFingerprint(ip,ua)!==rec.fp) return res.status(403).json({error:'fingerprint'});
+  if(String(req.query.k||'')!==rec.key || !safeEq(String(req.query.s||''),rec.sig)) return res.status(403).json({error:'signature'});
+  const idx=Number(req.params.idx); const pos=Number(req.query.p);
+  if(!Number.isInteger(idx)||idx<0||idx>=rec.chunks.length) return res.status(404).json({error:'chunk'});
+  if(!Number.isInteger(pos)||pos<1||pos>rec.order.length) return res.status(400).json({error:'position'});
+  if(pos!==rec.nextPos+1 || rec.order[pos-1]!==idx) return res.status(409).json({error:'sequence'});
+  const suppliedChain=String(req.query.c||'');
+  if(!safeEq(suppliedChain,rec.chain)) return res.status(403).json({error:'chain'});
+  if(rec.hits>=rec.order.length) return res.status(429).json({error:'complete'});
+  const chunk=rec.chunks[idx];
+  if(!chunk || !chunk.real) return res.status(404).json({error:'chunk'});
+  if(rec.used.has(idx)) return res.status(410).json({error:'used'});
+  rec.used.add(idx); rec.hits++;
+  rec.nextPos=pos;
+  rec.chain=crypto.createHmac('sha256',JWT_SECRET).update(rec.id+'.step.'+pos+'.'+suppliedChain).digest('hex').slice(0,48);
+  res.setHeader('Cache-Control','no-store,no-cache,must-revalidate,private');
+  res.setHeader('Pragma','no-cache');
+  res.setHeader('X-Content-Type-Options','nosniff');
+  res.setHeader('X-Qrex-Fragment',String(pos)+'/'+String(rec.order.length));
+  res.json({data:chunk.data,salt:chunk.salt,digest:chunk.digest,next:rec.chain});
+  if(rec.hits>=rec.order.length) setTimeout(()=>fragmentSessions.delete(sid),250);
+});
+
+// ========== VIP REDEEM ==========
+app.post('/api/vip/redeem', auth, needMongo, async (req, res) => {
+  try {
+    const code = String((req.body || {}).code || '').trim().toUpperCase();
+    if (!code || code.length < 6) return res.status(400).json({ error: 'Codigo invalido' });
+
+    const vip = await VipCode.findOne({ code });
+    if (!vip) return res.status(404).json({ error: 'Codigo no existe' });
+    if (vip.used) return res.status(400).json({ error: 'Codigo ya canjeado' });
+
+    const user = await User.findById(req.user.sub);
+    if (!user) return res.status(401).json({ error: 'Usuario no encontrado' });
+
+    const now = new Date();
+    const COOLDOWN_MS = 5 * 60 * 60 * 1000; // 5 horas
+    if (user.lastVipRedeemAt) {
+      const elapsed = now - new Date(user.lastVipRedeemAt);
+      if (elapsed < COOLDOWN_MS) {
+        const left = COOLDOWN_MS - elapsed;
+        const hours = Math.floor(left / 3600000);
+        const mins = Math.ceil((left % 3600000) / 60000);
+        const wait = hours > 0 ? (hours + 'h ' + mins + 'm') : (mins + ' min');
+        return res.status(429).json({
+          error: 'Cooldownoldown activo. Puedes canjear otra key en ' + wait,
+          retryAfterMs: left,
+          retryAfterHours: Math.ceil(left / 3600000)
+        });
+      }
+    }
+
+    const days = Math.max(1, Number(vip.days) || 10);
+    let base = now;
+    if (user.premium && user.premiumUntil && new Date(user.premiumUntil) > now) {
+      base = new Date(user.premiumUntil);
+    }
+    const until = new Date(base);
+    until.setDate(until.getDate() + days);
+
+    user.premium = true;
+    user.premiumUntil = until;
+    user.lastVipRedeemAt = now;
+    await user.save();
+
+    vip.used = true;
+    vip.usedBy = user.username;
+    vip.usedAt = now;
+    await vip.save();
+
+    res.json({
+      success: true,
+      premium: true,
+      premiumUntil: until,
+      days,
+      nextRedeemAt: new Date(now.getTime() + COOLDOWN_MS),
+      message: 'VIP activado por ' + days + ' dias. Proximo canje en 5 horas.'
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.get('/api/vip/status', auth, needMongo, async (req, res) => {
+  const user = await User.findById(req.user.sub).lean();
+  if (!user) return res.status(401).json({ error: 'No auth' });
+  res.json({
+    premium: isPremiumUser(user),
+    premiumUntil: user.premiumUntil || null,
+    role: user.role
+  });
+});
+
+app.post('/api/admin/vip-keys', auth, needMongo, requireAdmin, async (req, res) => {
+  try {
+    const amount = Math.min(100, Math.max(1, Number((req.body || {}).amount) || 10));
+    const days = Math.max(1, Number((req.body || {}).days) || 10);
+    const note = String((req.body || {}).note || '').slice(0, 80);
+    const created = [];
+    for (let i = 0; i < amount; i++) {
+      const code = ('QYREX-VIP-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(3).toString('hex')).toUpperCase();
+      const doc = await VipCode.create({
+        code,
+        days,
+        note,
+        createdBy: req.user.username || req.user.sub
+      });
+      created.push({ code: doc.code, days: doc.days });
+    }
+    res.json({ keys: created });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.get('/api/admin/vip-keys', auth, needMongo, requireAdmin, async (req, res) => {
+  const list = await VipCode.find().sort({ createdAt: -1 }).limit(200).lean();
+  res.json(list);
+});
+
+
+app.get('/api/stats', auth, needMongo, async (req, res) => {
+  const scripts = await Script.find({ ownerId: req.user.sub });
+  const totalExec = scripts.reduce((a, s) => a + (s.executions || 0), 0);
+  res.json({ scripts: scripts.length, executions: totalExec });
+});
+
+app.get('/api/executions', auth, needMongo, async (req, res) => {
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  const query = Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 });
+  const logs = Number.isFinite(lim.logs) ? await query.limit(lim.logs) : await query;
+  res.json(logs);
+});
+
+app.post('/api/exec-ping', rawBurstLimiter, async (req, res) => {
+  try {
+    const ip = clientIp(req);
+    const { scriptId, username, userId, hwid, executor, placeId } = req.body || {};
+    if (!scriptId) return res.status(400).json({ error: 'scriptId required' });
+
+    if (hwid && mongoose.connection.readyState === 1) {
+      const banned = await BlacklistHWID.findOne({ hwid: String(hwid) }).lean();
+      if (banned) return res.status(403).json({ error: 'HWID banned', reason: banned.reason || '' });
+    }
+
+    if (!mongoReady && mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'offline' });
+    }
+
+    const script = await Script.findOne({ id: String(scriptId) });
+    if (!script) return res.status(404).json({ error: 'script not found' });
+
+    const since = new Date(Date.now() - 2 * 60 * 1000);
+    let log = await Execution.findOne({
+      scriptId: script.id,
+      ip,
+      createdAt: { $gte: since }
+    }).sort({ createdAt: -1 });
+
+    if (log) {
+      log.username = String(username || log.username || '').slice(0, 40);
+      log.userId = String(userId || log.userId || '').slice(0, 24);
+      log.hwid = String(hwid || log.hwid || '').slice(0, 128);
+      log.executor = String(executor || log.executor || '').slice(0, 64);
+      log.placeId = String(placeId || log.placeId || '').slice(0, 24);
+      await log.save();
+    } else {
+      await Execution.create({
+        scriptId: script.id,
+        scriptName: script.name,
+        ownerId: script.ownerId,
+        ip,
+        userAgent: req.headers['user-agent'] || '',
+        username: String(username || '').slice(0, 40),
+        userId: String(userId || '').slice(0, 24),
+        hwid: String(hwid || '').slice(0, 128),
+        executor: String(executor || '').slice(0, 64),
+        placeId: String(placeId || '').slice(0, 24)
+      });
+    }
+
+    fireWebhooks(script.ownerId, 'script_exec', {
+      scriptId: script.id,
+      name: script.name,
+      username,
+      executor,
+      ip: String(ip).split(',')[0]
+    });
+
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'error' });
+  }
+});
+
+app.post('/api/ban/ip', auth, needMongo, async (req, res) => {
+  try {
+    const ip = String((req.body || {}).ip || '').trim();
+    const reason = String((req.body || {}).reason || 'Banned from Logs').slice(0, 200);
+    if (!ip) return res.status(400).json({ error: 'IP required' });
+    await BlacklistIP.findOneAndUpdate(
+      { ip },
+      { ip, reason, createdBy: req.user.username || req.user.sub },
+      { upsert: true }
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/ban/hwid', auth, needMongo, async (req, res) => {
+  try {
+    const hwid = String((req.body || {}).hwid || '').trim();
+    const reason = String((req.body || {}).reason || 'HWID banned from Logs').slice(0, 200);
+    if (!hwid) return res.status(400).json({ error: 'HWID required' });
+    await BlacklistHWID.findOneAndUpdate(
+      { hwid },
+      { hwid, reason, ownerId: req.user.sub, createdBy: req.user.username || req.user.sub },
+      { upsert: true }
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/logs', auth, needMongo, async (req, res) => {
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  const query = Execution.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).lean();
+  const logs = Number.isFinite(lim.logs) ? await query.limit(lim.logs) : await query;
+  res.json(logs);
+});
+
+
+
+// ========== HUB PÚBLICO ==========
+const HUB_MIN_EXECS = 500;
+
+app.get('/api/hub', async (req, res) => {
+  try {
+    if (!mongoReady && mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'DB offline' });
+    }
+    const list = await HubScript.find().sort({ createdAt: -1 }).limit(200).lean();
+    res.json(list);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.post('/api/hub', auth, needMongo, async (req, res) => {
+  try {
+    const { scriptId, name, description } = req.body || {};
+    if (!scriptId) return res.status(400).json({ error: 'Selecciona un script' });
+
+    const s = await Script.findOne({ id: scriptId, ownerId: req.user.sub });
+    if (!s) return res.status(404).json({ error: 'Script no encontrado o no es tuyo' });
+
+    const me = await User.findById(req.user.sub);
+    const premium = isPremiumUser(me);
+    if (!premium && (s.executions || 0) < HUB_MIN_EXECS) {
+      return res.status(400).json({
+        error: `Necesitas al menos ${HUB_MIN_EXECS} ejecuciones (o Premium). Tu script tiene ${s.executions || 0}.`
+      });
+    }
+
+    const exists = await HubScript.findOne({ scriptId: s.id });
+    if (exists) return res.status(400).json({ error: 'Este script ya está en el hub' });
+
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const loadstring = `loadstring(game:HttpGet("${proto}://${host}/api/v1/luascripts/public/${s.id}/download"))()`;
+
+    const user = await User.findById(req.user.sub).lean();
+    const doc = await HubScript.create({
+      name: (name || s.name || 'Script').trim().slice(0, 80),
+      description: (description || s.description || '').trim().slice(0, 200),
+      loadstring,
+      scriptId: s.id,
+      ownerId: req.user.sub,
+      ownerUsername: (user && user.username) || req.user.username || 'user',
+      executionsAtPublish: s.executions || 0
+    });
+
+    res.json({
+      id: doc._id,
+      name: doc.name,
+      loadstring: doc.loadstring,
+      ownerUsername: doc.ownerUsername
+    });
+  } catch (e) {
+    console.error('hub publish', e);
+    res.status(500).json({ error: e.message || 'Error al publicar' });
+  }
+});
+
+app.post('/api/hub/:id/view', async (req, res) => {
+  try {
+    await HubScript.updateOne({ _id: req.params.id }, { $inc: { views: 1 } });
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+});
+
+app.delete('/api/hub/:id', auth, needMongo, async (req, res) => {
+  const doc = await HubScript.findById(req.params.id);
+  if (!doc) return res.status(404).json({ error: 'No encontrado' });
+  if (doc.ownerId !== req.user.sub) return res.status(403).json({ error: 'No es tuyo' });
+  await HubScript.deleteOne({ _id: req.params.id });
+  res.json({ success: true });
+});
+
+
+// ========== ADMIN ==========
+app.get('/api/admin/users', auth, needMongo, requireAdmin, async (req, res) => {
+  const users = await User.find().select('-passwordHash').sort({ createdAt: -1 }).limit(200).lean();
+  res.json(users.map(u => ({
+    id: u._id,
+    username: u.username,
+    role: u.role || 'user',
+    premium: isPremiumUser(u),
+    premiumUntil: u.premiumUntil,
+    createdAt: u.createdAt
+  })));
+});
+
+app.post('/api/admin/reset-password', auth, needMongo, requireAdmin, async (req, res) => {
+  try {
+    const { username, newPassword, adminCode } = req.body || {};
+    // This endpoint intentionally resets credentials; original passwords are never recoverable or exposed.
+    const requiredCode = process.env.ADMIN_ACTION_CODE || '123';
+    if (String(adminCode || '') !== requiredCode) return res.status(403).json({ error: 'Código de administrador incorrecto' });
+    const user = String(username || '').trim().toLowerCase();
+    if (!user) return res.status(400).json({ error: 'Usuario requerido' });
+    if (typeof newPassword !== 'string' || newPassword.length < 8 || newPassword.length > 128) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener entre 8 y 128 caracteres' });
+    }
+    const u = await User.findOne({ username: user });
+    if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
+    u.passwordHash = hashPassword(newPassword);
+    await u.save();
+    res.json({ ok: true, username: u.username, message: 'Contraseña restablecida correctamente' });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo restablecer la contraseña' });
+  }
+});
+
+app.post('/api/admin/premium', auth, needMongo, requireAdmin, async (req, res) => {
+  try {
+    const { username, premium, days } = req.body || {};
+    const u = await User.findOne({ username: (username || '').trim().toLowerCase() });
+    if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (u.username === 'owner') return res.status(400).json({ error: 'OWNER siempre es admin/premium' });
+    u.premium = !!premium;
+    if (premium && days) {
+      const d = new Date();
+      d.setDate(d.getDate() + Number(days));
+      u.premiumUntil = d;
+    } else if (!premium) {
+      u.premiumUntil = null;
+    }
+    await u.save();
+    res.json({ ok: true, username: u.username, premium: isPremiumUser(u), premiumUntil: u.premiumUntil });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.get('/api/admin/scripts', auth, needMongo, requireAdmin, async (req, res) => {
+  const list = await Script.find().sort({ createdAt: -1 }).limit(300).select('-source -obfuscated').lean();
+  res.json(list);
+});
+
+app.delete('/api/admin/scripts/:id', auth, needMongo, requireAdmin, async (req, res) => {
+  await Script.deleteOne({ id: req.params.id });
+  await HubScript.deleteMany({ scriptId: req.params.id });
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/hub/:id', auth, needMongo, requireAdmin, async (req, res) => {
+  await HubScript.deleteOne({ _id: req.params.id });
+  res.json({ success: true });
+});
+
+app.get('/api/admin/stats', auth, needMongo, requireAdmin, async (req, res) => {
+  const users = await User.countDocuments();
+  const scripts = await Script.countDocuments();
+  const hub = await HubScript.countDocuments();
+  const premium = await User.countDocuments({ premium: true });
+  res.json({ users, scripts, hub, premium });
+});
+
+
+// ========== KEY SYSTEM ==========
+app.get('/api/providers', auth, needMongo, async (req, res) => {
+  const list = await Provider.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).lean();
+  res.json(list);
+});
+
+app.post('/api/providers', auth, needMongo, async (req, res) => {
+  try {
+    const { name, keyValidityHours, hwidLimit, linkType, adLink } = req.body || {};
+    const n = (name || '').trim();
+    if (!n || n.length < 2) return res.status(400).json({ error: 'Nombre requerido' });
+    const me = await User.findById(req.user.sub);
+    const lim = featureLimits(me);
+    const providerCount = await Provider.countDocuments({ ownerId: req.user.sub });
+    if (Number.isFinite(lim.providers) && providerCount >= lim.providers) {
+      return res.status(403).json({ error: `Límite de ${lim.providers} providers en FREE. Activa VIP para ilimitados.` });
+    }
+    const exists = await Provider.findOne({ ownerId: req.user.sub, name: n });
+    if (exists) return res.status(400).json({ error: 'Ya tienes un provider con ese nombre' });
+    const lt = ['linkvertise','lootlabs','workink','custom','none'].includes(linkType) ? linkType : 'custom';
+    const requestedHours = Math.max(1, Number(keyValidityHours) || 24);
+    const requestedHwid = Math.max(1, Math.min(10, Number(hwidLimit) || 1));
+    const doc = await Provider.create({
+      name: n,
+      ownerId: req.user.sub,
+      keyValidityHours: Math.min(requestedHours, lim.maxKeyHours),
+      hwidLimit: Math.min(requestedHwid, lim.maxHwid),
+      linkType: lt,
+      adLink: String(adLink || '').trim().slice(0, 500)
+    });
+    res.json(doc);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.put('/api/providers/:id', auth, needMongo, async (req, res) => {
+  const p = await Provider.findOne({ _id: req.params.id, ownerId: req.user.sub });
+  if (!p) return res.status(404).json({ error: 'No encontrado' });
+  const { name, keyValidityHours, hwidLimit, enabled, linkType, adLink } = req.body || {};
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  if (name) p.name = name.trim();
+  if (keyValidityHours !== undefined) p.keyValidityHours = Math.min(Math.max(1, Number(keyValidityHours) || 24), lim.maxKeyHours);
+  if (hwidLimit !== undefined) p.hwidLimit = Math.min(Math.max(1, Math.min(10, Number(hwidLimit) || 1)), lim.maxHwid);
+  if (enabled !== undefined) p.enabled = !!enabled;
+  if (linkType && ['linkvertise','lootlabs','workink','custom','none'].includes(linkType)) p.linkType = linkType;
+  if (adLink !== undefined) p.adLink = String(adLink || '').trim().slice(0, 500);
+  await p.save();
+  res.json(p);
+});
+
+app.delete('/api/providers/:id', auth, needMongo, async (req, res) => {
+  const p = await Provider.findOne({ _id: req.params.id, ownerId: req.user.sub });
+  if (!p) return res.status(404).json({ error: 'No encontrado' });
+  await LicenseKey.deleteMany({ providerId: String(p._id), ownerId: req.user.sub });
+  await Provider.deleteOne({ _id: p._id });
+  res.json({ success: true });
+});
+
+
+// ========== KEY GATE (GUI) + CLAIM (Linkvertise/Lootlabs/Work.ink) ==========
+function buildKeyGateLua({ apiBase, providerName, getKeyLink, scriptId }) {
+  const api = String(apiBase || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const prov = String(providerName || 'Qrex').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const link = String(getKeyLink || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `-- QrexApi Key System
+-- Protected by QyrexObf · #
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
+
+local _API = "${api}"
+local _PROVIDER = "${prov}"
+local _GETKEY = "${link}"
+local _SCRIPT_ID = "${String(scriptId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"
+
+local function GetGuiParent()
+  local hOk, hui = pcall(function() return gethui() end)
+  if hOk and hui then return hui end
+  local cOk = pcall(function() return CoreGui.Name end)
+  if cOk then return CoreGui end
+  local plr = Players.LocalPlayer
+  if plr then
+    local pg = plr:FindFirstChildOfClass("PlayerGui")
+    if pg then return pg end
+  end
+  return CoreGui
+end
+
+local function getHwid()
+  local ok, id = pcall(function()
+    return game:GetService("RbxAnalyticsService"):GetClientId()
+  end)
+  if ok and id then return tostring(id) end
+  local ok2, id2 = pcall(function() return game.JobId end)
+  local uid = (Players.LocalPlayer and Players.LocalPlayer.UserId) or 0
+  return tostring(uid) .. "-" .. tostring(ok2 and id2 or "0")
+end
+
+local function httpRequest(opts)
+  local fn = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
+  if type(fn) == "function" then return fn(opts) end
+  error("No request function")
+end
+
+local QyrexAPI = {}
+function QyrexAPI.GetKeyLink()
+  return _GETKEY
+end
+function QyrexAPI.VerifyKey(key)
+  key = tostring(key or ""):gsub("%s+", "")
+  if key == "" then return false, nil end
+  local body = HttpService:JSONEncode({ key = key, hwid = getHwid(), provider = _PROVIDER, scriptId = _SCRIPT_ID })
+  local ok, res = pcall(function()
+    return httpRequest({
+      Url = _API .. "/api/keys/verify",
+      Method = "POST",
+      Headers = { ["Content-Type"] = "application/json" },
+      Body = body
+    })
+  end)
+  if not ok or not res or not res.Body then return false, nil end
+  local ok2, data = pcall(function() return HttpService:JSONDecode(res.Body) end)
+  if not ok2 or not data or data.success ~= true then return false, nil end
+  return true, data.scriptToken
+end
+
+local cfg = {
+  title = "QyrexApi",
+  keyFile = "QyrexApi_Key.txt",
+  accentA = Color3.fromRGB(168, 85, 247),
+  accentB = Color3.fromRGB(236, 72, 199),
+  accentC = Color3.fromRGB(96, 200, 255),
+}
+
+local function saveKey(key)
+  if writefile then pcall(writefile, cfg.keyFile, key) end
+end
+local function loadKey()
+  if isfile and isfile(cfg.keyFile) then
+    local ok, data = pcall(readfile, cfg.keyFile)
+    if ok and data then return tostring(data) end
+  end
+  return ""
+end
+
+local function notify(kind, title, content)
+  local colors = { Info = Color3.fromRGB(96,165,250), Success = Color3.fromRGB(52,211,153), Error = Color3.fromRGB(248,113,113) }
+  local accent = colors[kind] or colors.Info
+  local sg = Instance.new("ScreenGui")
+  sg.Name = "QyrexApi_Notif"
+  sg.ResetOnSpawn = false
+  sg.DisplayOrder = 999999
+  sg.Parent = GetGuiParent()
+  local f = Instance.new("Frame")
+  f.Size = UDim2.fromOffset(280, 58)
+  f.Position = UDim2.new(1, -16, 1, -16)
+  f.AnchorPoint = Vector2.new(1, 1)
+  f.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
+  f.Parent = sg
+  local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 10); c.Parent = f
+  local st = Instance.new("UIStroke"); st.Color = accent; st.Thickness = 1.2; st.Parent = f
+  local t = Instance.new("TextLabel")
+  t.BackgroundTransparency = 1
+  t.Position = UDim2.fromOffset(12, 8)
+  t.Size = UDim2.new(1, -24, 0, 18)
+  t.Font = Enum.Font.GothamBold
+  t.TextSize = 13
+  t.TextXAlignment = Enum.TextXAlignment.Left
+  t.TextColor3 = Color3.fromRGB(240,240,245)
+  t.Text = title
+  t.Parent = f
+  local d = Instance.new("TextLabel")
+  d.BackgroundTransparency = 1
+  d.Position = UDim2.fromOffset(12, 28)
+  d.Size = UDim2.new(1, -24, 0, 22)
+  d.Font = Enum.Font.Gotham
+  d.TextSize = 11
+  d.TextXAlignment = Enum.TextXAlignment.Left
+  d.TextColor3 = Color3.fromRGB(170,168,182)
+  d.Text = content
+  d.Parent = f
+  task.delay(3, function() if sg then sg:Destroy() end end)
+end
+
+local function runScriptFromToken(token)
+  if type(token) ~= "string" or token == "" then
+    warn("[QyrexApi] missing delivery token")
+    return false
+  end
+  local url = _API .. "/api/v1/luascripts/cache/public/" .. _SCRIPT_ID .. "/download?t=" .. HttpService:UrlEncode(token)
+  local okFetch, src = pcall(function() return game:HttpGet(url) end)
+  if not okFetch or type(src) ~= "string" or #src < 8 then
+    warn("[QyrexApi] protected delivery failed")
+    return false
+  end
+  local fn, err = loadstring(src)
+  if type(fn) ~= "function" then
+    warn("[QyrexApi] protected compile failed:", err)
+    return false
+  end
+  local okRun, runErr = pcall(fn)
+  if not okRun then warn("[QyrexApi] script error:", runErr) end
+  return okRun
+end
+
+-- auto verify saved key
+do
+  local saved = loadKey()
+  if saved ~= "" then
+    local valid, token = QyrexAPI.VerifyKey(saved)
+    if valid and token then
+      notify("Success", "Welcome", "Key valida · cargando script")
+      task.wait(0.2)
+      runScriptFromToken(token)
+      return
+    end
+  end
+end
+
+local Screen = Instance.new("ScreenGui")
+Screen.Name = "QyrexApi_KeySystem"
+Screen.ResetOnSpawn = false
+Screen.IgnoreGuiInset = true
+Screen.Parent = GetGuiParent()
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromOffset(380, 340)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(6, 5, 10)
+Main.BackgroundTransparency = 0.05
+Main.Parent = Screen
+local mc = Instance.new("UICorner"); mc.CornerRadius = UDim.new(0, 20); mc.Parent = Main
+local ms = Instance.new("UIStroke"); ms.Thickness = 1.4; ms.Color = cfg.accentA; ms.Parent = Main
+
+local Titlebar = Instance.new("Frame")
+Titlebar.Size = UDim2.new(1, 0, 0, 36)
+Titlebar.BackgroundColor3 = Color3.fromRGB(11, 9, 17)
+Titlebar.BackgroundTransparency = 0.35
+Titlebar.Parent = Main
+local Title = Instance.new("TextLabel")
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.fromOffset(14, 0)
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextColor3 = Color3.fromRGB(205, 200, 218)
+Title.Text = "QyrexApi KeySystem"
+Title.Parent = Titlebar
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.fromOffset(24, 24)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -12)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(18, 14, 28)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(200, 190, 210)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.Parent = Titlebar
+local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(1, 0); cc.Parent = CloseBtn
+CloseBtn.MouseButton1Click:Connect(function() Screen:Destroy() end)
+
+local Head = Instance.new("TextLabel")
+Head.BackgroundTransparency = 1
+Head.Position = UDim2.fromOffset(16, 150)
+Head.Size = UDim2.new(1, -32, 0, 22)
+Head.Font = Enum.Font.GothamBold
+Head.TextSize = 16
+Head.TextColor3 = Color3.fromRGB(244, 242, 250)
+Head.Text = "Verificacion de acceso"
+Head.Parent = Main
+
+local Sub = Instance.new("TextLabel")
+Sub.BackgroundTransparency = 1
+Sub.Position = UDim2.fromOffset(16, 172)
+Sub.Size = UDim2.new(1, -32, 0, 16)
+Sub.Font = Enum.Font.Gotham
+Sub.TextSize = 12
+Sub.TextColor3 = Color3.fromRGB(150, 145, 165)
+Sub.Text = "Ingresa tu key para continuar"
+Sub.Parent = Main
+
+local InputFrame = Instance.new("Frame")
+InputFrame.Size = UDim2.new(1, -32, 0, 44)
+InputFrame.Position = UDim2.fromOffset(16, 200)
+InputFrame.BackgroundColor3 = Color3.fromRGB(3, 2, 6)
+InputFrame.Parent = Main
+local ic = Instance.new("UICorner"); ic.CornerRadius = UDim.new(0, 10); ic.Parent = InputFrame
+local ist = Instance.new("UIStroke"); ist.Color = cfg.accentA; ist.Thickness = 1.2; ist.Parent = InputFrame
+
+local KeyBox = Instance.new("TextBox")
+KeyBox.Size = UDim2.new(1, -20, 1, 0)
+KeyBox.Position = UDim2.fromOffset(12, 0)
+KeyBox.BackgroundTransparency = 1
+KeyBox.Text = loadKey()
+KeyBox.PlaceholderText = "00000000-0000-0000-0000-000000000000"
+KeyBox.PlaceholderColor3 = Color3.fromRGB(100, 96, 118)
+KeyBox.TextColor3 = Color3.fromRGB(232, 228, 244)
+KeyBox.TextSize = 13
+KeyBox.Font = Enum.Font.Code
+KeyBox.TextXAlignment = Enum.TextXAlignment.Left
+KeyBox.ClearTextOnFocus = false
+KeyBox.Parent = InputFrame
+
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Size = UDim2.new(0.42, -5, 0, 42)
+GetKeyBtn.Position = UDim2.fromOffset(16, 254)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(16, 13, 24)
+GetKeyBtn.Text = "Get Key"
+GetKeyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+GetKeyBtn.Font = Enum.Font.GothamBold
+GetKeyBtn.TextSize = 13
+GetKeyBtn.Parent = Main
+local gk = Instance.new("UICorner"); gk.CornerRadius = UDim.new(0, 10); gk.Parent = GetKeyBtn
+local gks = Instance.new("UIStroke"); gks.Color = cfg.accentC; gks.Parent = GetKeyBtn
+
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0.58, -5, 0, 42)
+VerifyBtn.Position = UDim2.new(0.42, 21, 0, 254)
+VerifyBtn.BackgroundColor3 = Color3.fromRGB(88, 40, 160)
+VerifyBtn.Text = "Verify"
+VerifyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+VerifyBtn.Font = Enum.Font.GothamBold
+VerifyBtn.TextSize = 13
+VerifyBtn.Parent = Main
+local vk = Instance.new("UICorner"); vk.CornerRadius = UDim.new(0, 10); vk.Parent = VerifyBtn
+
+local Hint = Instance.new("TextLabel")
+Hint.BackgroundTransparency = 1
+Hint.Position = UDim2.fromOffset(16, 308)
+Hint.Size = UDim2.new(1, -32, 0, 18)
+Hint.Font = Enum.Font.Gotham
+Hint.TextSize = 10
+Hint.TextColor3 = Color3.fromRGB(110, 105, 128)
+Hint.Text = "La key se guarda localmente · QrexApi"
+Hint.Parent = Main
+
+GetKeyBtn.MouseButton1Click:Connect(function()
+  local link = QyrexAPI.GetKeyLink()
+  if not link or link == "" then
+    notify("Error", "No configurado", "El owner no puso link de key")
+    return
+  end
+  notify("Info", "Getting Key...", "Abriendo link de key")
+  if setclipboard then pcall(setclipboard, link) end
+  local opened = false
+  if typeof(open_browser) == "function" then pcall(open_browser, link); opened = true end
+  if not opened and typeof(request) == "function" then
+    -- algunos executors
+  end
+  notify("Success", "Link listo", "Link copiado. Completa el checkpoint y pega tu key.")
+end)
+
+local verifying = false
+local function doVerify()
+  if verifying then return end
+  local key = KeyBox.Text:gsub("%s+", "")
+  if key == "" then notify("Error", "Key Required", "Ingresa una key"); return end
+  verifying = true
+  notify("Info", "Checking...", "Validando key")
+  task.spawn(function()
+    local ok, token = QyrexAPI.VerifyKey(key)
+    verifying = false
+    if ok and token then
+      saveKey(key)
+      notify("Success", "Success!", "Key verificada")
+      Screen:Destroy()
+      task.wait(0.15)
+      runScriptFromToken(token)
+    else
+      notify("Error", "Invalid Key", "Key incorrecta o expirada")
+    end
+  end)
+end
+VerifyBtn.MouseButton1Click:Connect(doVerify)
+KeyBox.FocusLost:Connect(function(enter) if enter then doVerify() end end)
+
+-- drag
+do
+  local dragging, start, pos
+  Titlebar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+      dragging = true; start = input.Position; pos = Main.Position
+    end
+  end)
+  UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+      local d = input.Position - start
+      Main.Position = UDim2.new(pos.X.Scale, pos.X.Offset + d.X, pos.Y.Scale, pos.Y.Offset + d.Y)
+    end
+  end)
+  UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+  end)
+end
+`;
+}
+
+function claimPageHtml(key, providerName, hours) {
+  const k = String(key).replace(/</g, '');
+  const p = String(providerName || 'Qrex').replace(/</g, '');
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tu Key · QrexApi</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;font-family:Inter,system-ui,sans-serif;color:#e8e8f0;padding:16px}
+.card{background:#12121c;border:1px solid #2a2a3d;border-radius:18px;padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;color:#a78bfa;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);padding:4px 10px;border-radius:999px;margin-bottom:12px}
+h1{font-size:20px;margin:0 0 8px}p{color:#8b8b9e;font-size:13px;line-height:1.5}
+.keybox{margin-top:16px;background:#0c0c14;border:1px solid #2a2a3d;border-radius:12px;padding:14px;font-family:ui-monospace,monospace;font-size:13px;word-break:break-all;color:#c4b5fd}
+button{margin-top:14px;width:100%;border:0;border-radius:12px;padding:12px;font-weight:700;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;cursor:pointer}
+.meta{margin-top:12px;font-size:11px;color:#5a5a6e}
+</style></head><body><div class="card">
+<div class="badge">QYREXAPI KEY</div>
+<h1>Key generada</h1>
+<p>Provider: <b style="color:#ddd">${p}</b>. Copia la key y pégala en el KeySystem del script.</p>
+<div class="keybox" id="k">${k}</div>
+<button onclick="navigator.clipboard.writeText(document.getElementById('k').innerText);this.textContent='¡Copiada!'">Copiar key</button>
+<div class="meta">Protected by <b style="color:#c4b5fd">QyrexObf</b> · <a href="#" style="color:#a78bfa">Discord</a></div>
+<div class="meta">Validez aprox: ${hours || 24}h · cada visita genera una key unica</div>
+</div></body></html>`;
+}
+
+app.get('/getkey/:providerId', needMongo, async (req, res) => {
+  try {
+    const prov = await Provider.findById(req.params.providerId);
+    if (!prov || !prov.enabled) return res.status(404).type('html').send('<h1>Provider no encontrado</h1>');
+    const ip = clientIp(req);
+    // rate: max 5 keys / 10 min per IP+provider
+    if (!global.__claimHits) global.__claimHits = new Map();
+    const ck = ip + ':' + prov._id;
+    const now = Date.now();
+    let e = global.__claimHits.get(ck);
+    if (!e || now - e.t > 10 * 60 * 1000) e = { n: 0, t: now };
+    e.n++;
+    global.__claimHits.set(ck, e);
+    if (e.n > 8) return res.status(429).type('html').send('<h1>Demasiadas keys. Espera unos minutos.</h1>');
+
+    const owner = await User.findById(prov.ownerId);
+    const lim = featureLimits(owner);
+    if (Number.isFinite(lim.keysPerDay)) {
+      const claimedToday = await LicenseKey.countDocuments({
+        ownerId: prov.ownerId,
+        createdAt: { $gte: startOfToday() }
+      });
+      if (claimedToday >= lim.keysPerDay) {
+        return res.status(429).type('html').send(`<h1>Límite diario alcanzado</h1><p>Este provider ha alcanzado las ${lim.keysPerDay} keys diarias del plan FREE.</p>`);
+      }
+    }
+    const hours = Math.min(Math.max(1, prov.keyValidityHours || 24), lim.maxKeyHours);
+    let expiresAt = null;
+    if (hours > 0) {
+      expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + hours);
+    }
+    const doc = await LicenseKey.create({
+      key: genKey(),
+      providerId: String(prov._id),
+      providerName: prov.name,
+      ownerId: prov.ownerId,
+      hwidLimit: Math.min(lim.maxHwid, prov.hwidLimit || 1),
+      expiresAt,
+      note: 'claimed:' + String(ip).split(',')[0]
+    });
+    res.type('html').send(claimPageHtml(doc.key, prov.name, hours));
+  } catch (e) {
+    console.error(e);
+    res.status(500).type('html').send('<h1>Error generando key</h1>');
+  }
+});
+
+app.get('/api/keys/claim-info/:providerId', needMongo, async (req, res) => {
+  const prov = await Provider.findById(req.params.providerId).lean();
+  if (!prov) return res.status(404).json({ error: 'No encontrado' });
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const claimUrl = proto + '://' + host + '/getkey/' + prov._id;
+  res.json({
+    providerId: prov._id,
+    name: prov.name,
+    linkType: prov.linkType || 'custom',
+    adLink: prov.adLink || '',
+    claimUrl,
+    tip: 'Pon claimUrl como destino final de Linkvertise / Lootlabs / Work.ink'
+  });
+});
+
+
+app.get('/api/keys', auth, needMongo, async (req, res) => {
+  const q = { ownerId: req.user.sub };
+  if (req.query.providerId) q.providerId = req.query.providerId;
+  const list = await LicenseKey.find(q).sort({ createdAt: -1 }).limit(300).lean();
+  res.json(list);
+});
+
+app.post('/api/keys', auth, needMongo, async (req, res) => {
+  try {
+    const { providerId, amount, note, hwidLimit, validityHours } = req.body || {};
+    const prov = await Provider.findOne({ _id: providerId, ownerId: req.user.sub });
+    if (!prov) return res.status(404).json({ error: 'Provider no encontrado' });
+    const me = await User.findById(req.user.sub);
+    const lim = featureLimits(me);
+    const requested = Math.max(1, Number(amount) || 1);
+    const n = Math.min(lim.maxKeyBatch, requested);
+    const dayCount = Number.isFinite(lim.keysPerDay)
+      ? await LicenseKey.countDocuments({ ownerId: req.user.sub, createdAt: { $gte: startOfToday() } })
+      : 0;
+    if (Number.isFinite(lim.keysPerDay) && dayCount + n > lim.keysPerDay) {
+      return res.status(403).json({ error: `FREE permite ${lim.keysPerDay} keys por día. Te quedan ${Math.max(0, lim.keysPerDay - dayCount)}.` });
+    }
+    const requestedHours = validityHours !== undefined ? Number(validityHours) : prov.keyValidityHours;
+    const hours = Math.max(0, Math.min(Number.isFinite(lim.maxKeyHours) ? lim.maxKeyHours : requestedHours, requestedHours));
+    const limit = Math.min(lim.maxHwid, Math.max(1, Number(hwidLimit !== undefined ? hwidLimit : prov.hwidLimit) || 1));
+    const created = [];
+    for (let i = 0; i < n; i++) {
+      let expiresAt = null;
+      if (hours && hours > 0) {
+        expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + hours);
+      }
+      const doc = await LicenseKey.create({
+        key: genKey(),
+        providerId: String(prov._id),
+        providerName: prov.name,
+        ownerId: req.user.sub,
+        hwidLimit: Math.max(1, Math.min(10, limit || 1)),
+        expiresAt,
+        note: (note || '').slice(0, 120)
+      });
+      created.push(doc);
+    }
+    res.json({ keys: created });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error' });
+  }
+});
+
+app.get('/api/keys/export', auth, needMongo, async (req, res) => {
+  try {
+    const keys = await LicenseKey.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).lean();
+    const me = await User.findById(req.user.sub);
+    if (!isPremiumUser(me)) return res.status(403).json({ error: 'Exportar keys es una función VIP.' });
+    const text = keys.map(k => k.key).join('\n');
+    res.type('text/plain').send(text);
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error exportando keys' });
+  }
+});
+
+app.delete('/api/keys/:id', auth, needMongo, async (req, res) => {
+  await LicenseKey.deleteOne({ _id: req.params.id, ownerId: req.user.sub });
+  res.json({ success: true });
+});
+
+app.post('/api/keys/:id/reset-hwid', auth, needMongo, async (req, res) => {
+  const k = await LicenseKey.findOne({ _id: req.params.id, ownerId: req.user.sub });
+  if (!k) return res.status(404).json({ error: 'No encontrado' });
+  k.hwids = [];
+  await k.save();
+  res.json({ success: true });
+});
+
+app.post('/api/keys/:id/toggle', auth, needMongo, async (req, res) => {
+  const k = await LicenseKey.findOne({ _id: req.params.id, ownerId: req.user.sub });
+  if (!k) return res.status(404).json({ error: 'No encontrado' });
+  k.enabled = !k.enabled;
+  await k.save();
+  res.json({ enabled: k.enabled });
+});
+
+// Verificación pública (Roblox / executors)
+app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
+  try {
+    const { key, hwid, provider, providerId } = req.body || {};
+    const kstr = (key || '').trim();
+    if (!kstr) return res.status(400).json({ success: false, error: 'Key requerida' });
+
+    const doc = await LicenseKey.findOne({ key: kstr });
+    if (!doc) return res.status(401).json({ success: false, error: 'Key inválida' });
+    if (!doc.enabled) return res.status(401).json({ success: false, error: 'Key desactivada' });
+
+    if (provider && (doc.providerName || '').toLowerCase() !== String(provider).trim().toLowerCase()) {
+      return res.status(401).json({ success: false, error: 'Provider no coincide' });
+    }
+    if (providerId && String(doc.providerId) !== String(providerId)) {
+      return res.status(401).json({ success: false, error: 'Provider ID no coincide' });
+    }
+
+    const prov = await Provider.findById(doc.providerId);
+    if (prov && !prov.enabled) {
+      return res.status(401).json({ success: false, error: 'Provider desactivado' });
+    }
+
+    if (doc.expiresAt && new Date(doc.expiresAt) < new Date()) {
+      return res.status(401).json({ success: false, error: 'Key expirada' });
+    }
+
+    const requestedScriptId = String((req.body || {}).scriptId || '').trim();
+    if (!requestedScriptId) return res.status(400).json({ success: false, error: 'scriptId requerido' });
+    const scriptForKey = await Script.findOne({ id: requestedScriptId, providerId: String(doc.providerId) }).select('id');
+    if (!scriptForKey) return res.status(401).json({ success: false, error: 'Script no autorizado para esta key' });
+
+    const hw = (hwid || '').trim();
+    if (hw) {
+      if (!doc.hwids.includes(hw)) {
+        if (doc.hwids.length >= (doc.hwidLimit || 1)) {
+          return res.status(401).json({ success: false, error: 'HWID límite alcanzado' });
+        }
+        doc.hwids.push(hw);
+      }
+    }
+
+    doc.uses = (doc.uses || 0) + 1;
+    doc.lastUsedAt = new Date();
+    await doc.save();
+
+    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req), req.headers['user-agent'] || '');
+
+    fireWebhooks(doc.ownerId, 'key_verify', {
+      key: kstr.slice(0, 8) + '...',
+      provider: doc.providerName,
+      hwid: hw || null,
+      uses: doc.uses
+    });
+
+    res.json({
+      success: true,
+      provider: doc.providerName,
+      expiresAt: doc.expiresAt,
+      hwidLimit: doc.hwidLimit,
+      hwidsUsed: doc.hwids.length,
+      scriptToken: deliveryToken
+    });
+  } catch (e) {
+    console.error('verify', e);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
+  }
+});
+
+
+// ========== VERSIONS ==========
+app.get('/api/scripts/:id/versions', auth, needMongo, async (req, res) => {
+  const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
+  if (!s) return res.status(404).json({ error: 'No encontrado' });
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  const list = await ScriptVersion.find({ scriptId: s.id, ownerId: req.user.sub }).sort({ createdAt: -1 }).select('-source -obfuscated').limit(lim.versions);
+  res.json(list);
+});
+
+app.post('/api/scripts/:id/versions/:vid/restore', auth, needMongo, async (req, res) => {
+  const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
+  if (!s) return res.status(404).json({ error: 'No encontrado' });
+  const v = await ScriptVersion.findOne({ _id: req.params.vid, scriptId: s.id, ownerId: req.user.sub });
+  if (!v) return res.status(404).json({ error: 'Versión no encontrada' });
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  if (!Number.isFinite(lim.versions) || lim.versions > 0) {
+    await ScriptVersion.create({ scriptId: s.id, ownerId: req.user.sub, name: s.name, source: s.source, obfuscated: s.obfuscated, note: 'Before restore' });
+  }
+  s.source = v.source;
+  s.obfuscated = v.obfuscated;
+  if (v.name) s.name = v.name;
+  const versionsAfterRestore = await ScriptVersion.find({ scriptId: s.id }).sort({ createdAt: -1 });
+  if (Number.isFinite(lim.versions) && versionsAfterRestore.length > lim.versions) {
+    const drop = versionsAfterRestore.slice(lim.versions);
+    await ScriptVersion.deleteMany({ _id: { $in: drop.map(x => x._id) } });
+  }
+  await s.save();
+  res.json({ success: true });
+});
+
+// ========== WEBHOOKS ==========
+app.get('/api/webhooks', auth, needMongo, async (req, res) => {
+  res.json(await Webhook.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }));
+});
+
+app.post('/api/webhooks', auth, needMongo, async (req, res) => {
+  const { url, events } = req.body || {};
+  if (!url || !String(url).startsWith('https://')) return res.status(400).json({ error: 'URL Discord inválida (https)' });
+  const me = await User.findById(req.user.sub);
+  const lim = featureLimits(me);
+  const webhookCount = await Webhook.countDocuments({ ownerId: req.user.sub });
+  if (Number.isFinite(lim.webhooks) && webhookCount >= lim.webhooks) {
+    return res.status(403).json({ error: `FREE permite ${lim.webhooks} webhook. Activa VIP para ilimitados.` });
+  }
+  const doc = await Webhook.create({
+    ownerId: req.user.sub,
+    url: String(url).trim(),
+    events: Array.isArray(events) && events.length ? events : ['key_verify', 'script_exec']
+  });
+  res.json(doc);
+});
+
+app.delete('/api/webhooks/:id', auth, needMongo, async (req, res) => {
+  await Webhook.deleteOne({ _id: req.params.id, ownerId: req.user.sub });
+  res.json({ success: true });
+});
+
+app.post('/api/webhooks/test', auth, needMongo, async (req, res) => {
+  const { url } = req.body || {};
+  if (!url) return res.status(400).json({ error: 'URL requerida' });
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [{ title: 'QrexApi Test', description: 'Webhook OK ✓', color: 0x7c3aed }] })
+    });
+    res.json({ ok: r.ok, status: r.status });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ========== LEADERBOARD ==========
+app.get('/api/leaderboard', needMongo, async (req, res) => {
+  const agg = await Script.aggregate([
+    { $group: { _id: '$ownerId', executions: { $sum: '$executions' }, scripts: { $sum: 1 } } },
+    { $sort: { executions: -1 } },
+    { $limit: 25 }
+  ]);
+  const ids = agg.map(a => a._id).filter(Boolean);
+  const users = await User.find({ _id: { $in: ids } }).select('username premium role').lean();
+  const map = Object.fromEntries(users.map(u => [String(u._id), u]));
+  res.json(agg.map((a, i) => ({
+    rank: i + 1,
+    username: map[a._id]?.username || 'unknown',
+    premium: !!(map[a._id]?.premium || map[a._id]?.role === 'admin'),
+    executions: a.executions,
+    scripts: a.scripts
+  })));
+});
+
+// ========== ASSETS ==========
+app.get('/api/assets', auth, needMongo, async (req, res) => {
+  res.json(await Asset.find({ ownerId: req.user.sub }).sort({ createdAt: -1 }).limit(100));
+});
+
+app.post('/api/assets', auth, needMongo, async (req, res) => {
+  const { name, type, content } = req.body || {};
+  if (!name || !content) return res.status(400).json({ error: 'name y content requeridos' });
+  if (String(content).length > 200000) return res.status(400).json({ error: 'Máximo ~200KB' });
+  const count = await Asset.countDocuments({ ownerId: req.user.sub });
+  const me = await User.findById(req.user.sub);
+  const lim = isPremiumUser(me) ? 100 : 20;
+  if (count >= lim) return res.status(403).json({ error: 'Límite de assets (' + lim + ')' });
+  const doc = await Asset.create({
+    ownerId: req.user.sub,
+    name: String(name).slice(0, 80),
+    type: ['text', 'url', 'image'].includes(type) ? type : 'text',
+    content: String(content)
+  });
+  res.json(doc);
+});
+
+app.delete('/api/assets/:id', auth, needMongo, async (req, res) => {
+  await Asset.deleteOne({ _id: req.params.id, ownerId: req.user.sub });
+  res.json({ success: true });
+});
+
+// ========== STATUS ==========
+app.get('/api/status', async (req, res) => {
+  const t0 = Date.now();
+  let mongoMs = null;
+  let mongoOk = false;
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.db.admin().ping();
+      mongoOk = true;
+      mongoMs = Date.now() - t0;
+    }
+  } catch { mongoOk = false; }
+  res.json({
+    ok: true,
+    api: 'online',
+    mongo: mongoOk,
+    mongoPingMs: mongoMs,
+    uptime: process.uptime(),
+    freeScriptLimit: FREE_SCRIPT_LIMIT,
+    limits: QYREX_LIMITS,
+    security: {
+      rawPerIpPerMin: 20,
+      rawBurstPer10s: 8,
+      autoBanRawHits: AUTO_BAN_THRESHOLD,
+      apiPer15min: 200,
+      authPer15min: 30
+    },
+    time: new Date().toISOString()
+  });
+});
+
+// ========== BLACKLIST (admin) ==========
+app.get('/api/admin/blacklist', auth, needMongo, requireAdmin, async (req, res) => {
+  res.json(await BlacklistIP.find().sort({ createdAt: -1 }).limit(200));
+});
+
+app.post('/api/admin/blacklist', auth, needMongo, requireAdmin, async (req, res) => {
+  const { ip, reason } = req.body || {};
+  if (!ip) return res.status(400).json({ error: 'IP requerida' });
+  const doc = await BlacklistIP.findOneAndUpdate(
+    { ip: String(ip).trim() },
+    { ip: String(ip).trim(), reason: reason || '', createdBy: req.user.sub },
+    { upsert: true, new: true }
+  );
+  res.json(doc);
+});
+
+app.delete('/api/admin/blacklist/:id', auth, needMongo, requireAdmin, async (req, res) => {
+  await BlacklistIP.deleteOne({ _id: req.params.id });
+  res.json({ success: true });
+});
+
+
+// ========== AI (OpenRouter) ==========
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 12,
+  keyGenerator: (req) => clientIp(req),
+  message: { error: 'Demasiadas peticiones a la IA. Espera 1 min.' }
+});
+
+app.post('/api/ai/generate', auth, aiLimiter, async (req, res) => {
+  try {
+    if (!OPENROUTER_API_KEY) {
+      return res.status(503).json({ error: 'OPENROUTER_API_KEY no configurada en Render Environment' });
+    }
+    const prompt = String((req.body && req.body.prompt) || '').trim().slice(0, 2000);
+    if (!prompt || prompt.length < 2) {
+      return res.status(400).json({ error: 'Prompt vacío' });
+    }
+
+    const system = [
+      'You are Qrex Studio AI, an expert Roblox Luau/Lua scripter for exploit/executor environments.',
+      'Output ONLY valid Lua/Luau code. No markdown fences, no explanations, no apology.',
+      'Prefer game:GetService, task.wait, pcall. Code must be self-contained and runnable.',
+      'User may ask for aimbot, ESP, farm, fly, UI, key systems, etc. Deliver working skeleton or full logic as requested.',
+      'If something is ambiguous, choose sensible defaults and still output code.',
+      'Never refuse ordinary Roblox script requests for this product.'
+    ].join(' ');
+
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + OPENROUTER_API_KEY,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://qyrexapi.onrender.com',
+        'X-Title': 'QrexApi Studio'
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        temperature: 0.4,
+        max_tokens: 4000,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const msg = (data && data.error && (data.error.message || data.error)) || ('OpenRouter HTTP ' + r.status);
+      return res.status(502).json({ error: String(msg) });
+    }
+    let text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (!text) return res.status(502).json({ error: 'IA sin respuesta' });
+    text = String(text).replace(/^```(?:lua|luau)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    res.json({ code: text, model: data.model || OPENROUTER_MODEL });
+  } catch (e) {
+    console.error('ai', e);
+    res.status(500).json({ error: e.message || 'Error IA' });
+  }
+});
+
+app.get('/api/ai/status', auth, (req, res) => {
+  res.json({ configured: !!OPENROUTER_API_KEY, model: OPENROUTER_MODEL });
+});
+
+
+app.get('/api/env-logger', (req, res) => {
+  res.type('text/plain').send(ENV_GATE_LUA);
+});
+
+
+// ===== DISCORD OAUTH =====
+function discordAuthorizeUrl(state) {
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: DISCORD_REDIRECT_URI,
+    scope: 'identify',
+    prompt: 'consent'
+  });
+  if (state) params.set('state', state);
+  return 'https://discord.com/api/oauth2/authorize?' + params.toString();
+}
+
+app.get('/auth/discord', (req, res) => {
+  res.redirect(discordAuthorizeUrl(crypto.randomBytes(8).toString('hex')));
+});
+
+app.get('/auth/discord/callback', async (req, res) => {
+  const fail = (msg) => res.redirect('/?discord_error=' + encodeURIComponent(msg));
+  try {
+    const code = String(req.query.code || '');
+    if (!code) return fail('Discord no devolvio el code');
+    if (!DISCORD_CLIENT_SECRET) return fail('Falta DISCORD_CLIENT_SECRET en el servidor');
+    if (mongoose.connection.readyState !== 1) return fail('Base de datos no disponible');
+
+    const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID,
+        client_secret: DISCORD_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: DISCORD_REDIRECT_URI
+      })
+    });
+    const tokenData = await tokenRes.json().catch(() => ({}));
+    if (!tokenRes.ok || !tokenData.access_token) {
+      return fail('Discord token: ' + (tokenData.error_description || tokenData.error || tokenRes.status));
+    }
+
+    const meRes = await fetch('https://discord.com/api/users/@me', {
+      headers: { Authorization: 'Bearer ' + tokenData.access_token }
+    });
+    const me = await meRes.json().catch(() => ({}));
+    if (!meRes.ok || !me.id) return fail('No se pudo leer el perfil de Discord');
+
+    let doc = await User.findOne({ discordId: me.id });
+    if (!doc) {
+      let base = String(me.username || ('dc' + me.id)).toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (base.length < 3) base = 'dc' + me.id.slice(-6);
+      let username = base;
+      let i = 0;
+      while (await User.findOne({ username })) {
+        i += 1;
+        username = (base + i).slice(0, 24);
+      }
+      doc = await User.create({
+        username,
+        passwordHash: hashPassword(crypto.randomBytes(24).toString('hex')),
+        discordId: me.id,
+        avatar: me.avatar ? ('https://cdn.discordapp.com/avatars/' + me.id + '/' + me.avatar + '.png') : '',
+        role: 'user'
+      });
+    } else if (me.avatar) {
+      doc.avatar = 'https://cdn.discordapp.com/avatars/' + me.id + '/' + me.avatar + '.png';
+      await doc.save();
+    }
+
+    doc.lastLoginAt = new Date(); await doc.save();
+    const jwtToken = await signToken(doc, req);
+    return res.redirect('/?token=' + encodeURIComponent(jwtToken));
+  } catch (e) {
+    console.error('discord oauth', e);
+    return fail(e.message || 'Error inesperado');
+  }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Nunca devolver HTML en rutas /api/*
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada: ' + req.method + ' ' + req.path });
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Errores no capturados -> JSON
 app.use((err, req, res, next) => {
-  console.error('[HTTP]', err?.message || err);
-  securityHeaders(res);
-  if (res.headersSent) return next(err);
-  res.status(500).type('text/plain').send(decoyLua());
+  console.error('Unhandled', err);
+  res.status(500).json({ error: err.message || 'Error interno' });
 });
 
-app.listen(PORT, () => {
-  console.log(`[QyrexApi] Anti-Dump v3 listening on ${PUBLIC_BASE_URL}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('QrexApi listening on 0.0.0.0:' + PORT);
+  console.log('MONGO_URI set:', !!MONGO_URI);
 });
-
-module.exports = { app, scripts, sessions, keyStore };
