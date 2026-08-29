@@ -2862,6 +2862,7 @@ function updateLoaderSnippet(){
   const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + option.value)) : (base + '/getkey/PROVIDER_ID');
   const safeProvider = provName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const safeClaim = claimUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const safeGetKey = getKeyLink.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
   const snip = `local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -2919,8 +2920,8 @@ local cfg = {
 	keyFile = "QyrexApi_Key.txt",
 	api = "${base}",
 	provider = "${safeProvider}",
-	providerId = "${option ? option.value : ''}",
-	getKeyLink = "${safeClaim}",
+	providerId = "${providerId}",
+	getKeyLink = "${safeGetKey}",
 	sounds = {
 		open = "rbxassetid://6655851046",
 		close = "rbxassetid://6655851046",
@@ -2950,10 +2951,13 @@ end
 
 function QyrexAPI.VerifyKey(key)
 	local HttpService = game:GetService("HttpService")
+	local providerId = cfg.providerId ~= "" and cfg.providerId or cfg.provider
 	local body = HttpService:JSONEncode({
 		key = key,
 		hwid = getHwid(),
-		provider = cfg.providerId ~= "" and cfg.providerId or cfg.provider
+		provider = providerId,
+		providerId = providerId,
+		providerName = cfg.provider
 	})
 
 	local res = httpRequest({
