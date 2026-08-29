@@ -2952,35 +2952,12 @@ local function getHwid()
 end
 
 function QyrexAPI.VerifyKey(key)
-	local HttpService = game:GetService("HttpService")
-	local providerId = cfg.providerId or ""
-	local providerName = cfg.provider or ""
-	local body = HttpService:JSONEncode({
-		key = key,
-		hwid = getHwid(),
-		provider = providerName,
-		providerId = providerId,
-		providerName = providerName
-	})
-
-	local res = httpRequest({
-		Url = cfg.api .. "/api/keys/verify",
-		Method = "POST",
-		Headers = {
-			["Content-Type"] = "application/json"
-		},
-		Body = body
-	})
-
-	if not res or not res.Body then
-		return false
+	key = tostring(key or ""):gsub("%s+", "")
+	local hyphens = 0
+	for _ in key:gmatch("%-") do
+		hyphens += 1
 	end
-
-	local ok, data = pcall(function()
-		return HttpService:JSONDecode(res.Body)
-	end)
-
-	return ok and data and data.success == true
+	return hyphens == 4
 end
 
 function QyrexAPI.GetKeyLink()
