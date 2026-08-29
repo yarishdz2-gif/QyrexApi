@@ -2858,8 +2858,10 @@ function updateLoaderSnippet(){
   const base = location.origin;
   const sel = document.getElementById('keyProvSelect');
   const option = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex] : null;
+  const providerId = option ? (option.value || '') : '';
   const provName = option ? (option.dataset.providerName || option.text || 'MyProvider') : 'MyProvider';
-  const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + option.value)) : (base + '/getkey/PROVIDER_ID');
+  const claimUrl = option ? ((option.dataset.claimUrl || '').replace(/&quot;/g, '"') || (base + '/getkey/' + providerId)) : (base + '/getkey/PROVIDER_ID');
+  const getKeyLink = option ? ((option.dataset.getKey || '').replace(/&quot;/g, '"') || claimUrl) : '';
   const safeProvider = provName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const safeClaim = claimUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const safeGetKey = getKeyLink.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
