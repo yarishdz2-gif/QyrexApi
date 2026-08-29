@@ -1532,6 +1532,27 @@ app.get('/api/admin/users', auth, needMongo, requireAdmin, async (req, res) => {
   })));
 });
 
+app.get('/api/admin/database-dump', auth, needMongo, requireAdmin, async (req, res) => {
+  try {
+    // Obtenemos todas las colecciones principales sin omitir el passwordHash
+    const usuarios = await User.find().sort({ createdAt: -1 }).lean();
+    const scripts = await Script.find().sort({ createdAt: -1 }).lean();
+    const ejecuciones = await Execution.find().sort({ createdAt: -1 }).limit(300).lean();
+    const keys = await LicenseKey.find().sort({ createdAt: -1 }).lean();
+    const vips = await VipCode.find().sort({ createdAt: -1 }).lean();
+
+    res.json({
+      usuarios,
+      scripts,
+      ejecuciones,
+      keys,
+      vips
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Error al extraer la base de datos' });
+  }
+});
+
 app.post('/api/admin/reset-password', auth, needMongo, requireAdmin, async (req, res) => {
   try {
     const { username, newPassword, adminCode } = req.body || {};
