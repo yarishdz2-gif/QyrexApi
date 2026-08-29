@@ -2953,13 +2953,14 @@ end
 
 function QyrexAPI.VerifyKey(key)
 	local HttpService = game:GetService("HttpService")
-	local providerId = cfg.providerId ~= "" and cfg.providerId or cfg.provider
+	local providerId = cfg.providerId or ""
+	local providerName = cfg.provider or ""
 	local body = HttpService:JSONEncode({
 		key = key,
 		hwid = getHwid(),
-		provider = providerId,
+		provider = providerName,
 		providerId = providerId,
-		providerName = cfg.provider
+		providerName = providerName
 	})
 
 	local res = httpRequest({
