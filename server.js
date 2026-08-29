@@ -119,10 +119,11 @@ function issueScriptToken(scriptId, ip, ua) {
   const nonce = crypto.randomBytes(18).toString('base64url');
   const exp = Date.now() + TOKEN_TTL_MS;
   const fp = deliveryFingerprint(ip, ua);
-  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
+  const ipFp = crypto.createHash('sha256').update(String(ip || '')).digest('hex').slice(0, 24);
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp + '.' + ipFp;
   const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
   const token = exp.toString(36) + '.' + nonce + '.' + sig;
-  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, exp, used: false });
+  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, ipFp, exp, used: false });
   return token;
 }
 
@@ -139,12 +140,18 @@ function consumeScriptToken(scriptId, token, ip, ua) {
   const rec = scriptTokens.get(nonce);
   if (!rec || rec.used || rec.scriptId !== scriptId) return false;
   if (now > rec.exp) return false;
-  const fp = deliveryFingerprint(ip, ua);
-  if (fp !== rec.fp) return false;
-  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
-  const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
+  const currentIp = String(ip || '');
+  const currentIpFp = crypto.createHash('sha256').update(currentIp).digest('hex').slice(0, 24);
+  if (currentIpFp !== rec.ipFp) return false;
+  const currentFp = deliveryFingerprint(ip, ua);
+  const payloadExact = scriptId + '.' + exp + '.' + nonce + '.' + rec.fp + '.' + rec.ipFp;
+  const expected = crypto.createHmac('sha256', JWT_SECRET).update(payloadExact).digest('hex').slice(0, 48);
   if (expected.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig))) return false;
+  // Roblox/executor HttpGet implementations may send a different UA between requests.
+  // The token remains strongly bound to IP + short-lived nonce, while UA is retained as telemetry.
   rec.used = true;
+  rec.lastUa = String(ua || '').slice(0, 220);
+  rec.fpAtConsume = currentFp;
   scriptTokens.set(nonce, rec);
   return true;
 }
@@ -1039,19 +1046,27 @@ function wrapDeliveredScript(code, apiBase, scriptId) {
 function buildDoubleLinkStub(cacheUrl) {
   const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return [
+    '-- Qyrex compatible bootstrap',
     'local __QYREX_URL = "' + u + '"',
-    'local __QYREX_SRC',
-    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
-    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
-    'end)',
-    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
-    '  error(__QYREX_ERR or "Qyrex delivery failed")',
+    'local function __QYREX_FETCH(url)',
+    '  local ok, src = pcall(function() return game:HttpGet(url) end)',
+    '  if ok and type(src) == "string" and #src >= 8 then return src end',
+    '  local req = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)',
+    '  if type(req) == "function" then',
+    '    local rok, rr = pcall(function() return req({ Url = url, Method = "GET", Headers = { ["Cache-Control"] = "no-cache", ["X-Requested-With"] = "Roblox" } }) end)',
+    '    if rok and rr and type(rr.Body) == "string" and #rr.Body >= 8 then return rr.Body end',
+    '  end',
+    '  return nil',
     'end',
-    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
-    'if type(__QYREX_FN) ~= "function" then',
-    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
-    'end',
-    'return __QYREX_FN()'
+    'local __QYREX_SRC = __QYREX_FETCH(__QYREX_URL)',
+    'if type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then return nil end',
+    'local __QYREX_LOAD = loadstring or load',
+    'if type(__QYREX_LOAD) ~= "function" then return nil end',
+    'local __QYREX_FN, __QYREX_ERR = pcall(__QYREX_LOAD, __QYREX_SRC)',
+    'if not __QYREX_FN or type(__QYREX_ERR) ~= "function" then return nil end',
+    'local __QYREX_OK, __QYREX_RUNERR = pcall(__QYREX_ERR)',
+    'if not __QYREX_OK then warn("[QyrexApi] runtime error:", __QYREX_RUNERR) end',
+    'return __QYREX_OK and __QYREX_RUNERR or nil'
   ].join('\n');
 }
 
