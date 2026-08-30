@@ -601,30 +601,6 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
-/* ===== SCRIPT / UI SOURCE EDITOR ===== */
-.source-tab-panel{display:none}
-.source-tab-panel.active{display:block;animation:fadeIn .18s ease both}
-.source-tab-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025)}
-.source-tab-note .source-tab-note-main{display:flex;align-items:flex-start;gap:10px;min-width:0}
-.source-tab-note .source-tab-note-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;background:var(--elev);border:1px solid var(--border-strong);font-size:13px}
-.source-tab-note b{color:var(--fg)}
-.source-tab-note span{font-size:11px;color:var(--subtle);line-height:1.5}
-.obfuscator-card{margin-top:12px;padding:14px 16px;border:1px solid rgba(52,211,153,.22);border-radius:14px;background:linear-gradient(135deg,rgba(52,211,153,.07),rgba(255,255,255,.018));display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.obfuscator-copy{display:flex;align-items:flex-start;gap:11px;min-width:0}
-.obfuscator-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok);border:1px solid rgba(52,211,153,.22);flex:0 0 auto}
-.obfuscator-copy strong{display:block;font-size:12px;color:var(--fg);margin-bottom:3px}
-.obfuscator-copy span{font-size:11px;color:var(--muted)}
-.obfuscator-copy a{color:var(--ok);font-weight:700;text-decoration:none}
-.obfuscator-copy a:hover{text-decoration:underline}
-.obfuscator-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:10px;background:var(--ok-bg);border:1px solid rgba(52,211,153,.25);color:var(--ok);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s}
-.obfuscator-btn:hover{transform:translateY(-1px);border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.14)}
-.ui-source-editor{display:flex;flex-direction:column}
-.ui-source-editor textarea{min-height:320px}
-@media (max-width:900px){
-  .obfuscator-card{align-items:stretch}
-  .obfuscator-btn{justify-content:center;width:100%}
-}
-
 
 </style>
 </head>
@@ -1144,105 +1120,53 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
               <div class="text-xs" style="color:#5a5a6e">Gratis: máx 15 scripts · VIP: ilimitados</div>
 
               <div class="tab-bar">
-                <button type="button" class="active" id="tabScript" onclick="switchSourceTab('script')">
+                <button type="button" class="active" id="tabScript">
                   <span style="color:#34d399">●</span> Script
                 </button>
-                <button type="button" id="tabUi" onclick="switchSourceTab('ui')">
+                <button type="button" id="tabUi" style="opacity:.5;cursor:default" title="Próximamente">
                   UI-Source
                 </button>
               </div>
 
-              <div id="scriptSourcePanel" class="source-tab-panel active">
-                <div class="hint-green">
-                  This is your script. It gets obfuscated before it reaches users — paste your source here.
-                </div>
+              <div class="hint-green">
+                This is your script. It gets obfuscated before it reaches users — paste your source here.
+              </div>
 
-                <div class="editor-wrap" id="studioEditor">
-                  <div class="editor-header">
-                    <div class="flex items-center gap-2 text-xs">
-                      <span style="color:#8b8b9e">&lt;/&gt; Studio · Lua</span>
-                      <span class="badge badge-green">Protected</span>
-                      <span class="badge" id="studioLang">Lua 5.1</span>
-                    </div>
-                    <div class="studio-toolbar">
-                      <button type="button" class="btn-ghost" onclick="studioInsertTab()" title="Tab">Tab</button>
-                      <button type="button" class="btn-ghost" onclick="studioComment()" title="Comentar">//</button>
-                      <button type="button" class="btn-ghost" onclick="studioFormat()" title="Indentar">Format</button>
-                      <button type="button" class="btn-ghost" onclick="studioDownload()" title="Descargar .lua">Download</button>
-                      <label class="btn-ghost cursor-pointer" style="padding:5px 10px">
-                        Upload
-                        <input type="file" accept=".lua,.txt" class="hidden" onchange="uploadFile(this)"/>
-                      </label>
-                      <button type="button" class="btn-ghost" onclick="studioClear()" title="Limpiar">Clear</button>
-                      <button type="button" class="btn-ghost" onclick="studioToggleAi()">AI Tips</button>
-                    </div>
+              <div class="editor-wrap" id="studioEditor">
+                <div class="editor-header">
+                  <div class="flex items-center gap-2 text-xs">
+                    <span style="color:#8b8b9e">&lt;/&gt; Studio · Lua</span>
+                    <span class="badge badge-green">Protected</span>
+                    <span class="badge" id="studioLang">Lua 5.1</span>
                   </div>
-                  <div class="editor-body">
-                    <div class="line-nums" id="lineNums">1</div>
-                    <textarea id="sSource" placeholder="-- Escribe tu Lua aquí (Studio)
+                  <div class="studio-toolbar">
+                    <button type="button" class="btn-ghost" onclick="studioInsertTab()" title="Tab">Tab</button>
+                    <button type="button" class="btn-ghost" onclick="studioComment()" title="Comentar">//</button>
+                    <button type="button" class="btn-ghost" onclick="studioFormat()" title="Indentar">Format</button>
+                    <button type="button" class="btn-ghost" onclick="studioDownload()" title="Descargar .lua">Download</button>
+                    <label class="btn-ghost cursor-pointer" style="padding:5px 10px">
+                      Upload
+                      <input type="file" accept=".lua,.txt" class="hidden" onchange="uploadFile(this)"/>
+                    </label>
+                    <button type="button" class="btn-ghost" onclick="studioClear()" title="Limpiar">Clear</button>
+                    <button type="button" class="btn-ghost" onclick="studioToggleAi()">AI Tips</button>
+                  </div>
+                </div>
+                <div class="editor-body">
+                  <div class="line-nums" id="lineNums">1</div>
+                  <textarea id="sSource" placeholder="-- Escribe tu Lua aquí (Studio)
 -- Los números de línea están a la izquierda y no tapan el código
 local Players = game:GetService(&quot;Players&quot;)
 " oninput="onStudioInput()" onscroll="syncStudioScroll()" onkeydown="studioKey(event)" spellcheck="false"></textarea>
-                  </div>
-                  <div class="ai-panel" id="aiPanel">
-                    <div class="text-xs mb-1" style="color:#6b6b80">Sugerencias rápidas (clic para insertar)</div>
-                    <div id="aiChips"></div>
-                  </div>
-                  <div class="studio-status">
-                    <span id="studioPos">Ln 1, Col 1</span>
-                    <span id="studioStats">0 líneas · 0 chars</span>
-                    <span>UTF-8 · Spaces: 2</span>
-                  </div>
                 </div>
-
-                <div class="obfuscator-card">
-                  <div class="obfuscator-copy">
-                    <div class="obfuscator-icon">✓</div>
-                    <div>
-                      <strong>Obfuscate Script</strong>
-                      <span>Recommended obfuscator 100%: <a href="https://qyrexobf.hopto.org" target="_blank" rel="noopener noreferrer">https://qyrexobf.hopto.org</a></span>
-                    </div>
-                  </div>
-                  <a class="obfuscator-btn" href="https://qyrexobf.hopto.org" target="_blank" rel="noopener noreferrer">
-                    Obfuscate Script →
-                  </a>
+                <div class="ai-panel" id="aiPanel">
+                  <div class="text-xs mb-1" style="color:#6b6b80">Sugerencias rápidas (clic para insertar)</div>
+                  <div id="aiChips"></div>
                 </div>
-              </div>
-
-              <div id="uiSourcePanel" class="source-tab-panel">
-                <div class="hint-green">
-                  UI-Source is an editing-only source. Paste or edit the source exactly as provided — it is not sent as the script source when you save changes.
-                </div>
-                <div class="editor-wrap ui-source-editor" id="uiSourceEditor" style="margin-top:12px">
-                  <div class="editor-header">
-                    <div class="flex items-center gap-2 text-xs">
-                      <span style="color:#8b8b9e">&lt;/&gt; UI-Source · Lua</span>
-                      <span class="badge">Editor only</span>
-                    </div>
-                    <div class="studio-toolbar">
-                      <button type="button" class="btn-ghost" onclick="uiSourceInsertTab()">Tab</button>
-                      <button type="button" class="btn-ghost" onclick="uiSourceClear()">Clear</button>
-                      <label class="btn-ghost cursor-pointer" style="padding:5px 10px">
-                        Upload
-                        <input type="file" accept=".lua,.txt" class="hidden" onchange="uploadUiSource(this)"/>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="editor-body">
-                    <div class="line-nums" id="uiLineNums">1</div>
-                    <textarea id="uiSource" placeholder="Paste UI source here. This editor is for editing only and is NOT included when Save changes is pressed." oninput="updateUiSourceLines()" onscroll="syncUiSourceScroll()" onkeydown="uiSourceKey(event)" spellcheck="false"></textarea>
-                  </div>
-                  <div class="studio-status">
-                    <span id="uiSourcePos">Ln 1, Col 1</span>
-                    <span id="uiSourceStats">0 líneas · 0 chars</span>
-                    <span>Editing only · Not saved</span>
-                  </div>
-                </div>
-                <div class="source-tab-note">
-                  <div class="source-tab-note-main">
-                    <div class="source-tab-note-icon">i</div>
-                    <div><b>Save changes uses Script only.</b><br/><span>Anything written in UI-Source stays available only for editing in this page and is deliberately excluded from the save request.</span></div>
-                  </div>
+                <div class="studio-status">
+                  <span id="studioPos">Ln 1, Col 1</span>
+                  <span id="studioStats">0 líneas · 0 chars</span>
+                  <span>UTF-8 · Spaces: 2</span>
                 </div>
               </div>
 
@@ -2150,92 +2074,6 @@ function go(p){
 
 function esc(t){ const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
 
-function switchSourceTab(tab){
-  const scriptPanel = document.getElementById('scriptSourcePanel');
-  const uiPanel = document.getElementById('uiSourcePanel');
-  const scriptBtn = document.getElementById('tabScript');
-  const uiBtn = document.getElementById('tabUi');
-  const isUi = tab === 'ui';
-  if (scriptPanel) scriptPanel.classList.toggle('active', !isUi);
-  if (uiPanel) uiPanel.classList.toggle('active', isUi);
-  if (scriptBtn) scriptBtn.classList.toggle('active', !isUi);
-  if (uiBtn) uiBtn.classList.toggle('active', isUi);
-  if (isUi) updateUiSourceLines();
-  else updateLines();
-}
-
-function updateUiSourceLines(){
-  const src = document.getElementById('uiSource');
-  const nums = document.getElementById('uiLineNums');
-  if (!src || !nums) return;
-  const n = Math.max(1, src.value.split('\n').length);
-  let out = '';
-  for (let i=1;i<=n;i++) out += i + '\n';
-  nums.textContent = out;
-  nums.scrollTop = src.scrollTop;
-  const st = document.getElementById('uiSourceStats');
-  if (st) st.textContent = n + ' líneas · ' + src.value.length + ' chars';
-  const pos = document.getElementById('uiSourcePos');
-  if (pos) {
-    const off = src.selectionStart || 0;
-    const before = src.value.slice(0, off);
-    const ln = before.split('\n').length;
-    const col = before.length - before.lastIndexOf('\n');
-    pos.textContent = 'Ln ' + ln + ', Col ' + col;
-  }
-}
-
-function syncUiSourceScroll(){
-  const src = document.getElementById('uiSource');
-  const nums = document.getElementById('uiLineNums');
-  if (src && nums) nums.scrollTop = src.scrollTop;
-}
-
-function uiSourceKey(e){
-  const src = document.getElementById('uiSource');
-  if (!src) return;
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const s = src.selectionStart, en = src.selectionEnd;
-    src.value = src.value.slice(0,s) + '  ' + src.value.slice(en);
-    src.selectionStart = src.selectionEnd = s + 2;
-    updateUiSourceLines();
-  }
-  setTimeout(updateUiSourceLines, 0);
-}
-
-function uiSourceInsertTab(){
-  const src = document.getElementById('uiSource');
-  if (!src) return;
-  const s = src.selectionStart || 0;
-  src.value = src.value.slice(0,s) + '  ' + src.value.slice(src.selectionEnd || s);
-  src.selectionStart = src.selectionEnd = s + 2;
-  src.focus();
-  updateUiSourceLines();
-}
-
-function uiSourceClear(){
-  const src = document.getElementById('uiSource');
-  if (!src) return;
-  if (!confirm('Clear UI-Source editor?')) return;
-  src.value = '';
-  updateUiSourceLines();
-}
-
-function uploadUiSource(input){
-  const f = input.files && input.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    const src = document.getElementById('uiSource');
-    if (src) src.value = r.result;
-    updateUiSourceLines();
-    switchSourceTab('ui');
-  };
-  r.readAsText(f);
-  input.value = '';
-}
-
 function updateLines(){
   const src = document.getElementById('sSource');
   const nums = document.getElementById('lineNums');
@@ -2489,10 +2327,6 @@ async function editScript(id){
     document.getElementById('sName').value = s.name || '';
     document.getElementById('sDesc').value = s.description || '';
     document.getElementById('sSource').value = s.source || '';
-    const uiSrc = document.getElementById('uiSource');
-    if (uiSrc) uiSrc.value = s.uiSource || '';
-    switchSourceTab('script');
-    updateUiSourceLines();
     const om = document.getElementById('sObfMode');
     if (om) om.value = s.obfMode || (s.doObfuscate === false ? 'none' : 'qyrex');
     const km = document.getElementById('sKeyMode');
@@ -2521,9 +2355,6 @@ function resetCreateForm(){
   document.getElementById('sName').value = '';
   document.getElementById('sDesc').value = '';
   document.getElementById('sSource').value = '';
-  const uiSrc2 = document.getElementById('uiSource'); if (uiSrc2) uiSrc2.value = '';
-  switchSourceTab('script');
-  updateUiSourceLines();
   document.getElementById('createTitle').textContent = 'Create Script';
   document.getElementById('createSubtitle').textContent = 'Create or modify Lua script';
   document.getElementById('createBtnLabel').textContent = 'Create';
@@ -2584,7 +2415,6 @@ async function createScript(){
   const name = document.getElementById('sName').value.trim();
   const description = document.getElementById('sDesc').value.trim();
   const source = document.getElementById('sSource').value;
-  // UI-Source is editing-only and is intentionally NOT part of the save payload.
   const btn = document.getElementById('createBtn');
   const out = document.getElementById('createOut');
   const wrap = document.getElementById('createOutWrap');
@@ -4770,14 +4600,6 @@ function openLegal(k){
 function closeLegal(){ document.getElementById('qxModal').classList.remove('show'); }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
-
-document.addEventListener('DOMContentLoaded', function(){
-  try {
-    updateLines();
-    updateUiSourceLines();
-    switchSourceTab('script');
-  } catch(e) {}
-});
 </script>
 </body>
 </html>
