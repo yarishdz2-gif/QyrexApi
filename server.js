@@ -17,14 +17,6 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/auto';
 
-const QYREX_DELIVERY_SECRET = process.env.QYREX_DELIVERY_SECRET || JWT_SECRET;
-const QYREX_MASTER_KEY_INPUT = process.env.QYREX_MASTER_KEY || QYREX_DELIVERY_SECRET;
-const QYREX_MASTER_KEY = crypto.createHash('sha256').update(String(QYREX_MASTER_KEY_INPUT)).digest();
-const MAX_DELIVERY_CHUNK = 1400;
-const DELIVERY_SESSION_TTL_MS = 30 * 1000;
-const BOOTSTRAP_TTL_MS = 20 * 1000;
-const DELIVERY_CONTEXT = 'QYREX-A-D-V4';
-
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491';
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
@@ -86,9 +78,7 @@ app.use('/api/auth/', authLimiter);
 
 // Contadores en memoria para auto-ban
 const abuseHits = new Map(); // ip -> { n, t, uas }
-const scriptTokens = new Map(); // legacy token -> { scriptId, ip, exp, used, fp }
-const bootstrapTokens = new Map(); // one-shot token -> { scriptId, ip, fp, exp, used }
-const deliverySessions = new Map(); // sessionId -> ephemeral encrypted delivery state
+const scriptTokens = new Map(); // nonce -> { scriptId, ip, exp, used }
 const AUTO_BAN_THRESHOLD = 45;
 const AUTO_BAN_WINDOW = 2 * 60 * 1000;
 const TOKEN_TTL_MS = 25 * 1000;
@@ -159,160 +149,6 @@ function consumeScriptToken(scriptId, token, ip, ua) {
   return true;
 }
 
-
-function storageEncrypt(plaintext) {
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', QYREX_MASTER_KEY, iv);
-  const ciphertext = Buffer.concat([cipher.update(Buffer.from(String(plaintext ?? ''), 'utf8')), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return `v1.${iv.toString('base64url')}.${tag.toString('base64url')}.${ciphertext.toString('base64url')}`;
-}
-
-function storageDecrypt(value) {
-  if (typeof value !== 'string' || !value.startsWith('v1.')) return '';
-  try {
-    const [, ivB64, tagB64, dataB64] = value.split('.');
-    if (!ivB64 || !tagB64 || !dataB64) return '';
-    const iv = Buffer.from(ivB64, 'base64url');
-    const tag = Buffer.from(tagB64, 'base64url');
-    const data = Buffer.from(dataB64, 'base64url');
-    const decipher = crypto.createDecipheriv('aes-256-gcm', QYREX_MASTER_KEY, iv);
-    decipher.setAuthTag(tag);
-    return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
-  } catch {
-    return '';
-  }
-}
-
-function sha256Hex(data) {
-  return crypto.createHash('sha256').update(data).digest('hex');
-}
-
-function sha256Bytes(data) {
-  return crypto.createHash('sha256').update(data).digest();
-}
-
-function byteMask(data, key) {
-  const out = Buffer.alloc(data.length);
-  for (let i = 0; i < data.length; i++) out[i] = data[i] ^ key[i % key.length];
-  return out;
-}
-
-function deriveDeliveryMaterial(sessionKey, salt, label) {
-  return sha256Bytes(Buffer.concat([
-    Buffer.from(sessionKey),
-    Buffer.from(salt),
-    Buffer.from(label, 'utf8')
-  ]));
-}
-
-function issueBootstrapToken(scriptId, ip, ua) {
-  const nonce = crypto.randomBytes(20).toString('base64url');
-  const exp = Date.now() + BOOTSTRAP_TTL_MS;
-  const fp = deliveryFingerprint(ip, ua);
-  const payload = `${scriptId}.${exp}.${nonce}.${fp}.${DELIVERY_CONTEXT}`;
-  const sig = crypto.createHmac('sha256', QYREX_DELIVERY_SECRET).update(payload).digest('hex');
-  bootstrapTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, exp, used: false });
-  return `${exp.toString(36)}.${nonce}.${sig}`;
-}
-
-function consumeBootstrapToken(scriptId, token, ip, ua) {
-  if (typeof token !== 'string') return false;
-  const parts = token.split('.');
-  if (parts.length !== 3) return false;
-  const exp = parseInt(parts[0], 36);
-  const nonce = parts[1];
-  const sig = parts[2];
-  const rec = bootstrapTokens.get(nonce);
-  if (!rec || rec.used || rec.scriptId !== scriptId || Date.now() > exp || Date.now() > rec.exp) return false;
-  const fp = deliveryFingerprint(ip, ua);
-  if (fp !== rec.fp) return false;
-  const payload = `${scriptId}.${exp}.${nonce}.${fp}.${DELIVERY_CONTEXT}`;
-  const expected = crypto.createHmac('sha256', QYREX_DELIVERY_SECRET).update(payload).digest('hex');
-  if (sig.length !== expected.length) return false;
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return false;
-  rec.used = true;
-  bootstrapTokens.delete(nonce);
-  return true;
-}
-
-function createDeliveryChallenge(sessionId, cursor, previousChallenge) {
-  return crypto.createHmac('sha256', QYREX_DELIVERY_SECRET)
-    .update(`${sessionId}.${cursor}.${previousChallenge}.${DELIVERY_CONTEXT}`)
-    .digest('base64url');
-}
-
-function buildEncryptedChunk(session, item) {
-  const salt = crypto.randomBytes(16);
-  const iv = crypto.randomBytes(12);
-  const key = deriveDeliveryMaterial(session.key, salt, 'key');
-  const mask = deriveDeliveryMaterial(session.key, salt, 'mask');
-  const nextChallenge = createDeliveryChallenge(session.id, item.cursor, session.challenge);
-  const aad = Buffer.from(`${DELIVERY_CONTEXT}|${session.id}|${item.cursor}|${item.type}|${item.index}|${session.challenge}`, 'utf8');
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(aad);
-  const plaintext = Buffer.from(item.data, 'utf8');
-  const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const masked = byteMask(encrypted, mask);
-  const tag = cipher.getAuthTag();
-  session.challenge = nextChallenge;
-  session.cursor = item.cursor + 1;
-  return {
-    done: false,
-    cursor: item.cursor,
-    type: item.type,
-    index: item.index,
-    ciphertext: masked.toString('base64'),
-    ciphertextSha256: sha256Hex(masked),
-    sha256: sha256Hex(plaintext),
-    salt: salt.toString('base64'),
-    iv: iv.toString('base64'),
-    tag: tag.toString('base64'),
-    aad: aad.toString('base64'),
-    challenge: nextChallenge,
-    final: session.cursor >= session.chunks.length
-  };
-}
-
-function chunkPayload(text) {
-  const input = Buffer.from(String(text ?? ''), 'utf8');
-  const chunks = [];
-  for (let i = 0; i < input.length; i += MAX_DELIVERY_CHUNK) {
-    chunks.push(input.subarray(i, i + MAX_DELIVERY_CHUNK).toString('utf8'));
-  }
-  return chunks.length ? chunks : [''];
-}
-
-function createDeliverySession(scriptId, ip, ua, payload) {
-  const sessionId = crypto.randomBytes(24).toString('base64url');
-  const key = crypto.randomBytes(32);
-  const real = chunkPayload(payload);
-  const items = [];
-  let cursor = 0;
-  for (let i = 0; i < real.length; i++) {
-    items.push({ cursor: cursor++, type: 'real', index: i, data: real[i] });
-    if (i < real.length - 1 && crypto.randomInt(0, 3) === 0) {
-      items.push({ cursor: cursor++, type: 'decoy', index: -1, data: `-- qyrex:${crypto.randomBytes(7).toString('hex')}` });
-    }
-  }
-  const challenge = crypto.randomBytes(24).toString('base64url');
-  const session = {
-    id: sessionId,
-    scriptId: String(scriptId),
-    ip: String(ip || ''),
-    fp: deliveryFingerprint(ip, ua),
-    key,
-    chunks: items,
-    cursor: 0,
-    challenge,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + DELIVERY_SESSION_TTL_MS,
-    used: false
-  };
-  deliverySessions.set(sessionId, session);
-  return session;
-}
-
 function isScraperUa(ua) {
   const u = String(ua || '');
   if (!u.trim()) return true;
@@ -337,13 +173,7 @@ setInterval(() => {
   for (const [k, v] of scriptTokens) {
     if (!v || now > (v.exp || 0) + 60000 || v.used) scriptTokens.delete(k);
   }
-  for (const [k, v] of bootstrapTokens) {
-    if (!v || now > (v.exp || 0) || v.used) bootstrapTokens.delete(k);
-  }
-  for (const [k, v] of deliverySessions) {
-    if (!v || now > (v.expiresAt || 0) || v.used) deliverySessions.delete(k);
-  }
-}, 10000).unref?.();
+}, 30000).unref?.();
 
 app.use(async (req, res, next) => {
   try {
@@ -440,7 +270,7 @@ async function ensureOwnerAdmin() {
     }
   } catch (e) {}
 }
-mongoose.connection.on('connected', () => { ensureOwnerAdmin(); migrateLegacyScriptStorage(); });
+mongoose.connection.on('connected', () => { ensureOwnerAdmin(); });
 
 const Script = mongoose.models.QrexScript || mongoose.model('QrexScript', new mongoose.Schema({
   id: { type: String, default: () => crypto.randomBytes(12).toString('hex') },
@@ -449,8 +279,6 @@ const Script = mongoose.models.QrexScript || mongoose.model('QrexScript', new mo
   description: { type: String, default: '' },
   source: String,
   obfuscated: String,
-  sourceEnc: { type: String, default: '' },
-  obfuscatedEnc: { type: String, default: '' },
   executions: { type: Number, default: 0 },
   keyMode: { type: String, default: 'keyless' }, // keyless | key
   providerId: { type: String, default: '' },
@@ -465,58 +293,9 @@ const ScriptVersion = mongoose.models.QrexScriptVersion || mongoose.model('QrexS
   name: String,
   source: String,
   obfuscated: String,
-  sourceEnc: { type: String, default: '' },
-  obfuscatedEnc: { type: String, default: '' },
   note: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 }));
-
-
-async function migrateLegacyScriptStorage() {
-  try {
-    if (mongoose.connection.readyState !== 1) return;
-    const legacy = await Script.find({
-      $or: [
-        { source: { $exists: true, $ne: '' } },
-        { obfuscated: { $exists: true, $ne: '' } }
-      ],
-      $and: [
-        { $or: [{ sourceEnc: { $exists: false } }, { sourceEnc: '' }] },
-      ]
-    }).select('source obfuscated sourceEnc obfuscatedEnc').limit(250);
-    for (const doc of legacy) {
-      const update = {};
-      const unset = {};
-      if (doc.source && !doc.sourceEnc) update.sourceEnc = storageEncrypt(doc.source);
-      if (doc.obfuscated && !doc.obfuscatedEnc) update.obfuscatedEnc = storageEncrypt(doc.obfuscated);
-      if (doc.source) unset.source = 1;
-      if (doc.obfuscated) unset.obfuscated = 1;
-      if (Object.keys(update).length || Object.keys(unset).length) {
-        await Script.updateOne({ _id: doc._id }, { ...(Object.keys(update).length ? { $set: update } : {}), ...(Object.keys(unset).length ? { $unset: unset } : {}) });
-      }
-    }
-
-    const vLegacy = await ScriptVersion.find({
-      $or: [
-        { source: { $exists: true, $ne: '' } },
-        { obfuscated: { $exists: true, $ne: '' } }
-      ],
-      $and: [{ $or: [{ sourceEnc: { $exists: false } }, { sourceEnc: '' }] }]
-    }).select('source obfuscated sourceEnc obfuscatedEnc').limit(500);
-    for (const doc of vLegacy) {
-      const update = {}, unset = {};
-      if (doc.source && !doc.sourceEnc) update.sourceEnc = storageEncrypt(doc.source);
-      if (doc.obfuscated && !doc.obfuscatedEnc) update.obfuscatedEnc = storageEncrypt(doc.obfuscated);
-      if (doc.source) unset.source = 1;
-      if (doc.obfuscated) unset.obfuscated = 1;
-      if (Object.keys(update).length || Object.keys(unset).length) {
-        await ScriptVersion.updateOne({ _id: doc._id }, { ...(Object.keys(update).length ? { $set: update } : {}), ...(Object.keys(unset).length ? { $unset: unset } : {}) });
-      }
-    }
-  } catch (e) {
-    console.error('Legacy encryption migration failed:', e.message);
-  }
-}
 
 const Webhook = mongoose.models.QrexWebhook || mongoose.model('QrexWebhook', new mongoose.Schema({
   ownerId: String,
@@ -771,14 +550,7 @@ function needMongo(req, res, next) {
 }
 
 async function obfuscateWithQyrexObf(code) {
-  const passes = Math.max(1, Math.min(5, Number(process.env.QYREX_OBF_PASSES || 1)));
-  let current = String(code || '');
-  for (let i = 0; i < passes; i++) {
-    const result = qyrexObfuscate(current, { vm: true });
-    current = result && result.code ? result.code : String(result || '');
-    if (!current.trim()) throw new Error('Ofuscador produjo una respuesta vacía');
-  }
-  return current;
+  throw new Error('QyrexObf eliminado — usa QyrexObf local');
 }
 
 function xorBytes(buf, key) {
@@ -802,9 +574,10 @@ async function resolveObfuscated(source, mode) {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
   try {
-    // No reescribe la sintaxis del usuario. Hace varias capas independientes
-    // para que recuperar la fuente requiera atravesar múltiples envoltorios.
-    const code = await obfuscateWithQyrexObf(src);
+    // Stability-first: do not rewrite Lua tokens or inject independent chunks.
+    const result = qyrexObfuscate(src, { vm: true });
+    const code = result && result.code ? result.code : String(result || "");
+    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
     return { code, doObfuscate: true, obfMode: "qrex" };
   } catch (e) {
     console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
@@ -1066,13 +839,8 @@ app.get('/api/scripts', auth, needMongo, async (req, res) => {
 });
 
 app.get('/api/scripts/:id', auth, needMongo, async (req, res) => {
-  const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub }).lean();
+  const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
   if (!s) return res.status(404).json({ error: 'No encontrado' });
-  const source = storageDecrypt(s.sourceEnc) || s.source || '';
-  const obfuscated = storageDecrypt(s.obfuscatedEnc) || s.obfuscated || '';
-  delete s.sourceEnc; delete s.obfuscatedEnc;
-  s.source = source;
-  s.obfuscated = obfuscated;
   res.json(s);
 });
 
@@ -1110,10 +878,8 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
       ownerId: req.user.sub,
       name,
       description: description || '',
-      source: '',
-      obfuscated: '',
-      sourceEnc: storageEncrypt(source),
-      obfuscatedEnc: storageEncrypt(resolved.code),
+      source,
+      obfuscated: resolved.code,
       doObfuscate: resolved.doObfuscate,
       obfMode: resolved.obfMode,
       keyMode: mode,
@@ -1147,10 +913,8 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         scriptId: s.id,
         ownerId: req.user.sub,
         name: s.name,
-        source: '',
-        obfuscated: '',
-        sourceEnc: storageEncrypt(storageDecrypt(s.sourceEnc) || s.source || ''),
-        obfuscatedEnc: storageEncrypt(storageDecrypt(s.obfuscatedEnc) || s.obfuscated || ''),
+        source: s.source,
+        obfuscated: s.obfuscated,
         note: 'Auto-save before edit'
       });
       const vers = await ScriptVersion.find({ scriptId: s.id }).sort({ createdAt: -1 });
@@ -1178,20 +942,18 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
       s.doObfuscate = req.body.doObfuscate !== false && req.body.doObfuscate !== 'false';
       s.obfMode = s.doObfuscate ? (s.obfMode === 'local' ? 'local' : 'qrex') : 'none';
     }
-    const currentSource = storageDecrypt(s.sourceEnc) || s.source || '';
     if (source) {
-      s.source = '';
-      s.sourceEnc = storageEncrypt(source);
+      s.source = source;
       const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex');
-      s.obfuscated = '';
-      s.obfuscatedEnc = storageEncrypt(resolved.code);
+      s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
-    } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && currentSource) {
-      const resolved = await resolveObfuscated(currentSource, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
-      s.obfuscated = '';
-      s.obfuscatedEnc = storageEncrypt(resolved.code);
+      s.obfMode = resolved.obfMode;
+    } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
+      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
+      s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
+      s.obfMode = resolved.obfMode;
       s.obfMode = resolved.obfMode;
     }
     await s.save();
@@ -1273,78 +1035,25 @@ function wrapDeliveredScript(code, apiBase, scriptId) {
   return String(code || "");
 }
 
-// ========== SECURE V4 DELIVERY ==========
-let LOADER_TEMPLATE = '';
-try {
-  LOADER_TEMPLATE = fs.readFileSync(path.join(__dirname, 'loader.lua'), 'utf8');
-} catch (e) {
-  console.error('Could not load loader.lua', e.message);
+// ========== DOUBLE LINK + ANTI-SCRAPE ==========
+function buildDoubleLinkStub(cacheUrl) {
+  const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return [
+    'local __QYREX_URL = "' + u + '"',
+    'local __QYREX_SRC',
+    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
+    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
+    'end)',
+    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
+    '  error(__QYREX_ERR or "Qyrex delivery failed")',
+    'end',
+    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
+    'if type(__QYREX_FN) ~= "function" then',
+    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
+    'end',
+    'return __QYREX_FN()'
+  ].join('\n');
 }
-
-function buildSecureLoader(apiBase, scriptId) {
-  const safe = (v) => String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  if (!LOADER_TEMPLATE) throw new Error('loader.lua missing');
-  return LOADER_TEMPLATE
-    .replace(/https:\/\/YOUR-DOMAIN\.example\.com/g, safe(apiBase))
-    .replace(/local SCRIPT_ID = "demo"/, `local SCRIPT_ID = "${safe(scriptId)}"`)
-    .replace(/local KEY = "PUT-USER-KEY-HERE"/, 'local KEY = ""')
-    .replace(/local BOOTSTRAP = ""/, 'local BOOTSTRAP = "{{BOOTSTRAP}}"');
-}
-
-function buildSecureLoaderWithBootstrap(apiBase, scriptId, bootstrap) {
-  return buildSecureLoader(apiBase, scriptId).replace('{{BOOTSTRAP}}', String(bootstrap).replace(/\\/g, '\\\\').replace(/"/g, '\\"'));
-}
-
-function normalizeDeliveredPayload(s, req) {
-  let payload = storageDecrypt(s.obfuscatedEnc) || s.obfuscated || '';
-  if (s.keyMode === 'key' && s.providerId) {
-    return (async () => {
-      try {
-        const prov = await Provider.findById(s.providerId);
-        const base = publicBase(req);
-        const claimUrl = base + '/getkey/' + s.providerId;
-        const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
-        return buildKeyGateLua({
-          apiBase: base,
-          providerName: (prov && prov.name) || s.providerName || 'Qrex',
-          getKeyLink,
-          scriptId: s.id
-        });
-      } catch {
-        return payload;
-      }
-    })();
-  }
-  return Promise.resolve(payload);
-}
-
-async function startV4Delivery(req, res, scriptId, bootstrapRequired = true, bootstrapToken = '') {
-  const ip = clientIp(req);
-  const ua = req.headers['user-agent'] || '';
-  if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(scriptId));
-  if (isScraperUa(ua) && !/roblox|executor|synapse|fluxus|solara|wave|delta/i.test(ua)) {
-    return res.status(403).type('text/plain').send(decoyLua());
-  }
-  const hits = trackAbuse(ip, ua);
-  if (hits >= AUTO_BAN_THRESHOLD) {
-    await banIp(ip, 'Auto-ban V4 delivery flood');
-    return res.status(403).type('text/plain').send('-- banned');
-  }
-  const s = await Script.findOne({ id: scriptId });
-  if (!s) return res.status(404).type('text/plain').send('-- not found');
-  if (bootstrapRequired && !consumeBootstrapToken(s.id, bootstrapToken, ip, ua)) {
-    return res.status(403).type('text/plain').send(decoyLua());
-  }
-  const base = publicBase(req);
-  const nextBootstrap = issueBootstrapToken(s.id, ip, ua);
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-Qrex-Layer', 'bootstrap-v4');
-  return res.type('text/plain').send(buildSecureLoaderWithBootstrap(base, s.id, nextBootstrap));
-}
-
 function publicBase(req) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const proto = req.headers['x-forwarded-proto'] || 'https';
@@ -1374,12 +1083,62 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 
 async function serveRealScript(req, res, scriptId) {
   const ip = clientIp(req);
-  const ua = req.headers['user-agent'] || '';
-  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
-  if (!consumeScriptToken(scriptId, token, ip, ua)) {
-    return res.status(403).type('text/plain').send(decoyLua());
+  if (!mongoReady && mongoose.connection.readyState !== 1) {
+    return res.status(503).type('text/plain').send('-- offline');
   }
-  await startV4Delivery(req, res, scriptId, false, '');
+  const sk = 'cache:' + ip + ':' + scriptId;
+  const now = Date.now();
+  if (!global.__rawScriptHits) global.__rawScriptHits = new Map();
+  let se = global.__rawScriptHits.get(sk);
+  if (!se || now - se.t > 60000) se = { n: 0, t: now };
+  se.n++;
+  global.__rawScriptHits.set(sk, se);
+  if (se.n > 30) return res.status(429).type('text/plain').send('-- slow down');
+
+  const s = await Script.findOne({ id: scriptId });
+  if (!s) return res.status(404).type('text/plain').send('-- not found');
+
+  s.executions = (s.executions || 0) + 1;
+  await s.save();
+  await Execution.create({
+    scriptId: s.id,
+    scriptName: s.name,
+    ownerId: s.ownerId,
+    ip,
+    userAgent: req.headers['user-agent'] || ''
+  });
+  fireWebhooks(s.ownerId, 'script_exec', { scriptId: s.id, name: s.name, ip: String(ip).split(',')[0] });
+
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('X-Qrex-Layer', 'cache');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+
+  let payload = s.obfuscated || '';
+  if (s.keyMode === 'key' && s.providerId) {
+    try {
+      const prov = await Provider.findById(s.providerId);
+      const base = publicBase(req);
+      const claimUrl = base + '/getkey/' + s.providerId;
+      const getKeyLink = (prov && prov.adLink) ? prov.adLink : claimUrl;
+      payload = buildKeyGateLua({
+        apiBase: base,
+        providerName: (prov && prov.name) || s.providerName || 'Qrex',
+        getKeyLink,
+        scriptId: s.id
+      });
+    } catch (e) {
+      console.error('key gate wrap', e);
+    }
+  }
+  try {
+    payload = wrapDeliveredScript(payload, publicBase(req), s.id);
+  } catch (e) {
+    console.error('wrapDeliveredScript', e.message);
+  }
+  res.type('text/plain').send(payload);
 }
 
 app.get('/api/public/script/:id', async (req,res)=>{
@@ -1425,116 +1184,50 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
     return res.status(403).type('text/plain').send('-- banned');
   }
   if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
+
+  if (isScraperUa(ua) && !/roblox/i.test(ua)) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'public');
+    return res.type('text/plain').send(decoyLua());
+  }
+
   if (!mongoReady && mongoose.connection.readyState !== 1) {
     return res.status(503).type('text/plain').send('-- offline');
   }
-  const s = await Script.findOne({ id: req.params.id }).select('id').lean();
+
+  const s = await Script.findOne({ id: req.params.id }).select('id');
   if (!s) return res.status(404).type('text/plain').send('-- not found');
-  const bootstrap = issueBootstrapToken(s.id, ip, ua);
+
+  const token = issueScriptToken(s.id, ip, ua);
   const base = publicBase(req);
+  const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
+
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.setHeader('Pragma', 'no-cache');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-Qrex-Layer', 'bootstrap');
-  res.type('text/plain').send(buildSecureLoaderWithBootstrap(base, s.id, bootstrap));
+  res.setHeader('X-Qrex-Layer', 'public');
+  res.type('text/plain').send(buildDoubleLinkStub(cacheUrl));
 });
 
 app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api/raw/cache/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
-  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
   const ip = clientIp(req);
   const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer2');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
   if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
-  if (!consumeScriptToken(req.params.id, token, ip, ua)) {
+
+  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
+  const ok = consumeScriptToken(req.params.id, token, ip, ua);
+  if (!ok) {
+    if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Qrex-Layer', 'cache');
     return res.status(403).type('text/plain').send(decoyLua());
   }
-  const bootstrap = issueBootstrapToken(req.params.id, ip, ua);
-  const base = publicBase(req);
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-Qrex-Layer', 'cache-bootstrap');
-  res.type('text/plain').send(buildSecureLoaderWithBootstrap(base, req.params.id, bootstrap));
-});
-
-// V4 handshake + encrypted one-chunk-at-a-time delivery.
-app.post('/api/v4/handshake', rawBurstLimiter, rawLimiter, async (req, res) => {
-  try {
-    const ip = clientIp(req);
-    const ua = req.headers['user-agent'] || '';
-    const body = req.body || {};
-    const scriptId = String(body.scriptId || '');
-    const bootstrap = String(body.bootstrap || '');
-    if (!scriptId || !bootstrap) return res.status(400).json({ error: 'bad handshake' });
-    const s = await Script.findOne({ id: scriptId }).lean();
-    if (!s) return res.status(404).json({ error: 'not found' });
-    if (!consumeBootstrapToken(scriptId, bootstrap, ip, ua)) return res.status(403).json({ error: 'expired bootstrap' });
-    let payload = storageDecrypt(s.obfuscatedEnc) || s.obfuscated || '';
-    if (s.keyMode === 'key' && s.providerId) {
-      try {
-        const prov = await Provider.findById(s.providerId);
-        const base = publicBase(req);
-        const claimUrl = base + '/getkey/' + s.providerId;
-        payload = buildKeyGateLua({
-          apiBase: base,
-          providerName: (prov && prov.name) || s.providerName || 'Qrex',
-          getKeyLink: (prov && prov.adLink) ? prov.adLink : claimUrl,
-          scriptId: s.id
-        });
-      } catch (e) { console.error('v4 key gate', e.message); }
-    }
-    if (!payload) return res.status(410).json({ error: 'empty payload' });
-    const session = createDeliverySession(scriptId, ip, ua, payload);
-    s.executions = (s.executions || 0) + 1;
-    await s.save();
-    await Execution.create({ scriptId: s.id, scriptName: s.name, ownerId: s.ownerId, ip, userAgent: ua });
-    fireWebhooks(s.ownerId, 'script_exec', { scriptId: s.id, name: s.name, ip: String(ip).split(',')[0] });
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Qrex-Layer', 'handshake-v4');
-    res.json({
-      version: 4,
-      sessionId: session.id,
-      sessionKey: session.key.toString('base64'),
-      firstChallenge: session.challenge,
-      total: session.chunks.length,
-      realCount: chunkPayload(payload).length,
-      sourceSha256: sha256Hex(payload),
-      expiresAt: session.expiresAt
-    });
-  } catch (e) {
-    console.error('v4 handshake', e);
-    res.status(500).json({ error: 'handshake failed' });
-  }
-});
-
-app.post('/api/v4/chunk', rawBurstLimiter, rawLimiter, async (req, res) => {
-  try {
-    const ip = clientIp(req);
-    const ua = req.headers['user-agent'] || '';
-    const sessionId = String((req.body || {}).sessionId || '');
-    const challenge = String((req.body || {}).challenge || '');
-    const session = deliverySessions.get(sessionId);
-    if (!session || session.used || Date.now() > session.expiresAt) return res.status(403).json({ error: 'invalid session' });
-    if (session.ip !== String(ip || '') || session.fp !== deliveryFingerprint(ip, ua)) return res.status(403).json({ error: 'session binding failed' });
-    if (session.challenge !== challenge) return res.status(403).json({ error: 'challenge failed' });
-    const item = session.chunks[session.cursor];
-    if (!item) {
-      session.used = true;
-      deliverySessions.delete(sessionId);
-      return res.json({ done: true });
-    }
-    const packet = buildEncryptedChunk(session, item);
-    if (session.cursor >= session.chunks.length) session.used = true;
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Qrex-Layer', 'chunk-v4');
-    res.json(packet);
-    if (session.used) deliverySessions.delete(sessionId);
-  } catch (e) {
-    console.error('v4 chunk', e);
-    res.status(500).json({ error: 'chunk failed' });
-  }
+  return serveRealScript(req, res, req.params.id);
 });
 
 // ========== VIP REDEEM ==========
