@@ -1,14 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-let qyrexObfuscate = null;
-try {
-  ({ obfuscate: qyrexObfuscate } = require('./obfuscate'));
-} catch (e) {
-  // The local packer remains available for development and recovery.  Do not
-  // silently claim that a VM transform was applied when this module is absent.
-  console.warn('[SECURITY] ./obfuscate is unavailable; only local packaging can be used:', e.message);
-}
+const { obfuscate: qyrexObfuscate } = require('./obfuscate');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -19,81 +12,7 @@ const fs = require('fs');
 const app = express();
 app.set('trust proxy', 1);
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
-function requireProductionSecret(name, configuredValue, bytes) {
-  const value = String(configuredValue || '').trim();
-  if (value) return value;
-  if (IS_PRODUCTION) {
-    throw new Error(`[SECURITY] ${name} is required in production.`);
-  }
-  const generated = crypto.randomBytes(bytes).toString('base64url');
-  console.warn(`[SECURITY] ${name} is not configured; using an ephemeral development secret.`);
-  return generated;
-}
-
-function normalizePublicBase(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-  let parsed;
-  try {
-    parsed = new URL(raw);
-  } catch {
-    throw new Error('[SECURITY] PUBLIC_BASE_URL must be an absolute URL.');
-  }
-  if (parsed.username || parsed.password || parsed.search || parsed.hash ||
-      (parsed.pathname && parsed.pathname !== '/')) {
-    throw new Error('[SECURITY] PUBLIC_BASE_URL must contain only scheme and host.');
-  }
-  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && !IS_PRODUCTION)) {
-    throw new Error('[SECURITY] PUBLIC_BASE_URL must use HTTPS in production.');
-  }
-  return parsed.origin;
-}
-
-function parseOriginSet(value) {
-  const result = new Set();
-  for (const part of String(value || '').split(',')) {
-    const candidate = part.trim();
-    if (!candidate) continue;
-    try {
-      const origin = new URL(candidate).origin;
-      if (origin !== 'null') result.add(origin);
-    } catch {
-      throw new Error('[SECURITY] CORS_ORIGINS contains an invalid origin.');
-    }
-  }
-  return result;
-}
-
-function decodeSourceKey(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return null;
-  const key = /^[0-9a-f]{64}$/i.test(raw)
-    ? Buffer.from(raw, 'hex')
-    : Buffer.from(raw.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
-  if (key.length !== 32) {
-    throw new Error('[SECURITY] SCRIPT_SOURCE_KEY must be exactly 32 bytes (base64/base64url or 64 hex chars).');
-  }
-  return key;
-}
-
-const JWT_SECRET = requireProductionSecret('JWT_SECRET', process.env.JWT_SECRET, 48);
-const PUBLIC_BASE_URL = normalizePublicBase(process.env.PUBLIC_BASE_URL);
-if (IS_PRODUCTION && !PUBLIC_BASE_URL) {
-  throw new Error('[SECURITY] PUBLIC_BASE_URL is required in production.');
-}
-const SOURCE_ENCRYPTION_KEY = decodeSourceKey(process.env.SCRIPT_SOURCE_KEY);
-if (IS_PRODUCTION && !SOURCE_ENCRYPTION_KEY) {
-  throw new Error('[SECURITY] SCRIPT_SOURCE_KEY is required in production.');
-}
-if (!SOURCE_ENCRYPTION_KEY) {
-  console.warn('[SECURITY] SCRIPT_SOURCE_KEY is not configured; source code is stored in plaintext in development only.');
-}
-
-const CORS_ORIGINS = parseOriginSet(process.env.CORS_ORIGINS);
-if (PUBLIC_BASE_URL) CORS_ORIGINS.add(PUBLIC_BASE_URL);
-
+const JWT_SECRET = process.env.JWT_SECRET || 'cambia-este-secret-por-uno-largo';
 const MONGO_URI = process.env.MONGO_URI || '';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/auto';
@@ -104,36 +23,6 @@ const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.
 
 const PORT = process.env.PORT || 10000;
 
-function protectSourceAtRest(source) {
-  const plaintext = String(source || '');
-  if (!SOURCE_ENCRYPTION_KEY) return plaintext;
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', SOURCE_ENCRYPTION_KEY, iv);
-  const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return ['enc', 'v1', iv.toString('base64url'), tag.toString('base64url'), ciphertext.toString('base64url')].join(':');
-}
-
-function revealSourceAtRest(value) {
-  const stored = String(value || '');
-  if (!stored.startsWith('enc:v1:')) return stored; // legacy rows stay readable until their next edit.
-  if (!SOURCE_ENCRYPTION_KEY) {
-    throw new Error('Source encryption is configured in the database but SCRIPT_SOURCE_KEY is unavailable.');
-  }
-  const parts = stored.split(':');
-  if (parts.length !== 5 || parts[0] !== 'enc' || parts[1] !== 'v1') {
-    throw new Error('Invalid encrypted source format.');
-  }
-  try {
-    const decipher = crypto.createDecipheriv('aes-256-gcm', SOURCE_ENCRYPTION_KEY,
-      Buffer.from(parts[2], 'base64url'));
-    decipher.setAuthTag(Buffer.from(parts[3], 'base64url'));
-    return Buffer.concat([decipher.update(Buffer.from(parts[4], 'base64url')), decipher.final()]).toString('utf8');
-  } catch {
-    throw new Error('Encrypted source cannot be authenticated. Check SCRIPT_SOURCE_KEY.');
-  }
-}
-
 app.use(helmet({
   contentSecurityPolicy: false,
   frameguard: { action: 'deny' },
@@ -141,24 +30,13 @@ app.use(helmet({
   hidePoweredBy: true
 }));
 app.disable('x-powered-by');
-app.use(cors({
-  origin(origin, done) {
-    // Requests without Origin are non-browser clients (Roblox/executors, health checks).
-    // Browser credentials are allowed only for explicit origins.
-    if (!origin) return done(null, false);
-    return done(null, CORS_ORIGINS.has(origin));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Authorization', 'Content-Type'],
-  maxAge: 600
-}));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 
 function clientIp(req) {
-  const resolved = req && req.ip ? String(req.ip) : '';
-  const direct = req && req.socket && req.socket.remoteAddress ? String(req.socket.remoteAddress) : '';
-  return (resolved || direct || '?').replace(/^::ffff:/, '');
+  const xf = req.headers['x-forwarded-for'];
+  if (xf) return String(xf).split(',')[0].trim();
+  return (req.socket?.remoteAddress || req.ip || '?').replace(/^::ffff:/, '');
 }
 
 // --- Rate limits por capa ---
@@ -200,10 +78,10 @@ app.use('/api/auth/', authLimiter);
 
 // Contadores en memoria para auto-ban
 const abuseHits = new Map(); // ip -> { n, t, uas }
-const scriptTokens = new Map(); // nonce -> { scriptId, purpose, ip, fp, exp, used, bindUa }
+const scriptTokens = new Map(); // nonce -> { scriptId, ip, exp, used }
 const AUTO_BAN_THRESHOLD = 45;
 const AUTO_BAN_WINDOW = 2 * 60 * 1000;
-const TOKEN_TTL_MS = Math.max(15000, Math.min(120000, Number(process.env.SCRIPT_TOKEN_TTL_MS) || 60000));
+const TOKEN_TTL_MS = 25 * 1000;
 const SCRAPER_UA_RE = /curl|wget|python|requests|axios|node-fetch|got\/|httpclient|libwww|scrapy|postman|insomnia|go-http|java\/|okhttp|httpie|discord|bot|crawler|spider/i;
 
 function trackAbuse(ip, ua) {
@@ -237,54 +115,38 @@ function deliveryFingerprint(ip, ua) {
     .slice(0, 24);
 }
 
-// One-shot delivery tickets. `purpose` prevents a key-gate ticket from being
-// reused as authorization for the protected payload. UA binding is optional
-// because executor request() and game:HttpGet() may expose different UAs.
-function issueScriptToken(scriptId, ip, ua, purpose = 'payload', options = {}) {
-  const safePurpose = ['gate', 'payload'].includes(String(purpose)) ? String(purpose) : 'payload';
-  const bindUa = options.bindUa !== false;
+function issueScriptToken(scriptId, ip, ua) {
   const nonce = crypto.randomBytes(18).toString('base64url');
   const exp = Date.now() + TOKEN_TTL_MS;
-  const fp = deliveryFingerprint(ip, bindUa ? ua : '');
-  const payload = [scriptId, safePurpose, exp, nonce, fp].join('.');
+  const fp = deliveryFingerprint(ip, ua);
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
   const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
-  const token = exp.toString(36) + '.' + nonce + '.' + safePurpose + '.' + sig;
-  scriptTokens.set(nonce, {
-    scriptId,
-    purpose: safePurpose,
-    ip: String(ip || ''),
-    fp,
-    exp,
-    used: false,
-    bindUa
-  });
+  const token = exp.toString(36) + '.' + nonce + '.' + sig;
+  scriptTokens.set(nonce, { scriptId, ip: String(ip || ''), fp, exp, used: false });
   return token;
 }
 
 function consumeScriptToken(scriptId, token, ip, ua) {
-  if (!token || typeof token !== 'string') return null;
+  if (!token || typeof token !== 'string') return false;
   const parts = token.split('.');
-  if (parts.length !== 4) return null;
+  if (parts.length !== 3) return false;
   const exp = parseInt(parts[0], 36);
   const nonce = parts[1];
-  const purpose = parts[2];
-  const sig = parts[3];
-  if (!exp || !nonce || !sig || !['gate', 'payload'].includes(purpose)) return null;
+  const sig = parts[2];
+  if (!exp || !nonce || !sig) return false;
   const now = Date.now();
-  if (now > exp) return null;
+  if (now > exp) return false;
   const rec = scriptTokens.get(nonce);
-  if (!rec || rec.used || rec.scriptId !== scriptId || rec.purpose !== purpose) return null;
-  if (now > rec.exp) return null;
-  const fp = deliveryFingerprint(ip, rec.bindUa ? ua : '');
-  if (fp !== rec.fp) return null;
-  const payload = [scriptId, purpose, exp, nonce, fp].join('.');
+  if (!rec || rec.used || rec.scriptId !== scriptId) return false;
+  if (now > rec.exp) return false;
+  const fp = deliveryFingerprint(ip, ua);
+  if (fp !== rec.fp) return false;
+  const payload = scriptId + '.' + exp + '.' + nonce + '.' + fp;
   const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex').slice(0, 48);
-  const got = Buffer.from(sig, 'utf8');
-  const want = Buffer.from(expected, 'utf8');
-  if (got.length !== want.length || !crypto.timingSafeEqual(want, got)) return null;
+  if (expected.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig))) return false;
   rec.used = true;
   scriptTokens.set(nonce, rec);
-  return rec;
+  return true;
 }
 
 function isScraperUa(ua) {
@@ -422,7 +284,6 @@ const Script = mongoose.models.QrexScript || mongoose.model('QrexScript', new mo
   providerId: { type: String, default: '' },
   providerName: { type: String, default: '' },
   doObfuscate: { type: Boolean, default: true },
-  obfMode: { type: String, enum: ['none', 'qrex', 'local', 'hybrid'], default: 'hybrid' },
   createdAt: { type: Date, default: Date.now }
 }));
 
@@ -553,8 +414,77 @@ const VipCode = mongoose.models.QrexVipCode || mongoose.model('QrexVipCode', new
   createdAt: { type: Date, default: Date.now }
 }));
 
-// Never ship deterministic VIP codes.  Create keys through the authenticated
-// admin endpoint so their issuance is auditable and revocable.
+const BOOTSTRAP_VIP_KEYS = [
+  "QYREX-VIP-E13F-520E-164079",
+  "QYREX-VIP-4EC0-79EE-C72E92",
+  "QYREX-VIP-B1FC-1CFB-928515",
+  "QYREX-VIP-1BAB-2B17-E385B8",
+  "QYREX-VIP-D567-E462-7B586A",
+  "QYREX-VIP-E02B-C3AA-EAA997",
+  "QYREX-VIP-5F4A-B79E-093EC1",
+  "QYREX-VIP-705A-0FBE-F807A9",
+  "QYREX-VIP-B72D-EC5C-25EE03",
+  "QYREX-VIP-0357-C159-B37CAB",
+  "QYREX-VIP-6845-6F86-A6AA32",
+  "QYREX-VIP-CA88-B276-7AD428",
+  "QYREX-VIP-957A-8576-3005B1",
+  "QYREX-VIP-D9C8-404C-84374A",
+  "QYREX-VIP-B48C-511B-42069C",
+  "QYREX-VIP-2A97-76F0-DA3DAD",
+  "QYREX-VIP-37EA-A4DE-04F9CC",
+  "QYREX-VIP-51CE-DCDA-FE352C",
+  "QYREX-VIP-72F0-07BF-E27516",
+  "QYREX-VIP-51E8-954E-06A868",
+  "QYREX-VIP-7BAF-CE84-E9F4E9",
+  "QYREX-VIP-F062-E538-9CE073",
+  "QYREX-VIP-6CEC-4362-694B38",
+  "QYREX-VIP-6B16-BADE-FEEC7F",
+  "QYREX-VIP-A24C-CF36-F986A8",
+  "QYREX-VIP-F1E1-C28A-C1783B",
+  "QYREX-VIP-6257-6E1A-977A02",
+  "QYREX-VIP-7BF7-6E70-B9DD8B",
+  "QYREX-VIP-D1D9-942F-21883B",
+  "QYREX-VIP-3881-4939-143D40",
+  "QYREX-VIP-FA48-7E1B-4B5B46",
+  "QYREX-VIP-9580-EC09-A36C4E",
+  "QYREX-VIP-F956-FE91-0DA808",
+  "QYREX-VIP-F420-8961-E26A8A",
+  "QYREX-VIP-7A6A-826B-A3EB2E",
+  "QYREX-VIP-E8DB-1DFD-BD1F75",
+  "QYREX-VIP-DFBE-1551-F2D4EB",
+  "QYREX-VIP-6C8B-AAA9-F05A61",
+  "QYREX-VIP-7FFE-1676-3AD751",
+  "QYREX-VIP-814E-7BB8-080F11",
+  "QYREX-VIP-5FAE-B230-6419A9",
+  "QYREX-VIP-6A6A-C171-095C8D",
+  "QYREX-VIP-518A-D491-EEA75E",
+  "QYREX-VIP-4B53-B67B-C90B60",
+  "QYREX-VIP-427E-6264-1E8A12",
+  "QYREX-VIP-64AC-46DC-BAF4A9",
+  "QYREX-VIP-DAF5-C082-F3F0A0",
+  "QYREX-VIP-B595-BCB7-F9E64A",
+  "QYREX-VIP-57D6-79C1-8EFB99",
+  "QYREX-VIP-55FF-14BD-3FFB06"
+];
+
+async function seedVipKeysIfEmpty() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const count = await VipCode.countDocuments();
+    if (count > 0) return;
+    const docs = BOOTSTRAP_VIP_KEYS.map(code => ({
+      code: code.toUpperCase(),
+      days: 10,
+      note: 'batch-50-bootstrap',
+      createdBy: 'system'
+    }));
+    await VipCode.insertMany(docs, { ordered: false }).catch(() => {});
+    console.log('VIP keys seeded:', docs.length);
+  } catch (e) {
+    console.error('VIP seed error', e.message);
+  }
+}
+mongoose.connection.on('connected', () => { seedVipKeysIfEmpty(); });
 
 function genKey() {
   return crypto.randomUUID ? crypto.randomUUID() : [
@@ -589,21 +519,21 @@ async function signToken(user, req) {
   return jwt.sign({ sub: user._id.toString(), username: user.username, sid: sessionId }, JWT_SECRET, { expiresIn: '30d' });
 }
 
-async function auth(req, res, next) {
+function auth(req, res, next) {
   const h = req.headers.authorization || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
   if (!token) return res.status(401).json({ error: 'No autorizado' });
   try {
-    const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-    if (!user || !user.sub || !user.sid) {
-      return res.status(401).json({ error: 'Sesión inválida' });
+    req.user = jwt.verify(token, JWT_SECRET);
+    if (req.user.sid) {
+      Session.findOne({ sessionId: req.user.sid, userId: req.user.sub, revokedAt: null }).then(sess => {
+        if (!sess) return res.status(401).json({ error: 'Sesión cerrada o inválida' });
+        sess.lastSeenAt = new Date(); sess.save().catch(() => {});
+        next();
+      }).catch(() => res.status(401).json({ error: 'Sesión inválida' }));
+      return;
     }
-    const sess = await Session.findOne({ sessionId: user.sid, userId: user.sub, revokedAt: null });
-    if (!sess) return res.status(401).json({ error: 'Sesión cerrada o inválida' });
-    req.user = user;
-    sess.lastSeenAt = new Date();
-    sess.save().catch(() => {});
-    return next();
+    next();
   } catch {
     return res.status(401).json({ error: 'Token invalido' });
   }
@@ -637,198 +567,71 @@ function wrapWithEnvLogger(source) {
 }
 
 async function resolveObfuscated(source, mode) {
-  const src = String(source || '');
-  if (!src.trim()) throw new Error('Código vacío');
-  const m = String(mode || 'qrex').toLowerCase().replace(/^qyrex$/, 'qrex');
-
-  if (m === 'none' || m === 'false' || m === 'plain') {
-    return { code: src, doObfuscate: false, obfMode: 'none' };
+  const src = String(source || "");
+  if (!src.trim()) throw new Error("Código vacío");
+  const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
+  if (m === "none" || m === "false" || m === "plain") {
+    return { code: src, doObfuscate: false, obfMode: "none" };
   }
-
-  if (m === 'local') {
-    return { code: localObfuscate(src), doObfuscate: true, obfMode: 'local' };
-  }
-
-  if (typeof qyrexObfuscate !== 'function') {
-    // Never label local packaging as a VM transformation.  This keeps the
-    // service usable when an optional transformer is missing while making the
-    // downgrade explicit in the saved metadata and logs.
-    console.warn('[SECURITY] Requested VM/hybrid obfuscation without ./obfuscate; using local packaging.');
-    return { code: localObfuscate(src), doObfuscate: true, obfMode: 'local' };
-  }
-
   try {
+    // Stability-first: do not rewrite Lua tokens or inject independent chunks.
     const result = qyrexObfuscate(src, { vm: true });
-    const vmCode = result && result.code ? result.code : String(result || '');
-    if (!vmCode.trim()) throw new Error('Ofuscador produjo una respuesta vacía');
-
-    // Hybrid keeps the VM output byte-for-byte intact, then adds a randomized
-    // transport/integrity layer. This avoids token rewriting that can break Luau.
-    if (m === 'hybrid') {
-      return { code: localObfuscate(vmCode), doObfuscate: true, obfMode: 'hybrid' };
-    }
-
-    return { code: vmCode, doObfuscate: true, obfMode: 'qrex' };
+    const code = result && result.code ? result.code : String(result || "");
+    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
+    return { code, doObfuscate: true, obfMode: "qrex" };
   } catch (e) {
-    console.error('QyrexObf fail:', e && e.stack ? e.stack : e);
-    throw new Error('Ofuscación falló: ' + (e.message || 'error'));
+    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación falló: " + (e.message || "error"));
   }
 }
 
-function _shuffleChars(value) {
-  const a = String(value).split('');
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = crypto.randomInt(0, i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a.join('');
-}
-
-function _luaId() {
-  return '_' + crypto.randomBytes(6).toString('hex');
-}
-
-function _adler32(buf) {
-  let a = 1;
-  let b = 0;
-  for (const byte of buf) {
-    a = (a + byte) % 65521;
-    b = (b + a) % 65521;
-  }
-  return b * 65536 + a;
-}
-
-/**
- * Compatibility-first polymorphic packer.
- *
- * It does NOT rewrite user Luau tokens. Instead it encrypts the exact UTF-8
- * bytes, uses a per-build Base64 alphabet, randomized chunk order, per-build
- * byte masks and an integrity check. Every build has a structurally different
- * loader while the decoded source remains byte-identical to the input.
- */
 function localObfuscate(code) {
   const raw = String(code || '');
   if (!raw) return '-- empty';
-  if (Buffer.byteLength(raw, 'utf8') > 2_000_000) {
-    throw new Error('Script demasiado grande para ofuscar (máx. 2 MB)');
-  }
-
+  if (raw.length > 1500000) throw new Error('Script demasiado grande para ofuscar');
   const src = Buffer.from(raw, 'utf8');
-  const key = crypto.randomBytes(crypto.randomInt(19, 41));
-  const mul = crypto.randomInt(5, 126) * 2 + 1; // odd, 11..251
-  const add = crypto.randomInt(0, 256);
-  const step = crypto.randomInt(1, 256);
-  const encrypted = Buffer.allocUnsafe(src.length);
-
-  for (let i = 0; i < src.length; i++) {
-    const pos = i + 1; // Lua is 1-based
-    const mask = (pos * mul + add + Math.floor(pos / 7) * step) & 0xff;
-    encrypted[i] = src[i] ^ key[i % key.length] ^ mask;
+  let data = src;
+  const keys = [];
+  for (let layer = 0; layer < 5; layer++) {
+    const key = crypto.randomBytes(16);
+    keys.push(key);
+    data = xorBytes(data, key);
+    data = Buffer.from(data.toString('base64'), 'utf8');
   }
-
-  const stdAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  const alphabet = _shuffleChars(stdAlphabet);
-  const translate = Object.fromEntries([...stdAlphabet].map((c, i) => [c, alphabet[i]]));
-  const encoded = encrypted.toString('base64').replace(/[A-Za-z0-9+/]/g, c => translate[c]);
-
-  const chunks = [];
-  let off = 0;
-  while (off < encoded.length) {
-    const size = crypto.randomInt(96, 225);
-    chunks.push(encoded.slice(off, off + size));
-    off += size;
-  }
-
-  const perm = chunks.map((_, i) => i);
-  for (let i = perm.length - 1; i > 0; i--) {
-    const j = crypto.randomInt(0, i + 1);
-    [perm[i], perm[j]] = [perm[j], perm[i]];
-  }
-  const storedChunks = perm.map(i => chunks[i]);
-  const order = new Array(chunks.length);
-  perm.forEach((originalIndex, storedIndex) => { order[originalIndex] = storedIndex + 1; });
-
-  const nChunks = _luaId();
-  const nOrder = _luaId();
-  const nAlphabet = _luaId();
-  const nKey = _luaId();
-  const nJoin = _luaId();
-  const nB64 = _luaId();
-  const nXor = _luaId();
-  const nDecrypt = _luaId();
-  const nAdler = _luaId();
-  const nEnc = _luaId();
-  const nData = _luaId();
-  const nFn = _luaId();
-  const nErr = _luaId();
-
-  const keyLiteral = '{' + Array.from(key).join(',') + '}';
-  const chunksLiteral = '{' + storedChunks.map(c => JSON.stringify(c)).join(',') + '}';
-  const orderLiteral = '{' + order.join(',') + '}';
-  const checksum = _adler32(src);
-
+  const keyLits = keys.map(k => '{' + Array.from(k).join(',') + '}').join(',');
+  const payload = data.toString('utf8').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const lines = [
-    '-- Qyrex polymorphic compatibility pack',
-    'local ' + nChunks + '=' + chunksLiteral,
-    'local ' + nOrder + '=' + orderLiteral,
-    'local ' + nAlphabet + '=' + JSON.stringify(alphabet),
-    'local ' + nKey + '=' + keyLiteral,
-    'local function ' + nJoin + '()',
-    '  local o={}',
-    '  for i=1,#' + nOrder + ' do o[i]=' + nChunks + '[' + nOrder + '[i]] end',
-    '  return table.concat(o)',
+    '-- Qrex local protect (5x XOR+B64)',
+    'local _k={' + keyLits + '}',
+    'local _d="' + payload + '"',
+    'local function _xb(s,key)',
+    '  local t={}',
+    '  for i=1,#s do t[i]=string.char(bit32.bxor(string.byte(s,i), key[((i-1)%#key)+1])) end',
+    '  return table.concat(t)',
     'end',
-    'local function ' + nB64 + '(s)',
-    '  local m={}',
-    '  for i=1,#' + nAlphabet + ' do m[string.sub(' + nAlphabet + ',i,i)]=i-1 end',
-    '  local o,n={},0',
-    '  for i=1,#s,4 do',
-    '    local a=string.sub(s,i,i)',
-    '    local b=string.sub(s,i+1,i+1)',
-    '    local c=string.sub(s,i+2,i+2)',
-    '    local d=string.sub(s,i+3,i+3)',
-    '    local v1=m[a] or 0; local v2=m[b] or 0; local v3=m[c] or 0; local v4=m[d] or 0',
-    '    local x=v1*262144+v2*4096+v3*64+v4',
-    '    n=n+1; o[n]=string.char(math.floor(x/65536)%256)',
-    '    if c~="=" and c~="" then n=n+1; o[n]=string.char(math.floor(x/256)%256) end',
-    '    if d~="=" and d~="" then n=n+1; o[n]=string.char(x%256) end',
-    '  end',
-    '  return table.concat(o)',
+    'local function _b64(data)',
+    "  local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'",
+    "  data=string.gsub(data,'[^'..b..'=]','')",
+    "  return (data:gsub('.',function(x)",
+    "    if x=='=' then return '' end",
+    "    local r,f='',(b:find(x)-1)",
+    "    for i=6,1,-1 do r=r..(f%2^i - f%2^(i-1) > 0 and '1' or '0') end",
+    '    return r',
+    "  end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)",
+    '    if #x~=8 then return \'\' end',
+    '    local c=0',
+    "    for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end",
+    '    return string.char(c)',
+    '  end))',
     'end',
-    'local ' + nXor + '=(bit32 and bit32.bxor) or function(a,b)',
-    '  local r,p=0,1',
-    '  while a>0 or b>0 do',
-    '    local aa=a%2; local bb=b%2',
-    '    if aa~=bb then r=r+p end',
-    '    a=(a-aa)/2; b=(b-bb)/2; p=p*2',
-    '  end',
-    '  return r',
+    'for i=5,1,-1 do',
+    '  _d=_b64(_d)',
+    '  _d=_xb(_d,_k[i])',
     'end',
-    'local function ' + nDecrypt + '(s)',
-    '  local o={}',
-    '  for i=1,#s do',
-    '    local mask=(i*' + mul + '+' + add + '+math.floor(i/7)*' + step + ')%256',
-    '    local k=' + nKey + '[((i-1)%#' + nKey + ')+1]',
-    '    o[i]=string.char(' + nXor + '(string.byte(s,i),' + nXor + '(k,mask)))',
-    '  end',
-    '  return table.concat(o)',
-    'end',
-    'local function ' + nAdler + '(s)',
-    '  local a,b=1,0',
-    '  for i=1,#s do a=(a+string.byte(s,i))%65521; b=(b+a)%65521 end',
-    '  return b*65536+a',
-    'end',
-    'local ' + nEnc + '=' + nJoin + '()',
-    'local ' + nData + '=' + nDecrypt + '(' + nB64 + '(' + nEnc + '))',
-    'if ' + nAdler + '(' + nData + ')~=' + checksum + ' then error("protected payload integrity failure") end',
-    'local ' + nFn + ',' + nErr + '=(loadstring or load)(' + nData + ')',
-    'if type(' + nFn + ')~="function" then error(' + nErr + ' or "protected compile failure") end',
-    'return ' + nFn + '()'
+    'assert((loadstring or load)(_d))()'
   ];
-
   return lines.join('\n');
 }
-
 
 
 app.get('/api/health', (req, res) => {
@@ -1038,22 +841,13 @@ app.get('/api/scripts', auth, needMongo, async (req, res) => {
 app.get('/api/scripts/:id', auth, needMongo, async (req, res) => {
   const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
   if (!s) return res.status(404).json({ error: 'No encontrado' });
-  try {
-    const response = s.toObject();
-    response.source = revealSourceAtRest(response.source);
-    res.json(response);
-  } catch (e) {
-    console.error('[SECURITY] source read failed', e.message);
-    res.status(503).json({ error: 'El código fuente protegido no está disponible en este servidor.' });
-  }
+  res.json(s);
 });
 
 app.post('/api/scripts', auth, needMongo, async (req, res) => {
   try {
     const { name, description, source, keyMode, providerId } = req.body || {};
-    if (!name || typeof source !== 'string' || !source.trim()) {
-      return res.status(400).json({ error: 'name y source requeridos' });
-    }
+    if (!name || !source) return res.status(400).json({ error: 'name y source requeridos' });
 
     const me = await User.findById(req.user.sub);
     const prem = isPremiumUser(me);
@@ -1075,16 +869,16 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
     let obfMode = (req.body?.obfMode || '').toString();
     if (!obfMode) {
       const wantObf = req.body?.doObfuscate !== false && req.body?.doObfuscate !== 'false';
-      obfMode = wantObf ? 'hybrid' : 'none';
+      obfMode = wantObf ? 'qrex' : 'none';
     }
     if (obfMode === 'qyrex') obfMode = 'qrex';
-    if (!['none', 'qrex', 'local', 'hybrid', 'qyrex'].includes(obfMode)) obfMode = 'hybrid';
+    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'qrex';
     const resolved = await resolveObfuscated(source, obfMode);
     const doc = await Script.create({
       ownerId: req.user.sub,
       name,
       description: description || '',
-      source: protectSourceAtRest(source),
+      source,
       obfuscated: resolved.code,
       doObfuscate: resolved.doObfuscate,
       obfMode: resolved.obfMode,
@@ -1093,12 +887,13 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
       providerName
     });
 
-    const base = publicBase(req);
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const proto = req.headers['x-forwarded-proto'] || 'https';
 
     res.json({
       id: doc.id,
       name: doc.name,
-      loadstring: `loadstring(game:HttpGet("${base}/api/v1/luascripts/public/${doc.id}/download"))()`
+      loadstring: `loadstring(game:HttpGet("${proto}://${host}/api/v1/luascripts/public/${doc.id}/download"))()`
     });
   } catch (e) {
     console.error(e);
@@ -1108,22 +903,12 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
 
 app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
   try {
-    const body = req.body || {};
-    const { name, description, source, keyMode, providerId } = body;
-    const hasSource = Object.prototype.hasOwnProperty.call(body, 'source');
-    if (hasSource && (typeof source !== 'string' || !source.trim())) {
-      return res.status(400).json({ error: 'source debe ser texto no vacío' });
-    }
+    const { name, description, source, keyMode, providerId } = req.body || {};
     const s = await Script.findOne({ id: req.params.id, ownerId: req.user.sub });
     if (!s) return res.status(404).json({ error: 'No encontrado' });
-    // Migrate a legacy plaintext row whenever its owner edits it.  The current
-    // payload remains unchanged; only storage is upgraded.
-    if (SOURCE_ENCRYPTION_KEY && !String(s.source || '').startsWith('enc:v1:')) {
-      s.source = protectSourceAtRest(s.source);
-    }
 
     // version snapshot before change
-    if (hasSource || name || description !== undefined) {
+    if (source || name || description !== undefined) {
       await ScriptVersion.create({
         scriptId: s.id,
         ownerId: req.user.sub,
@@ -1150,24 +935,25 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         s.providerId = ''; s.providerName = '';
       }
     }
-    if (body.obfMode && ['none','qrex','qyrex','local','hybrid'].includes(body.obfMode)) {
-      s.obfMode = body.obfMode === 'qyrex' ? 'qrex' : body.obfMode;
+    if (req.body?.obfMode && ['none','qrex','qyrex','local'].includes(req.body.obfMode)) {
+      s.obfMode = req.body.obfMode;
       s.doObfuscate = s.obfMode !== 'none';
-    } else if (body.doObfuscate !== undefined) {
-      s.doObfuscate = body.doObfuscate !== false && body.doObfuscate !== 'false';
-      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' ? 'local' : 'hybrid') : 'none';
+    } else if (req.body?.doObfuscate !== undefined) {
+      s.doObfuscate = req.body.doObfuscate !== false && req.body.doObfuscate !== 'false';
+      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' ? 'local' : 'qrex') : 'none';
     }
-    if (hasSource) {
-      const resolved = await resolveObfuscated(source, body.obfMode || s.obfMode || 'qrex');
-      s.source = protectSourceAtRest(source);
+    if (source) {
+      s.source = source;
+      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
-    } else if ((body.obfMode || body.doObfuscate !== undefined) && s.source) {
-      const sourceForBuild = revealSourceAtRest(s.source);
-      const resolved = await resolveObfuscated(sourceForBuild, body.obfMode || s.obfMode || 'qrex');
+      s.obfMode = resolved.obfMode;
+    } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
+      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
+      s.obfMode = resolved.obfMode;
       s.obfMode = resolved.obfMode;
     }
     await s.save();
@@ -1269,19 +1055,9 @@ function buildDoubleLinkStub(cacheUrl) {
   ].join('\n');
 }
 function publicBase(req) {
-  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL;
-
-  // Development-only fallback.  Production uses a configured canonical URL so
-  // a forwarded Host header cannot be reflected into generated loadstrings.
-  const forwardedHost = String(req.headers['x-forwarded-host'] || req.headers.host || '')
-    .split(',')[0].trim();
-  if (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(forwardedHost)) {
-    throw new Error('Invalid request host. Configure PUBLIC_BASE_URL.');
-  }
-  const forwardedProto = String(req.headers['x-forwarded-proto'] || req.protocol || 'http')
-    .split(',')[0].trim().toLowerCase();
-  const protocol = forwardedProto === 'https' ? 'https' : 'http';
-  return protocol + '://' + forwardedHost;
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return proto + '://' + host;
 }
 
 function isBrowserReq(req) {
@@ -1305,7 +1081,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 <p>This resource cannot be viewed in a browser.</p>
 </div></body></html>`;
 
-async function serveRealScript(req, res, scriptId, delivery = {}) {
+async function serveRealScript(req, res, scriptId) {
   const ip = clientIp(req);
   if (!mongoReady && mongoose.connection.readyState !== 1) {
     return res.status(503).type('text/plain').send('-- offline');
@@ -1340,9 +1116,8 @@ async function serveRealScript(req, res, scriptId, delivery = {}) {
   res.setHeader('X-Qrex-Layer', 'cache');
   res.setHeader('Referrer-Policy', 'no-referrer');
 
-  const deliveryPurpose = delivery && delivery.purpose ? String(delivery.purpose) : 'gate';
   let payload = s.obfuscated || '';
-  if (s.keyMode === 'key' && s.providerId && deliveryPurpose !== 'payload') {
+  if (s.keyMode === 'key' && s.providerId) {
     try {
       const prov = await Provider.findById(s.providerId);
       const base = publicBase(req);
@@ -1403,14 +1178,14 @@ app.get('/script/:id', async (req,res)=>{
 app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luascripts/public/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
   const ip = clientIp(req);
   const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer1');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
   if (isBrowserReq(req)) return res.redirect(302, '/script/' + encodeURIComponent(req.params.id));
 
   if (isScraperUa(ua) && !/roblox/i.test(ua)) {
-    const hits = trackAbuse(ip, ua);
-    if (hits >= AUTO_BAN_THRESHOLD) {
-      await banIp(ip, 'Auto-ban suspicious public scraping');
-      return res.status(403).type('text/plain').send('-- banned');
-    }
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Qrex-Layer', 'public');
     return res.type('text/plain').send(decoyLua());
@@ -1420,11 +1195,10 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
     return res.status(503).type('text/plain').send('-- offline');
   }
 
-  const s = await Script.findOne({ id: req.params.id }).select('id keyMode providerId');
+  const s = await Script.findOne({ id: req.params.id }).select('id');
   if (!s) return res.status(404).type('text/plain').send('-- not found');
 
-  const purpose = (s.keyMode === 'key' && s.providerId) ? 'gate' : 'payload';
-  const token = issueScriptToken(s.id, ip, ua, purpose, { bindUa: true });
+  const token = issueScriptToken(s.id, ip, ua);
   const base = publicBase(req);
   const cacheUrl = base + '/api/v1/luascripts/cache/public/' + s.id + '/download?t=' + encodeURIComponent(token);
 
@@ -1438,20 +1212,22 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
 app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api/raw/cache/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
   const ip = clientIp(req);
   const ua = req.headers['user-agent'] || '';
+  const hits = trackAbuse(ip, ua);
+  if (hits >= AUTO_BAN_THRESHOLD) {
+    await banIp(ip, 'Auto-ban flood layer2');
+    return res.status(403).type('text/plain').send('-- banned');
+  }
   if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
 
   const token = String(req.query.t || req.headers['x-qrex-token'] || '');
-  const ticket = consumeScriptToken(req.params.id, token, ip, ua);
-  if (!ticket) {
-    const hits = trackAbuse(ip, ua);
-    if (hits >= AUTO_BAN_THRESHOLD || (isScraperUa(ua) && hits > 12)) {
-      await banIp(ip, 'Repeated invalid cache token');
-    }
+  const ok = consumeScriptToken(req.params.id, token, ip, ua);
+  if (!ok) {
+    if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Qrex-Layer', 'cache');
     return res.status(403).type('text/plain').send(decoyLua());
   }
-  return serveRealScript(req, res, req.params.id, { purpose: ticket.purpose });
+  return serveRealScript(req, res, req.params.id);
 });
 
 // ========== VIP REDEEM ==========
@@ -1698,8 +1474,9 @@ app.post('/api/hub', auth, needMongo, async (req, res) => {
     const exists = await HubScript.findOne({ scriptId: s.id });
     if (exists) return res.status(400).json({ error: 'Este script ya está en el hub' });
 
-    const base = publicBase(req);
-    const loadstring = `loadstring(game:HttpGet("${base}/api/v1/luascripts/public/${s.id}/download"))()`;
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const loadstring = `loadstring(game:HttpGet("${proto}://${host}/api/v1/luascripts/public/${s.id}/download"))()`;
 
     const user = await User.findById(req.user.sub).lean();
     const doc = await HubScript.create({
@@ -2401,13 +2178,7 @@ app.post('/api/keys/verify', verifyLimiter, needMongo, async (req, res) => {
     doc.lastUsedAt = new Date();
     await doc.save();
 
-    const deliveryToken = issueScriptToken(
-      scriptForKey.id,
-      clientIp(req),
-      req.headers['user-agent'] || '',
-      'payload',
-      { bindUa: false }
-    );
+    const deliveryToken = issueScriptToken(scriptForKey.id, clientIp(req));
 
     fireWebhooks(doc.ownerId, 'key_verify', {
       key: kstr.slice(0, 8) + '...',
@@ -2445,7 +2216,7 @@ app.post('/api/scripts/:id/versions/:vid/restore', auth, needMongo, async (req, 
   const v = await ScriptVersion.findOne({ _id: req.params.vid, scriptId: s.id, ownerId: req.user.sub });
   if (!v) return res.status(404).json({ error: 'Versión no encontrada' });
   await ScriptVersion.create({ scriptId: s.id, ownerId: req.user.sub, name: s.name, source: s.source, obfuscated: s.obfuscated, note: 'Before restore' });
-  s.source = protectSourceAtRest(revealSourceAtRest(v.source));
+  s.source = v.source;
   s.obfuscated = v.obfuscated;
   if (v.name) s.name = v.name;
   await s.save();
