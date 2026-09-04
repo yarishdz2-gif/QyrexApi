@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>QrexApi · Vault</title>
+<title>QrexApi</title>
 <meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.511.0/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#07070b;
@@ -36,7 +37,7 @@
   --radius-md:12px;
   --radius-lg:16px;
   --radius-xl:22px;
-  --font:Outfit,Inter,system-ui,sans-serif;
+  --font:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
   --mono:ui-monospace,"JetBrains Mono",Consolas,monospace;
   --ease:cubic-bezier(.22,1,.36,1);
   --shadow:0 18px 50px -28px rgba(0,0,0,.7);
@@ -783,6 +784,240 @@ td,th{border-bottom-color:rgba(255,255,255,.05)}
 h1,h2,.ov-title,.lg-title{text-wrap:balance}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+
+/* =========================================================
+   QrexApi · Linear / Vercel visual system (v5)
+   Accent: cyan eléctrico · glass · lucide icons
+   ========================================================= */
+:root{
+  --bg:#09090b;
+  --bg-2:#0c0c10;
+  --elev:#111114;
+  --card:rgba(18,18,22,.72);
+  --fg:#fafafa;
+  --muted:#a1a1aa;
+  --subtle:#71717a;
+  --faint:#52525b;
+  --border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.14);
+  --accent:#22d3ee;
+  --accent-fg:#042f2e;
+  --ok:#34d399;
+  --ok-bg:rgba(52,211,153,.12);
+  --danger:#fb7185;
+  --danger-bg:rgba(251,113,133,.1);
+  --vip:#c4b5fd;
+  --vip-bg:rgba(196,181,253,.1);
+  --glow:rgba(34,211,238,.35);
+  --font:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
+}
+html,body{background:#09090b;color:var(--fg);font-feature-settings:"ss01","cv11"}
+body{
+  background:
+    radial-gradient(80% 50% at 15% -10%, rgba(34,211,238,.12), transparent 50%),
+    radial-gradient(60% 40% at 100% 0%, rgba(167,139,250,.10), transparent 45%),
+    #09090b;
+  letter-spacing:-0.011em;
+}
+body::before{opacity:.03;z-index:90}
+::selection{background:rgba(34,211,238,.28);color:#fff}
+
+.card{
+  position:relative;
+  background:linear-gradient(180deg,rgba(24,24,27,.78),rgba(12,12,14,.7));
+  border:1px solid transparent;
+  background-clip:padding-box;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 24px 60px -36px rgba(0,0,0,.7);
+  backdrop-filter:blur(16px) saturate(1.2);
+}
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 40%,transparent);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  pointer-events:none;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 28px 70px -32px rgba(34,211,238,.18)}
+
+.btn-primary{
+  background:linear-gradient(180deg,#67e8f9,#22d3ee);
+  color:#042f2e;
+  box-shadow:0 10px 28px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.45);
+  font-weight:650;
+}
+.btn-primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn-ghost:hover{border-color:rgba(34,211,238,.45);color:#fff;box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+input:focus,textarea:focus,select:focus{
+  border-color:rgba(34,211,238,.7);
+  box-shadow:0 0 0 4px rgba(34,211,238,.14);
+}
+
+.lg-title em,.ov-title em{
+  font-family:"Plus Jakarta Sans",sans-serif;font-style:italic;font-weight:600;
+  background:linear-gradient(90deg,#fff,#67e8f9);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.lg-shell{
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 40px 120px -40px rgba(0,0,0,.85), 0 0 80px -30px rgba(34,211,238,.25);
+}
+.lg-discord{box-shadow:0 14px 36px -14px rgba(88,101,242,.7)}
+.lg-dot{background:#22d3ee;box-shadow:0 0 12px #22d3ee}
+.lg-thumb{background:linear-gradient(180deg,#67e8f9,#22d3ee)}
+.lg-switch button.on{color:#042f2e}
+
+.sidebar{
+  background:rgba(10,10,12,.72);
+  backdrop-filter:blur(22px) saturate(1.3);
+  border-right:1px solid rgba(255,255,255,.07);
+}
+.nav-item svg, .nav-item i, .nav-item [data-lucide]{
+  width:18px;height:18px;stroke-width:1.65;flex-shrink:0;
+  stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;
+}
+.nav-item.active{
+  background:linear-gradient(90deg,rgba(34,211,238,.16),rgba(34,211,238,.04));
+  color:#ecfeff;
+  box-shadow:inset 0 0 0 1px rgba(34,211,238,.22);
+}
+.nav-item.active::before{background:linear-gradient(#67e8f9,#22d3ee);box-shadow:0 0 12px #22d3ee}
+.nav-item:hover{color:#fff}
+
+.ov-hero{
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(34,211,238,.16), transparent 55%),
+    linear-gradient(160deg, rgba(24,24,27,.9), rgba(9,9,11,.92));
+}
+.ov-cta{
+  background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#042f2e;
+  box-shadow:0 16px 40px -16px var(--glow);
+}
+.ov-stat .val{background:none;color:var(--fg);-webkit-background-clip:initial}
+.stat-val{background:none;color:var(--fg);-webkit-background-clip:unset}
+
+.icon-btn:hover{border-color:rgba(34,211,238,.5);color:#67e8f9}
+.toast.ok{border-color:rgba(52,211,153,.4)}
+.cmdk-box{box-shadow:0 40px 100px -30px #000, 0 0 60px -28px rgba(34,211,238,.25)}
+
+/* Lucide sizing in chrome */
+.notif-btn svg,.icon-btn svg,.studio-toolbar svg{stroke-linecap:round;stroke-linejoin:round}
+
+@media (max-width:900px){
+  .lg-shell{grid-template-columns:1fr;border-radius:22px}
+  .lg-aside{display:none}
+}
+
+
+/* ============================================================
+   QrexApi · AWWWARDS LAYER  (atmosphere / glass / 60fps)
+   ============================================================ */
+:root{
+  --mx:50%; --my:30%;
+  --bg:#050507;
+  --fg:#f5f5f7;
+  --accent:#22d3ee;
+  --violet:#8b5cf6;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+}
+html{background:#050507}
+body{
+  font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;
+  background:
+    radial-gradient(70% 50% at var(--mx) var(--my), rgba(34,211,238,.09), transparent 42%),
+    radial-gradient(45% 40% at 88% 8%, rgba(139,92,246,.11), transparent 50%),
+    radial-gradient(35% 30% at 8% 92%, rgba(34,211,238,.06), transparent 50%),
+    #050507 !important;
+}
+/* grain film */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:70;opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.lg-title,.ov-title,h1{
+  font-family:"Space Grotesk","Plus Jakarta Sans",sans-serif;
+  letter-spacing:-.045em; font-weight:700;
+}
+.lg-title em,.ov-title em{
+  font-style:italic; font-weight:600;
+  background:linear-gradient(120deg,#fff 20%,#67e8f9 55%,#c4b5fd 95%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* Glass + spotlight border (uses --sx --sy per element) */
+.card,.ov-hero,.ov-stat,.lg-shell,.log-card,.cmdk-box,.editor-wrap,.user-pill{
+  position:relative; isolation:isolate;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px) saturate(1.35);
+  -webkit-backdrop-filter:blur(18px) saturate(1.35);
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .45s var(--ease-out), box-shadow .45s var(--ease-out), border-color .3s;
+}
+.card::after,.ov-hero::before,.ov-stat::after,.lg-shell::after,.log-card::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
+  background:radial-gradient(420px circle at var(--sx,50%) var(--sy,0%), rgba(255,255,255,.16), transparent 42%);
+  opacity:0; transition:opacity .35s var(--ease-out); mix-blend-mode:screen;
+}
+.card:hover::after,.ov-hero:hover::before,.ov-stat:hover::after,.lg-shell:hover::after,.log-card:hover::after{opacity:1}
+.card:hover,.ov-stat:hover,.log-card:hover{
+  transform:translateY(-4px) scale(1.008);
+  border-color:rgba(103,232,249,.28);
+  box-shadow:0 30px 80px -40px rgba(34,211,238,.28), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.btn-primary{
+  background:linear-gradient(180deg,#a5f3fc,#22d3ee 55%,#06b6d4);
+  color:#042f2e; font-weight:700; letter-spacing:-.02em;
+  box-shadow:0 8px 28px -8px rgba(34,211,238,.55), inset 0 1px 0 rgba(255,255,255,.55);
+  transition:transform .35s var(--ease-out), box-shadow .35s var(--ease-out), filter .25s;
+}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02); filter:saturate(1.08); box-shadow:0 16px 40px -12px rgba(34,211,238,.7)}
+.btn-primary:active{transform:translateY(0) scale(.985)}
+.btn-ghost{transition:transform .3s var(--ease-out), border-color .25s, background .25s, box-shadow .25s}
+.btn-ghost:hover{transform:translateY(-1px); border-color:rgba(34,211,238,.5); box-shadow:0 0 24px -8px rgba(34,211,238,.45)}
+
+.sidebar{
+  background:rgba(8,8,10,.55) !important;
+  backdrop-filter:blur(28px) saturate(1.4);
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.nav-item{transition:transform .3s var(--ease-out), background .25s, color .25s, box-shadow .3s}
+.nav-item:hover{transform:translateX(4px)}
+.nav-item.active{
+  background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(139,92,246,.08));
+  box-shadow:inset 0 0 0 1px rgba(34,211,238,.25), 0 0 24px -10px rgba(34,211,238,.5);
+}
+
+.lg-shell{animation:riseIn .8s var(--ease-out) both}
+.lg-aside{background:linear-gradient(165deg,rgba(34,211,238,.08),transparent 58%)}
+#loginView::before{background:rgba(34,211,238,.22)!important; filter:blur(120px)!important}
+#loginView::after{background:rgba(139,92,246,.22)!important; filter:blur(120px)!important}
+
+.ov-hero{
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgba(34,211,238,.2), transparent 55%),
+    radial-gradient(50% 80% at 0% 100%, rgba(139,92,246,.12), transparent 50%),
+    linear-gradient(160deg, rgba(16,16,20,.72), rgba(8,8,10,.8)) !important;
+}
+
+.page{animation:fadeUp .55s var(--ease-out) both}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ov-logo,.lg-mark img,.lg-topbar img{animation:floaty 6.5s ease-in-out infinite; will-change:transform}
+
+.toast{backdrop-filter:blur(20px); border-color:rgba(34,211,238,.25)}
+.cmdk{background:rgba(0,0,0,.55); backdrop-filter:blur(14px)}
+.cmdk-box{border:1px solid rgba(34,211,238,.2)}
+
+.editor-wrap{box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 30px 80px -40px #000}
+
+@media (max-width:900px){
+  .card:hover,.ov-stat:hover,.log-card:hover{transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .ov-logo,.lg-mark img,.lg-topbar img{animation:none}
+  .card:hover,.btn-primary:hover{transform:none}
 }
 
 </style>
@@ -4937,5 +5172,60 @@ function closeLegal(){ document.getElementById('qxModal').classList.remove('show
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
 </script>
+
+<script>
+(function(){
+  const MAP = {
+    overview:'layout-dashboard', executions:'chart-column', logs:'scroll-text', status:'activity',
+    scripts:'code-2', create:'plus', studio:'pen-line', hub:'boxes', templates:'layout-template',
+    keys:'key-round', webhooks:'unplug', assets:'folder', leaderboard:'trophy', changelog:'newspaper',
+    apiinfo:'info', playground:'terminal', admin:'shield-check', settings:'settings'
+  };
+  function paint(){
+    if(!window.lucide) return;
+    document.querySelectorAll('[data-page]').forEach(btn=>{
+      const name = MAP[btn.getAttribute('data-page')];
+      if(!name) return;
+      const old = btn.querySelector('svg, i[data-lucide]');
+      const i = document.createElement('i');
+      i.setAttribute('data-lucide', name);
+      i.setAttribute('aria-hidden','true');
+      if(old) old.replaceWith(i); else btn.insertBefore(i, btn.firstChild);
+    });
+    document.querySelectorAll('.notif-btn svg').forEach(el=>{
+      const i=document.createElement('i'); i.setAttribute('data-lucide','bell'); el.replaceWith(i);
+    });
+    lucide.createIcons({ attrs:{ width:18, height:18, 'stroke-width':1.65 }});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', paint);
+  else paint();
+  window.addEventListener('load', paint);
+})();
+</script>
+
+
+<script>
+/* Spotlight + magnetic hover — 60fps via rAF */
+(function(){
+  let mx=innerWidth/2, my=innerHeight/3, raf=0;
+  const root=document.documentElement;
+  function tick(){
+    raf=0;
+    root.style.setProperty('--mx', (mx/innerWidth*100).toFixed(2)+'%');
+    root.style.setProperty('--my', (my/innerHeight*100).toFixed(2)+'%');
+  }
+  window.addEventListener('pointermove', e=>{
+    mx=e.clientX; my=e.clientY;
+    if(!raf) raf=requestAnimationFrame(tick);
+    const t=e.target.closest('.card,.ov-hero,.ov-stat,.lg-shell,.log-card,.cmdk-box,.btn-primary,.nav-item');
+    if(t){
+      const r=t.getBoundingClientRect();
+      t.style.setProperty('--sx', (e.clientX-r.left)+'px');
+      t.style.setProperty('--sy', (e.clientY-r.top)+'px');
+    }
+  }, {passive:true});
+})();
+</script>
+
 </body>
 </html>
