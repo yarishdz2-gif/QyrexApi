@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>QrexApi · Panel privado · v3</title>
+<title>QrexApi · Panel privado</title>
 <meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -603,42 +603,26 @@ body.sidebar-open .burger-icon span:nth-child(3){top:6.5px;transform:rotate(-45d
 }
 
 
-/* ===== QrexApi redesign polish (v3) ===== */
-:root{
-  --bg:#06060a;
-  --bg-2:#0b0b11;
-  --elev:#101018;
-  --card:#13131c;
-  --fg:#f5f5f8;
-  --muted:#9b9baf;
-  --subtle:#6c6c80;
-  --faint:#4c4c60;
-  --border:rgba(255,255,255,.07);
-  --border-strong:rgba(255,255,255,.13);
-  --accent:#f0f0f5;
-  --accent-fg:#08080c;
-  --shadow:0 20px 56px -28px rgba(0,0,0,.75);
-  --ease:cubic-bezier(.22,1,.36,1);
-}
-body{background:radial-gradient(120% 80% at 50% -20%,rgba(255,255,255,.04),transparent 55%),var(--bg)}
-.card{backdrop-filter:blur(8px);transition:border-color .2s var(--ease),transform .2s var(--ease),box-shadow .25s var(--ease)}
-.card:hover{transform:translateY(-1px);box-shadow:0 22px 50px -30px rgba(0,0,0,.8)}
-.btn-primary{letter-spacing:-.01em;box-shadow:0 10px 28px -12px rgba(255,255,255,.4)}
-.btn-primary:hover{box-shadow:0 14px 32px -12px rgba(255,255,255,.5)}
-input:focus,textarea:focus,select:focus{border-color:rgba(255,255,255,.42);box-shadow:0 0 0 3px rgba(255,255,255,.1)}
-.nav-item{transition:background .18s var(--ease),color .18s var(--ease),transform .18s var(--ease)}
-.nav-item.active{background:rgba(255,255,255,.09)}
-.sidebar{background:linear-gradient(180deg,rgba(14,14,22,.98),rgba(8,8,14,.99));backdrop-filter:blur(20px)}
-.ov-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-.ov-cta{transition:transform .2s var(--ease),filter .2s var(--ease)}
-.log-card{transition:border-color .2s var(--ease),transform .2s var(--ease)}
-.log-card:hover{transform:translateY(-2px)}
-.toast{backdrop-filter:blur(12px)}
-.lg-shell{box-shadow:0 40px 120px -40px rgba(0,0,0,.92),inset 0 1px 0 rgba(255,255,255,.06)}
-.page{animation:fadeUp .45s var(--ease) both}
-@media (prefers-reduced-motion:reduce){
-  .card:hover,.log-card:hover,.nav-item,.ov-cta{transform:none!important}
-}
+/* Qrex v3.1 polish */
+:root{--shadow:0 24px 64px -32px rgba(0,0,0,.82)}
+body{background:radial-gradient(110% 70% at 50% -18%,rgba(255,255,255,.045),transparent 52%),var(--bg)}
+.card{transition:border-color .2s var(--ease),transform .2s var(--ease),box-shadow .25s var(--ease)}
+.card:hover{transform:translateY(-1px);box-shadow:0 22px 50px -30px rgba(0,0,0,.85)}
+.nav-item.active{background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.btn-primary{letter-spacing:-.01em}
+.lg-shell{box-shadow:0 40px 120px -48px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.06)}
+.demo-hint{margin:12px 0 0;text-align:center;font-size:11.5px;color:#6c6c80}
+.demo-hint b{color:#ececf2;font-family:var(--mono);font-weight:600}
+.cmdk{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,4,8,.62);backdrop-filter:blur(10px);align-items:flex-start;justify-content:center;padding:12vh 16px}
+.cmdk.show{display:flex}
+.cmdk-box{width:min(560px,100%);background:#101018;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px -30px #000}
+.cmdk input{border:0;border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;padding:16px 18px;font-size:15px;background:transparent}
+.cmdk-list{max-height:320px;overflow:auto;padding:8px}
+.cmdk-item{padding:10px 12px;border-radius:10px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;font-size:13px}
+.cmdk-item:hover,.cmdk-item.on{background:rgba(255,255,255,.07)}
+.cmdk-item span{color:#6c6c80;font-size:11px}
+.kbd{font-family:var(--mono);font-size:10px;padding:2px 6px;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:#8a8a9c}
+@media (prefers-reduced-motion:reduce){.card:hover,.page{animation:none;transform:none}}
 
 </style>
 </head>
@@ -660,6 +644,14 @@ input:focus,textarea:focus,select:focus{border-color:rgba(255,255,255,.42);box-s
     <div class="qx-upd" id="qxModalDate">Ultima actualizacion: agosto 2026</div>
     <div id="qxModalBody"></div>
     <button class="btn-primary qx-modal-close" onclick="closeLegal()">Entendido</button>
+  </div>
+</div>
+
+
+<div class="cmdk" id="cmdk" onclick="if(event.target===this)closeCmdk()">
+  <div class="cmdk-box">
+    <input id="cmdkInput" placeholder="Ir a… scripts, keys, studio" autocomplete="off" oninput="filterCmdk()"/>
+    <div class="cmdk-list" id="cmdkList"></div>
   </div>
 </div>
 
@@ -693,7 +685,7 @@ input:focus,textarea:focus,select:focus{border-color:rgba(255,255,255,.42);box-s
           <li><span>&#10003;</span> Webhooks a tu Discord al instante</li>
         </ul>
       </div>
-      <div class="lg-foot"><i class="lg-dot"></i> API operativa &middot; ~80ms</div>
+      <div class="lg-foot"><i class="lg-dot"></i> API operativa &middot; demo local</div>
     </section>
 
     <section class="lg-panel">
@@ -708,7 +700,7 @@ input:focus,textarea:focus,select:focus{border-color:rgba(255,255,255,.42);box-s
         <button id="tabReg" onclick="setTab('register')">Registrarse</button>
       </div>
 
-      <a class="lg-discord" href="/auth/discord">
+      <a class="lg-discord" href="#" onclick="event.preventDefault();document.getElementById('authUser').value='demo';document.getElementById('authPass').value='demo';mode='login';doAuth();">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4a9.6 9.6 0 0 0-9.6 9.6c0 1.72.45 3.33 1.25 4.73L2.4 21.6l5.05-1.22A9.55 9.55 0 0 0 12 21.6a9.6 9.6 0 0 0 0-19.2Zm-3.5 8.3c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm7 0c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm-7.6 4.9h8.2a4.2 4.2 0 0 1-8.2 0Z"/></svg>
         Continuar con Discord
       </a>
@@ -1628,6 +1620,126 @@ local Players = game:GetService(&quot;Players&quot;)
   </div>
 </div>
 
+
+<script>
+/* ===== Demo local: si /api falla, el panel sigue vivo en localStorage ===== */
+(function(){
+  const SK='qrex_demo_store_v3';
+  const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+  const now=()=>new Date().toISOString();
+  function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString()}
+  function seed(){
+    const s1=uid(),s2=uid(),s3=uid(),p1=uid();
+    return {
+      user:{id:'u_demo',username:'demo',displayName:'Qyrex',role:'admin',vip:true,avatar:'',bio:'Panel demo local.'},
+      token:'demo-'+uid(),
+      scripts:[
+        {id:s1,name:'Aura Hub',game:'Universal',version:'1.4.2',visibility:'private',obfuscation:'medium',executions:412,createdAt:daysAgo(18),updatedAt:daysAgo(1),source:'-- Aura Hub\nprint("aura")'},
+        {id:s2,name:'Silent Aim Kit',game:'FPS',version:'0.9.1',visibility:'unlisted',obfuscation:'heavy',executions:188,createdAt:daysAgo(9),updatedAt:daysAgo(2),source:'-- aim kit'},
+        {id:s3,name:'Farm Assistant',game:'Simulator',version:'2.0.0',visibility:'private',obfuscation:'light',executions:76,createdAt:daysAgo(4),updatedAt:daysAgo(0),source:'-- farm'},
+      ],
+      providers:[{id:p1,name:'Main',slug:'main',enabled:true}],
+      keys:[
+        {id:uid(),key:'QREX-'+uid().toUpperCase().slice(0,8),providerId:p1,note:'beta',expiresAt:daysAgo(-14),hwidLimit:1,hwids:[],enabled:true,uses:12},
+        {id:uid(),key:'QREX-'+uid().toUpperCase().slice(0,8),providerId:p1,note:'staff',expiresAt:daysAgo(-30),hwidLimit:2,hwids:['HWID-DEMO'],enabled:true,uses:3},
+      ],
+      logs:[
+        {id:uid(),level:'info',message:'Script Aura Hub ejecutado',ip:'201.14.xx.xx',createdAt:daysAgo(0)},
+        {id:uid(),level:'warn',message:'Key usada con HWID nuevo',ip:'187.22.xx.xx',createdAt:daysAgo(1)},
+        {id:uid(),level:'ok',message:'Webhook Discord entregado',ip:'—',createdAt:daysAgo(1)},
+      ],
+      webhooks:[{id:uid(),name:'Discord alerts',url:'https://discord.com/api/webhooks/demo',events:['key.used','script.exec'],enabled:true}],
+      hub:[{id:uid(),scriptId:s1,name:'Aura Hub',description:'Hub universal',executions:412}],
+      notifs:[{id:uid(),title:'Bienvenido al demo',message:'Todo corre en este navegador. Ctrl+K para navegar.',type:'success',read:false,createdAt:now()}],
+      executions: Array.from({length:7},(_,i)=>({day:daysAgo(6-i).slice(0,10),count:20+Math.round(Math.sin(i)*18+i*6)}))
+    };
+  }
+  function get(){try{const x=JSON.parse(localStorage.getItem(SK)||'null');if(x&&x.scripts)return x}catch{} const s=seed();set(s);return s}
+  function set(s){localStorage.setItem(SK,JSON.stringify(s))}
+  function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}})}
+  function bodyOf(init){try{return JSON.parse(init&&init.body||'{}')}catch{return {}}}
+
+  const real=window.fetch.bind(window);
+  window.fetch=async function(input,init){
+    const url=typeof input==='string'?input:(input&&input.url)||'';
+    const path=url.replace(/^https?:\/\/[^/]+/,'').split('?')[0];
+    const method=((init&&init.method)||'GET').toUpperCase();
+    if(!path.startsWith('/api') && !path.startsWith('/auth')) return real(input,init);
+    try{
+      const r=await Promise.race([
+        real(input,init),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),900))
+      ]);
+      if(r && r.ok){
+        const ct=r.headers.get('content-type')||'';
+        if(ct.includes('json')||ct.includes('javascript')||!ct) return r;
+      }
+    }catch{}
+    return mock(path,method,init);
+  };
+
+  function mock(path,method,init){
+    const s=get();
+    const b=bodyOf(init);
+    if(path==='/api/auth/login'||path==='/api/auth/register'){
+      if(method==='POST'){
+        const user=String(b.username||'demo');
+        if(!user||!b.password) return json({error:'Pon usuario y contraseña'},400);
+        s.user.username=user; s.token='demo-'+uid(); set(s);
+        return json({token:s.token,user:s.user});
+      }
+    }
+    if(path==='/api/me') return json(s.user);
+    if(path==='/api/notifications') return json({notifications:s.notifs});
+    if(path==='/api/notifications/read-all'&&method==='POST'){s.notifs.forEach(n=>n.read=true);set(s);return json({ok:true})}
+    if(path==='/api/account/profile'&&method==='PATCH'){Object.assign(s.user,b);set(s);return json(s.user)}
+    if(path==='/api/account/sessions') return json({sessions:[{id:'s1',device:'Este navegador',current:true,lastSeenAt:now()}]});
+    if(path.startsWith('/api/account')) return json({ok:true,message:'Guardado (demo)'});
+    if(path==='/api/scripts'||path==='/api/v1/scripts'){
+      if(method==='POST'){
+        const item={id:uid(),name:b.name||'Nuevo',game:b.game||'Universal',version:b.version||'1.0.0',visibility:b.visibility||'private',obfuscation:b.obfuscation||'none',executions:0,createdAt:now(),updatedAt:now(),source:b.source||b.code||'-- script'};
+        s.scripts.unshift(item); set(s); return json(item);
+      }
+      return json({scripts:s.scripts});
+    }
+    const sm=path.match(/^\/api\/(?:v1\/)?scripts\/([^/]+)$/);
+    if(sm){
+      const id=decodeURIComponent(sm[1]);
+      if(method==='DELETE'){s.scripts=s.scripts.filter(x=>x.id!==id);set(s);return json({ok:true})}
+      if(method==='PATCH'||method==='PUT'){const it=s.scripts.find(x=>x.id===id);if(!it)return json({error:'404'},404);Object.assign(it,b,{updatedAt:now()});set(s);return json(it)}
+      const it=s.scripts.find(x=>x.id===id);return it?json(it):json({error:'404'},404);
+    }
+    if(path.includes('/download')){const id=path.split('/').slice(-2)[0];const it=s.scripts.find(x=>x.id===id);return new Response((it&&it.source)||'print("qrex")',{headers:{'Content-Type':'text/plain'}})}
+    if(path==='/api/keys'||path.includes('/keys')){
+      if(method==='POST'){
+        const n=Math.min(20,Number(b.amount||1));
+        const made=[];
+        for(let i=0;i<n;i++){const k={id:uid(),key:'QREX-'+uid().toUpperCase().slice(0,10),providerId:b.providerId||(s.providers[0]&&s.providers[0].id),note:b.note||'',expiresAt:daysAgo(-(b.hours||24)/24),hwidLimit:b.hwidLimit||1,hwids:[],enabled:true,uses:0};s.keys.unshift(k);made.push(k.key)}
+        set(s); return json({keys:made,created:made.length});
+      }
+      return json({keys:s.keys,providers:s.providers});
+    }
+    if(path==='/api/providers') return json({providers:s.providers});
+    if(path==='/api/logs') return json({logs:s.logs});
+    if(path==='/api/hub') return json({hub:s.hub,items:s.hub});
+    if(path==='/api/webhooks'){
+      if(method==='POST'){const w={id:uid(),name:b.name||'Webhook',url:b.url||'',events:b.events||[],enabled:true};s.webhooks.unshift(w);set(s);return json(w)}
+      return json({webhooks:s.webhooks});
+    }
+    if(path==='/api/stats'||path==='/api/overview') return json({scripts:s.scripts.length,executions:s.scripts.reduce((a,x)=>a+x.executions,0),keys:s.keys.length,users:1});
+    if(path==='/api/analytics'||path.includes('analytics')) return json({daily:s.executions,hourly:s.executions,scripts:s.scripts.map(x=>({name:x.name,executions:x.executions}))});
+    if(path==='/api/admin'||path.startsWith('/api/admin')) return json({users:[{username:'demo',role:'admin'}],ok:true});
+    if(path==='/api/status') return json({ok:true,latency:12,version:'3.1-demo'});
+    if(path==='/api/leaderboard') return json({rows:s.scripts.map((x,i)=>({rank:i+1,name:x.name,executions:x.executions}))});
+    if(path==='/api/assets') return json({assets:[]});
+    if(path==='/api/vip'||path.includes('vip')) return json({vip:true,ok:true,message:'VIP demo activo'});
+    if(path.startsWith('/auth/discord')) return json({token:s.token,user:s.user});
+    return json({ok:true,demo:true,path,method});
+  }
+  window.__qrexDemo=true;
+})();
+</script>
+
 <script>
 function scriptDownloadUrl(id){
   return location.origin + '/api/v1/luascripts/public/' + id + '/download';
@@ -2028,6 +2140,11 @@ window.onload = function(){
     }
   } catch(e) {}
 
+  try {
+    const u=document.getElementById('authUser'); const p=document.getElementById('authPass');
+    if(u && !u.value) u.value='demo';
+    if(p && !p.value) p.value='demo';
+  } catch(e) {}
   if (token) {
     fetch('/api/me', { headers: headers() })
       .then(r => r.ok ? r.json() : Promise.reject())
@@ -2035,6 +2152,26 @@ window.onload = function(){
   }
   updateLines();
 };
+
+
+function cmdPages(){return Object.entries(pageNames).map(([id,label])=>({id,label}))}
+function openCmdk(){
+  const el=document.getElementById('cmdk'); if(!el)return;
+  el.classList.add('show');
+  filterCmdk();
+  const i=document.getElementById('cmdkInput'); if(i){i.value='';i.focus()}
+}
+function closeCmdk(){document.getElementById('cmdk')?.classList.remove('show')}
+function filterCmdk(){
+  const q=(document.getElementById('cmdkInput')?.value||'').toLowerCase();
+  const list=document.getElementById('cmdkList'); if(!list)return;
+  const rows=cmdPages().filter(p=>p.label.toLowerCase().includes(q)||p.id.includes(q));
+  list.innerHTML=rows.map((p,i)=>'<div class="cmdk-item'+(i===0?' on':'')+'" onclick="go(\''+p.id+'\');closeCmdk()"><b>'+p.label+'</b><span>'+p.id+'</span></div>').join('')||'<div class="cmdk-item">Sin resultados</div>';
+}
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault(); const el=document.getElementById('cmdk'); el.classList.contains('show')?closeCmdk():openCmdk()}
+  if(e.key==='Escape') closeCmdk();
+});
 
 const pageNames = { overview:'Overview', scripts:'Lua Scripts', hub:'Script Hub', keys:'Key System', webhooks:'Webhooks', leaderboard:'Leaderboard', assets:'My Assets', templates:'Templates', status:'System Status', playground:'API Playground', changelog:'Changelog', create:'Create Script', studio:'Studio', executions:'Analytics', logs:'Logs', apiinfo:'API Info', settings:'Settings', admin:'Admin Panel' };
 
