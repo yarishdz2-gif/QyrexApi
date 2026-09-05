@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>QrexApi</title>
-<meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
+<title>QyrexApi · Panel</title>
+<meta name="description" content="Panel QyrexApi: ofuscación Lua, key system HWID, webhooks y metricas en vivo."/>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@0.511.0/dist/umd/lucide.min.js"></script>
@@ -1185,7 +1185,7 @@ body::after{
           <div class="font-bold text-lg tracking-tight leading-tight">QrexApi</div>
           <a class="qyrex-credit mt-1" href="#" target="_blank" rel="noopener" title="Ofuscador QyrexObf">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l-10 5 10 5 10-5-10-5z"/></svg>
-            Protected by QyrexObf (beta)
+            Protected by QyrexObf v3
           </a>
         </div>
       </div>
@@ -1283,6 +1283,7 @@ body::after{
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 min-w-0">
             <span class="text-sm font-medium truncate" id="userLabel">—</span>
+            <div id="userBadges" class="flex flex-wrap gap-1 mt-0.5"></div>
             <span id="sidebarVip" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded" style="background:#3d3418;color:#fbbf24;border:1px solid #5c4d1f">VIP</span>
             <span id="sidebarAdmin" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded" style="background:#161618;color:#f4f4f5;border:1px solid #3b2a5c">ADMIN</span>
           </div>
@@ -1311,7 +1312,7 @@ body::after{
               <div class="min-w-0">
                 <div class="ov-kicker">QrexApi &middot; Panel privado</div>
                 <h1 class="ov-title">Tus scripts,<br/><em>bajo control.</em></h1>
-                <p class="ov-sub">Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
+                <p class="ov-sub">Sube tu Lua, protégela con QyrexObf v3, genera keys con HWID y mira quien lo ejecuta en vivo.</p>
               </div>
             </div>
             <div class="flex flex-wrap gap-3 mt-7">
@@ -1539,10 +1540,10 @@ body::after{
                 <label class="field">Protección del código</label>
                 <label class="text-xs" style="color:#8b8b9e">Ofuscación</label>
                 <select id="sObfMode" class="w-full mt-1">
-                  <option value="qyrex" selected>QyrexObf (beta) — máximo</option>
+                  <option value="qyrex" selected>QyrexObf v3 — máximo (anti-tamper)</option>
                   <option value="none">Sin ofuscar (código visible)</option>
                 </select>
-                <div class="text-xs mt-1" style="color:#5a5a6e">QyrexObf (beta): shell VM + hex. Elige "Sin ofuscar" solo para pruebas.</div></div>
+                <div class="text-xs mt-1" style="color:#5a5a6e">QyrexObf v3: 5 capas aritméticas + blob numérico + anti-tamper. Sin XOR / sin Base64. Usa "Sin ofuscar" solo para pruebas.</div></div>
               <div class="text-xs" style="color:#5a5a6e">Gratis: máx 15 scripts · VIP: ilimitados</div>
 
               <div class="tab-bar">
@@ -1891,6 +1892,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- SETTINGS -->
         <section id="page-settings" class="page hidden">
+          <div class="hidden" aria-hidden="true"><div id="settingsAvatar" class="avatar">?</div><span id="settingsUser"></span></div>
           <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h1 class="text-2xl font-bold">Tu cuenta</h1></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
           <div class="grid gap-4 max-w-4xl">
             <div class="card overflow-hidden"><div class="profile-banner" id="profileBanner"><div class="profile-avatar-xl" id="profileAvatarLarge">?</div></div><div class="p-6 pt-8"><div class="flex flex-wrap items-end justify-between gap-4"><div><div class="text-xl font-bold" id="profileDisplayName">—</div><div class="text-xs" style="color:#68687e" id="profileHandle">@—</div></div><div id="profileBadges" class="flex flex-wrap gap-1"></div></div><p id="profileBioPreview" class="text-sm mt-3" style="color:#9696aa">Sin biografía.</p></div></div>
@@ -2848,7 +2850,7 @@ function renderScripts(list){
           '<div class="text-xs mt-0.5 truncate" style="color:#5a5a6e">'+esc(s.description||'Sin descripción')+'</div>'+
           '<div class="flex flex-wrap gap-2 mt-2">'+
             '<span class="chip">'+(s.executions||0)+' runs</span>'+
-            '<span class="chip">'+(s.obfMode==='none'||s.doObfuscate===false?'Plain':'QyrexObf (beta)')+'</span>'+
+            '<span class="chip">'+(s.obfMode==='none'||s.doObfuscate===false?'Plain':'QyrexObf v3')+'</span>'+
             (date ? '<span class="chip">'+esc(date)+'</span>' : '')+
             '<span class="chip" style="font-family:monospace;font-size:10px">'+esc((s.id||'').slice(0,10))+'…</span>'+
           '</div>'+
