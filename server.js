@@ -550,7 +550,7 @@ function needMongo(req, res, next) {
 }
 
 async function obfuscateWithQyrexObf(code) {
-  // Now uses integrated QyrexObf 1.0.3 from ./obfuscate.js
+  // Now uses integrated QyrexObf 1.0.2 from ./obfuscate.js
   const result = qyrexObfuscate(String(code || ''));
   return result && result.code ? result.code : String(result || '');
 }
@@ -576,7 +576,7 @@ async function resolveObfuscated(source, mode) {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
   try {
-    // QyrexObf 1.0.3 integrated — hard anti-dump nest
+    // QyrexObf 1.0.2 integrated — decimal-affine + anti-dump nest
     const result = qyrexObfuscate(src);
     const code = result && result.code ? result.code : String(result || "");
     if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
