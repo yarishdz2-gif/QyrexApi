@@ -550,7 +550,9 @@ function needMongo(req, res, next) {
 }
 
 async function obfuscateWithQyrexObf(code) {
-  throw new Error('QyrexObf eliminado — usa QyrexObf local');
+  // Now uses integrated QyrexObf 1.0.2 from ./obfuscate.js
+  const result = qyrexObfuscate(String(code || ''));
+  return result && result.code ? result.code : String(result || '');
 }
 
 function xorBytes(buf, key) {
@@ -574,11 +576,11 @@ async function resolveObfuscated(source, mode) {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
   try {
-    // Stability-first: do not rewrite Lua tokens or inject independent chunks.
-    const result = qyrexObfuscate(src, { vm: true });
+    // QyrexObf 1.0.2 integrated — decimal-affine + anti-dump nest
+    const result = qyrexObfuscate(src);
     const code = result && result.code ? result.code : String(result || "");
     if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
-    return { code, doObfuscate: true, obfMode: "qrex" };
+    return { code, doObfuscate: true, obfMode: "qyrex" };
   } catch (e) {
     console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
     throw new Error("Ofuscación falló: " + (e.message || "error"));
