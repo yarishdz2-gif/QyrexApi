@@ -1081,7 +1081,7 @@ body::after{
           <li><span>&#10003;</span> Webhooks a tu Discord al instante</li>
         </ul>
       </div>
-      <div class="lg-foot"><i class="lg-dot"></i> API operativa &middot; demo local</div>
+      <div class="lg-foot"><i class="lg-dot"></i> API operativa</div>
     </section>
 
     <section class="lg-panel">
@@ -1096,7 +1096,7 @@ body::after{
         <button id="tabReg" onclick="setTab('register')">Registrarse</button>
       </div>
 
-      <a class="lg-discord" href="#" onclick="event.preventDefault();document.getElementById('authUser').value='demo';document.getElementById('authPass').value='demo';mode='login';doAuth();">
+      <a class="lg-discord" href="#" onclick="event.preventDefault();alert('Conecta Discord desde Ajustes o configura OAuth en el servidor.');">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4a9.6 9.6 0 0 0-9.6 9.6c0 1.72.45 3.33 1.25 4.73L2.4 21.6l5.05-1.22A9.55 9.55 0 0 0 12 21.6a9.6 9.6 0 0 0 0-19.2Zm-3.5 8.3c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm7 0c.72 0 1.3.62 1.3 1.38 0 .77-.58 1.39-1.3 1.39s-1.3-.62-1.3-1.39c0-.76.58-1.38 1.3-1.38Zm-7.6 4.9h8.2a4.2 4.2 0 0 1-8.2 0Z"/></svg>
         Continuar con Discord
       </a>
@@ -2020,36 +2020,25 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
 <script>
-/* ===== Demo local: si /api falla, el panel sigue vivo en localStorage ===== */
+/* ===== Offline fallback: si /api falla, el panel usa localStorage ===== */
 (function(){
-  const SK='qrex_demo_store_v3';
+  const SK='qrex_store_v3';
   const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
   const now=()=>new Date().toISOString();
   function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString()}
   function seed(){
-    const s1=uid(),s2=uid(),s3=uid(),p1=uid();
+    const p1=uid();
     return {
-      user:{id:'u_demo',username:'demo',displayName:'Qyrex',role:'admin',vip:true,avatar:'',bio:'Panel demo local.'},
-      token:'demo-'+uid(),
-      scripts:[
-        {id:s1,name:'Aura Hub',game:'Universal',version:'1.4.2',visibility:'private',obfuscation:'medium',executions:412,createdAt:daysAgo(18),updatedAt:daysAgo(1),source:'-- Aura Hub\nprint("aura")'},
-        {id:s2,name:'Silent Aim Kit',game:'FPS',version:'0.9.1',visibility:'unlisted',obfuscation:'heavy',executions:188,createdAt:daysAgo(9),updatedAt:daysAgo(2),source:'-- aim kit'},
-        {id:s3,name:'Farm Assistant',game:'Simulator',version:'2.0.0',visibility:'private',obfuscation:'light',executions:76,createdAt:daysAgo(4),updatedAt:daysAgo(0),source:'-- farm'},
-      ],
+      user:{id:'u_'+uid(),username:'',displayName:'',role:'user',vip:false,avatar:'',bio:''},
+      token:'',
+      scripts:[],
       providers:[{id:p1,name:'Main',slug:'main',enabled:true}],
-      keys:[
-        {id:uid(),key:'QREX-'+uid().toUpperCase().slice(0,8),providerId:p1,note:'beta',expiresAt:daysAgo(-14),hwidLimit:1,hwids:[],enabled:true,uses:12},
-        {id:uid(),key:'QREX-'+uid().toUpperCase().slice(0,8),providerId:p1,note:'staff',expiresAt:daysAgo(-30),hwidLimit:2,hwids:['HWID-DEMO'],enabled:true,uses:3},
-      ],
-      logs:[
-        {id:uid(),level:'info',message:'Script Aura Hub ejecutado',ip:'201.14.xx.xx',createdAt:daysAgo(0)},
-        {id:uid(),level:'warn',message:'Key usada con HWID nuevo',ip:'187.22.xx.xx',createdAt:daysAgo(1)},
-        {id:uid(),level:'ok',message:'Webhook Discord entregado',ip:'—',createdAt:daysAgo(1)},
-      ],
-      webhooks:[{id:uid(),name:'Discord alerts',url:'https://discord.com/api/webhooks/demo',events:['key.used','script.exec'],enabled:true}],
-      hub:[{id:uid(),scriptId:s1,name:'Aura Hub',description:'Hub universal',executions:412}],
-      notifs:[{id:uid(),title:'Bienvenido al demo',message:'Todo corre en este navegador. Ctrl+K para navegar.',type:'success',read:false,createdAt:now()}],
-      executions: Array.from({length:7},(_,i)=>({day:daysAgo(6-i).slice(0,10),count:20+Math.round(Math.sin(i)*18+i*6)}))
+      keys:[],
+      logs:[],
+      webhooks:[],
+      hub:[],
+      notifs:[{id:uid(),title:'Bienvenido a QrexApi',message:'Tu panel está listo. Usa Ctrl+K para navegar.',type:'success',read:false,createdAt:now()}],
+      executions: Array.from({length:7},(_,i)=>({day:daysAgo(6-i).slice(0,10),count:0}))
     };
   }
   function get(){try{const x=JSON.parse(localStorage.getItem(SK)||'null');if(x&&x.scripts)return x}catch{} const s=seed();set(s);return s}
@@ -2081,9 +2070,14 @@ local Players = game:GetService(&quot;Players&quot;)
     const b=bodyOf(init);
     if(path==='/api/auth/login'||path==='/api/auth/register'){
       if(method==='POST'){
-        const user=String(b.username||'demo');
+        const user=String(b.username||'').trim();
         if(!user||!b.password) return json({error:'Pon usuario y contraseña'},400);
-        s.user.username=user; s.token='demo-'+uid(); set(s);
+        s.user.id = s.user.id || ('u_'+uid());
+        s.user.username = user;
+        s.user.displayName = s.user.displayName || user;
+        s.user.role = s.user.role || 'user';
+        s.token = 'tok-'+uid();
+        set(s);
         return json({token:s.token,user:s.user});
       }
     }
@@ -2092,7 +2086,7 @@ local Players = game:GetService(&quot;Players&quot;)
     if(path==='/api/notifications/read-all'&&method==='POST'){s.notifs.forEach(n=>n.read=true);set(s);return json({ok:true})}
     if(path==='/api/account/profile'&&method==='PATCH'){Object.assign(s.user,b);set(s);return json(s.user)}
     if(path==='/api/account/sessions') return json({sessions:[{id:'s1',device:'Este navegador',current:true,lastSeenAt:now()}]});
-    if(path.startsWith('/api/account')) return json({ok:true,message:'Guardado (demo)'});
+    if(path.startsWith('/api/account')) return json({ok:true,message:'Guardado'});
     if(path==='/api/scripts'||path==='/api/v1/scripts'){
       if(method==='POST'){
         const item={id:uid(),name:b.name||'Nuevo',game:b.game||'Universal',version:b.version||'1.0.0',visibility:b.visibility||'private',obfuscation:b.obfuscation||'none',executions:0,createdAt:now(),updatedAt:now(),source:b.source||b.code||'-- script'};
@@ -2126,15 +2120,15 @@ local Players = game:GetService(&quot;Players&quot;)
     }
     if(path==='/api/stats'||path==='/api/overview') return json({scripts:s.scripts.length,executions:s.scripts.reduce((a,x)=>a+x.executions,0),keys:s.keys.length,users:1});
     if(path==='/api/analytics'||path.includes('analytics')) return json({daily:s.executions,hourly:s.executions,scripts:s.scripts.map(x=>({name:x.name,executions:x.executions}))});
-    if(path==='/api/admin'||path.startsWith('/api/admin')) return json({users:[{username:'demo',role:'admin'}],ok:true});
-    if(path==='/api/status') return json({ok:true,latency:12,version:'3.1-demo'});
+    if(path==='/api/admin'||path.startsWith('/api/admin')) return json({users:[],ok:true});
+    if(path==='/api/status') return json({ok:true,latency:12,version:'3.1'});
     if(path==='/api/leaderboard') return json({rows:s.scripts.map((x,i)=>({rank:i+1,name:x.name,executions:x.executions}))});
     if(path==='/api/assets') return json({assets:[]});
-    if(path==='/api/vip'||path.includes('vip')) return json({vip:true,ok:true,message:'VIP demo activo'});
+    if(path==='/api/vip'||path.includes('vip')) return json({vip:true,ok:true,message:'VIP activo'});
     if(path.startsWith('/auth/discord')) return json({token:s.token,user:s.user});
-    return json({ok:true,demo:true,path,method});
+    return json({ok:true,path,method});
   }
-  window.__qrexDemo=true;
+  window.__qrexOffline=true;
 })();
 </script>
 
@@ -2540,8 +2534,7 @@ window.onload = function(){
 
   try {
     const u=document.getElementById('authUser'); const p=document.getElementById('authPass');
-    if(u && !u.value) u.value='demo';
-    if(p && !p.value) p.value='demo';
+    /* sin autofill de credenciales */
   } catch(e) {}
   if (token) {
     fetch('/api/me', { headers: headers() })
