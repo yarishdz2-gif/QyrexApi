@@ -2610,15 +2610,23 @@ app.use(async (req,res,next)=>{
   }catch(e){ return next(); }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+const publicDir = path.join(__dirname, 'public');
+const rootIndex = path.join(__dirname, 'index.html');
+const publicIndex = path.join(publicDir, 'index.html');
+
+// Servir assets desde /public cuando exista y mantener compatibilidad con instalaciones
+// donde index.html está en la raíz. Esto evita los 404 causados por la estructura del ZIP.
+app.use(express.static(publicDir));
 
 // Nunca devolver HTML en rutas /api/*
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada: ' + req.method + ' ' + req.path });
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('*', (req, res, next) => {
+  const target = fs.existsSync(publicIndex) ? publicIndex : rootIndex;
+  if (!fs.existsSync(target)) return res.status(500).send('Qyrex: index.html no encontrado en /public ni en la raíz.');
+  res.sendFile(target, err => err ? next(err) : undefined);
 });
 
 // Errores no capturados -> JSON
