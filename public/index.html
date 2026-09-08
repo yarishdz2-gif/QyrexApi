@@ -783,6 +783,199 @@ input:focus,textarea:focus,select:focus{border-color:#93c5fd!important;box-shado
 @media(max-width:900px){.main-content{margin-left:0!important}.sidebar{background:#fff!important}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style id="qyrex-enterprise-v2">
+:root{
+ --qx-blue:#1769e0;--qx-blue-2:#0e4fb5;--qx-navy:#0b1730;--qx-ink:#101828;--qx-muted:#667085;
+ --qx-line:#e4e7ec;--qx-surface:#ffffff;--qx-bg:#f5f8fc;--qx-soft:#eef5ff;
+ --qx-success:#12b76a;--qx-warning:#f79009;--qx-danger:#f04438;--qx-radius:16px;
+ --qx-shadow:0 10px 35px rgba(16,24,40,.08);--qx-shadow-hover:0 18px 50px rgba(23,105,224,.13);
+ --qx-ease:cubic-bezier(.22,1,.36,1);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',Inter,system-ui,sans-serif!important;background:var(--qx-bg)!important;color:var(--qx-ink)!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:
+ radial-gradient(900px 420px at 78% -5%,rgba(23,105,224,.09),transparent 65%),
+ radial-gradient(700px 360px at 12% 100%,rgba(14,79,181,.055),transparent 65%)}
+#appView{position:relative;z-index:1;background:transparent!important}
+#appView .sidebar{background:rgba(10,23,48,.98)!important;border-right:1px solid rgba(255,255,255,.08)!important;box-shadow:10px 0 35px rgba(8,18,38,.08)!important}
+#appView .sidebar .nav-section{color:#8da3c7!important;font-weight:800;letter-spacing:.12em}
+#appView .sidebar .nav-item{color:#b8c6da!important;border-color:transparent!important;border-radius:12px!important}
+#appView .sidebar .nav-item:hover{color:#fff!important;background:rgba(23,105,224,.14)!important;border-color:rgba(86,150,255,.16)!important}
+#appView .sidebar .nav-item.active{color:#fff!important;background:linear-gradient(135deg,rgba(23,105,224,.95),rgba(14,79,181,.86))!important;border-color:rgba(255,255,255,.08)!important;box-shadow:0 8px 20px rgba(8,57,134,.28)!important}
+#appView .sidebar .user-pill{background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.09)!important}
+#appView .main-content{background:transparent!important}
+#appView .main-content>div.flex.items-center{background:rgba(255,255,255,.82)!important;border-color:var(--qx-line)!important;backdrop-filter:blur(18px)!important}
+#appView .card{background:rgba(255,255,255,.94)!important;border:1px solid var(--qx-line)!important;border-radius:var(--qx-radius)!important;box-shadow:var(--qx-shadow)!important;color:var(--qx-ink)!important}
+#appView .card:hover{transform:translateY(-2px);box-shadow:var(--qx-shadow-hover)!important;border-color:#cfe0fb!important}
+#appView input,#appView textarea,#appView select{background:#fff!important;color:#1d2939!important;border:1px solid #d0d5dd!important;border-radius:12px!important}
+#appView input::placeholder,#appView textarea::placeholder{color:#98a2b3!important}
+#appView input:focus,#appView textarea:focus,#appView select:focus{border-color:var(--qx-blue)!important;box-shadow:0 0 0 4px rgba(23,105,224,.10)!important}
+#appView .btn-primary{background:linear-gradient(135deg,var(--qx-blue),var(--qx-blue-2))!important;color:#fff!important;border:1px solid var(--qx-blue)!important;box-shadow:0 8px 20px rgba(23,105,224,.22)!important;border-radius:11px!important}
+#appView .btn-primary:hover{filter:brightness(1.03);box-shadow:0 12px 28px rgba(23,105,224,.28)!important}
+#appView .btn-ghost,#appView .icon-btn{background:#fff!important;color:#475467!important;border-color:#d0d5dd!important}
+#appView .btn-ghost:hover,#appView .icon-btn:hover{background:var(--qx-soft)!important;color:var(--qx-blue)!important;border-color:#b7d0f5!important}
+#appView .ov-hero{background:linear-gradient(135deg,#0b1730 0%,#123568 52%,#1769e0 100%)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 22px 60px rgba(11,23,48,.22)!important;border-radius:22px!important;position:relative;overflow:hidden}
+#appView .ov-hero:after{content:"";position:absolute;width:430px;height:430px;right:-170px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 68%);pointer-events:none}
+#appView .ov-hero *{position:relative;z-index:1}
+#appView .ov-kicker{color:#b7d3ff!important;letter-spacing:.13em!important;font-weight:800!important}
+#appView .ov-title{color:#fff!important;letter-spacing:-.045em!important;font-weight:800!important}
+#appView .ov-sub{color:#d8e6fb!important}
+#appView .ov-stat{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:14px!important;backdrop-filter:blur(10px)}
+#appView .ov-cta{background:#fff!important;color:#0b1730!important;border-color:#fff!important;box-shadow:0 8px 25px rgba(0,0,0,.16)!important}
+#appView .vip-top-btn{background:linear-gradient(135deg,#1769e0,#123f96)!important;border-color:#1769e0!important;color:#fff!important;box-shadow:0 8px 20px rgba(23,105,224,.2)!important}
+#appView .notif-btn,.lang-btn{background:#fff!important;color:#475467!important;border-color:#d0d5dd!important}
+#appView .editor-wrap{background:#0b1220!important;border-color:#17233a!important;box-shadow:0 14px 38px rgba(11,23,48,.14)!important}
+#appView .editor-header{background:#101a2b!important;border-color:#20304a!important}
+#appView .editor-body{background:#0b1220!important}
+#appView #sSource{background:#0b1220!important;color:#d9e5f5!important}
+#appView .line-nums{background:#08101d!important;color:#526581!important;border-color:#17263c!important}
+#appView .studio-status{background:#101a2b!important;border-color:#20304a!important;color:#8ea2be!important}
+#appView table th{color:#667085!important;background:#f8fafc!important}
+#appView table td{border-color:#eaecf0!important;color:#344054!important}
+#appView .badge,.chip{background:#f2f4f7!important;color:#475467!important;border-color:#e4e7ec!important}
+#appView .badge-green{background:#ecfdf3!important;color:#027a48!important;border-color:#abefc6!important}
+
+/* Enterprise workspace rail */
+.qx-enterprise-rail{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 18px;padding:11px 14px;background:rgba(255,255,255,.82);border:1px solid var(--qx-line);border-radius:14px;backdrop-filter:blur(14px);box-shadow:0 5px 22px rgba(16,24,40,.05)}
+.qx-rail-left,.qx-rail-right{display:flex;align-items:center;gap:10px;min-width:0}
+.qx-status{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:9px;background:#ecfdf3;color:#067647;font-size:11px;font-weight:800;border:1px solid #abefc6}
+.qx-status i{width:7px;height:7px;border-radius:50%;background:#12b76a;box-shadow:0 0 0 3px rgba(18,183,106,.12);animation:qxPulse 2.2s infinite}
+.qx-rail-btn{height:32px;padding:0 10px;border-radius:9px;background:#fff;border:1px solid #d0d5dd;color:#475467;font-size:11px;font-weight:800;cursor:pointer;transition:.2s var(--qx-ease)}
+.qx-rail-btn:hover{transform:translateY(-1px);border-color:#b7d0f5;color:var(--qx-blue);background:#f7fbff}
+.qx-time{font-variant-numeric:tabular-nums;color:#667085;font-size:11px;font-weight:700}
+@keyframes qxPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* premium section headers */
+#appView h1.text-2xl{font-weight:800!important;letter-spacing:-.035em!important;color:#101828!important}
+#appView .text-gray-500,#appView [style*="color:#5a5a6e"],#appView [style*="color: #5a5a6e"]{color:#667085!important}
+#appView .text-gray-400{color:#98a2b3!important}
+
+/* compact toast */
+.toast{background:#0b1730!important;border-color:#223a63!important;box-shadow:0 18px 50px rgba(11,23,48,.22)!important}
+.toast.ok{border-color:rgba(18,183,106,.35)!important}.toast.err{border-color:rgba(240,68,56,.35)!important}
+
+/* scroll polish */
+::-webkit-scrollbar{width:8px!important;height:8px!important}::-webkit-scrollbar-track{background:transparent!important}::-webkit-scrollbar-thumb{background:#cbd5e1!important;border-radius:20px!important;border:2px solid transparent!important;background-clip:padding-box!important}::-webkit-scrollbar-thumb:hover{background:#94a3b8!important}
+
+/* login — serious corporate */
+#loginView{background:linear-gradient(145deg,#071326 0%,#0b1730 48%,#11376f 100%)!important}
+#loginView:before{background:radial-gradient(circle at 25% 20%,rgba(23,105,224,.34),transparent 34%),radial-gradient(circle at 85% 80%,rgba(94,164,255,.17),transparent 30%)!important}
+.lg-shell{max-width:1040px!important;border-radius:24px!important;border:1px solid rgba(255,255,255,.12)!important;background:rgba(8,18,38,.78)!important;box-shadow:0 40px 100px rgba(0,0,0,.38)!important}
+.lg-aside{background:linear-gradient(155deg,rgba(23,105,224,.2),rgba(255,255,255,.02))!important;border-right:1px solid rgba(255,255,255,.1)!important}
+.lg-title{font-family:Manrope,Inter,sans-serif!important;font-weight:800!important;letter-spacing:-.05em!important}
+.lg-title em{color:#73adff!important}
+.lg-discord{background:linear-gradient(135deg,#1769e0,#0e4fb5)!important;border-color:#2d79e6!important}
+.lg-switch{background:#0b1425!important;border-color:#263651!important}.lg-thumb{background:#fff!important}
+.lg-panel input{background:#0c1729!important;border-color:#2a3c58!important;color:#fff!important}
+.lg-panel input:focus{border-color:#4e93f7!important;box-shadow:0 0 0 4px rgba(78,147,247,.14)!important}
+.lg-panel .btn-primary{background:linear-gradient(135deg,#1769e0,#0e4fb5)!important;color:#fff!important;border-color:#1769e0!important}
+
+@media(max-width:900px){
+ .qx-enterprise-rail{align-items:flex-start;flex-direction:column}.qx-rail-right{width:100%;justify-content:space-between}.qx-rail-left{width:100%;overflow:auto}
+}
+@media(prefers-reduced-motion:reduce){.qx-status i{animation:none!important}.card,.btn-primary{transition:none!important}}
+</style>
+
+<style id="qyrex-ultra-enterprise">
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --qx-blue:#2f80ed; --qx-blue-2:#56a6ff; --qx-deep:#0a2a52; --qx-ink:#05070b;
+  --qx-panel:#0a101a; --qx-panel-2:#0e1724; --qx-line:#1a2a3e; --qx-muted:#6e7f95;
+  --qx-text:#e9f1fb; --qx-soft:#a9b9cb; --qx-success:#36d399; --qx-danger:#ff6574;
+  --qx-shadow:0 18px 60px rgba(0,0,0,.42); --qx-ease:cubic-bezier(.2,.75,.2,1);
+}
+html,body{background:#05070b!important;color:var(--qx-text)!important;font-family:Manrope,Inter,system-ui,sans-serif!important}
+body{background:
+  radial-gradient(1100px 650px at 78% -12%,rgba(47,128,237,.13),transparent 62%),
+  radial-gradient(900px 650px at -12% 110%,rgba(17,78,143,.16),transparent 64%),
+  #05070b!important}
+body::selection{background:rgba(47,128,237,.34);color:#fff}
+h1,h2,h3,h4,.ov-title,.lg-title,.vip-price,.stat-val{font-family:'Space Grotesk',Manrope,Inter,sans-serif!important}
+.sidebar{background:linear-gradient(180deg,#07101b 0%,#050a11 100%)!important;border-right:1px solid #14263a!important;box-shadow:14px 0 42px rgba(0,0,0,.34)!important}
+.sidebar .flex.items-center.gap-3.px-5.py-5{border-bottom:1px solid rgba(47,128,237,.10)!important}
+.nav-section{color:#56708c!important;letter-spacing:.14em!important;font-weight:800!important}
+.nav-item{color:#8093a8!important;border-color:transparent!important;position:relative;overflow:hidden}
+.nav-item::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(47,128,237,.13),transparent 70%);opacity:0;transition:opacity .22s var(--qx-ease);pointer-events:none}
+.nav-item:hover{background:rgba(47,128,237,.09)!important;color:#eaf3ff!important;border-color:rgba(47,128,237,.18)!important;transform:translateX(2px)}
+.nav-item:hover::after,.nav-item.active::after{opacity:1}
+.nav-item.active{background:linear-gradient(90deg,rgba(47,128,237,.20),rgba(47,128,237,.07))!important;color:#fff!important;border-color:rgba(47,128,237,.34)!important;box-shadow:inset 3px 0 0 var(--qx-blue),0 10px 25px rgba(0,0,0,.20)!important}
+.nav-item svg{color:#6683a2}
+.nav-item.active svg,.nav-item:hover svg{color:var(--qx-blue-2)}
+.user-pill{background:rgba(10,16,25,.88)!important;border:1px solid #17283b!important;box-shadow:0 14px 30px rgba(0,0,0,.22)}
+.avatar{background:linear-gradient(135deg,#2f80ed,#0c2c55)!important;box-shadow:0 0 0 1px rgba(86,166,255,.22),0 8px 18px rgba(47,128,237,.18)!important}
+.main-content{background:transparent!important}
+.main-content>div.flex.items-center{background:rgba(5,9,15,.82)!important;border-color:#14263a!important;box-shadow:0 10px 40px rgba(0,0,0,.14)}
+.main-content>div.flex.items-center::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(47,128,237,.55),transparent);opacity:.7}
+.card{background:linear-gradient(180deg,rgba(12,20,31,.96),rgba(8,14,22,.96))!important;border:1px solid #182b40!important;box-shadow:0 14px 40px rgba(0,0,0,.28)!important;border-radius:16px!important;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03),transparent 35%,rgba(47,128,237,.025));pointer-events:none}
+.card:hover{border-color:rgba(47,128,237,.40)!important;box-shadow:0 20px 50px rgba(0,0,0,.34),0 0 0 1px rgba(47,128,237,.08)!important;transform:translateY(-2px)}
+input,textarea,select{background:#07101a!important;border-color:#1a2b3f!important;color:#e8f1fb!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
+input::placeholder,textarea::placeholder{color:#52677f!important}
+input:focus,textarea:focus,select:focus{border-color:rgba(47,128,237,.72)!important;box-shadow:0 0 0 3px rgba(47,128,237,.13),0 0 28px rgba(47,128,237,.08)!important}
+.btn-primary{background:linear-gradient(135deg,#2f80ed,#1967c8)!important;color:#fff!important;border:1px solid rgba(110,178,255,.34)!important;box-shadow:0 10px 28px rgba(47,128,237,.24)!important;position:relative;overflow:hidden}
+.btn-primary::after{content:"";position:absolute;top:-120%;left:-40%;width:25%;height:340%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transition:transform .65s var(--qx-ease)}
+.btn-primary:hover::after{transform:translateX(520%) rotate(25deg)}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 15px 34px rgba(47,128,237,.34)!important}
+.btn-ghost{background:rgba(9,16,25,.72)!important;border-color:#20364e!important;color:#8fa6bd!important}
+.btn-ghost:hover{border-color:rgba(47,128,237,.55)!important;color:#eaf3ff!important;background:rgba(47,128,237,.08)!important}
+.badge,.chip{background:#0b1724!important;color:#a7bad0!important;border-color:#20364f!important}
+.badge-green,.hint-green{background:rgba(24,111,83,.13)!important;border-color:rgba(54,211,153,.25)!important;color:#59e1af!important}
+table th{color:#60758c!important;border-bottom-color:#193047!important;font-family:Manrope,sans-serif!important;letter-spacing:.05em;text-transform:uppercase;font-size:10px!important}
+table td{border-bottom-color:#102033!important;color:#c5d2df!important}
+tbody tr{transition:background .18s ease,transform .18s ease}
+tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
+.stat-val{color:#f2f7fd!important;text-shadow:0 0 22px rgba(47,128,237,.10)}
+.vip-top-btn{background:linear-gradient(135deg,#0d1c2c,#102842)!important;color:#77b6ff!important;border-color:#214d7d!important;box-shadow:0 8px 22px rgba(0,0,0,.25)!important}
+.lang-btn,.notif-btn,.icon-btn{background:#09131f!important;border-color:#1b3249!important;color:#9fb4c9!important}
+.lang-btn:hover,.notif-btn:hover,.icon-btn:hover{border-color:rgba(47,128,237,.55)!important;color:#fff!important;background:#0d1b2a!important}
+.toast{background:#08111c!important;border-color:#1b3148!important;box-shadow:var(--qx-shadow)!important}
+.toast.ok{border-color:rgba(54,211,153,.4)!important}.toast.err{border-color:rgba(255,101,116,.38)!important}
+.editor-wrap{background:#050b12!important;border-color:#193049!important}
+.editor-wrap:focus-within{border-color:rgba(47,128,237,.55)!important;box-shadow:0 0 0 1px rgba(47,128,237,.10),0 18px 50px rgba(0,0,0,.28)}
+.editor-header,.studio-status{background:#07111c!important;border-color:#142a40!important}
+.line-nums{background:#04090e!important;border-right-color:#102538!important;color:#40566c!important}
+#sSource{background:#050b12!important;color:#d7e2ed!important}
+.ai-panel{background:#06101a!important;border-color:#142a40!important}
+.ai-chip{background:#0a1724!important;border-color:#1a334d!important;color:#91a8bf!important}.ai-chip:hover{border-color:#347ec6!important;background:#0d2033!important;color:#fff!important}
+::-webkit-scrollbar-thumb{background:#1d3855!important}::-webkit-scrollbar-track{background:#07101a!important}
+/* Login rebrand */
+#loginView{background:
+  radial-gradient(900px 600px at 20% 0%,rgba(47,128,237,.18),transparent 62%),
+  radial-gradient(800px 500px at 95% 100%,rgba(12,64,116,.18),transparent 60%),#04070b!important}
+#loginView::before{background:rgba(47,128,237,.18)!important}#loginView::after{background:rgba(0,84,164,.16)!important}
+.lg-shell{background:rgba(5,10,17,.91)!important;border-color:#17314c!important;box-shadow:0 40px 120px rgba(0,0,0,.68),0 0 0 1px rgba(47,128,237,.07)!important}
+.lg-aside{background:linear-gradient(160deg,rgba(47,128,237,.12),transparent 55%)!important;border-right-color:#162b41!important}
+.lg-mark b,.lg-title,.lg-title em,.lg-topbar b{color:#f3f8fd!important}.lg-kicker,.lg-sub,.lg-points li,.lg-foot{color:#7890a7!important}
+.lg-points span{background:#0b1826!important;border-color:#1a3854!important;color:#6fb4ff!important}
+.lg-dot{background:#3bd49d!important;box-shadow:0 0 12px #3bd49d!important}
+.lg-switch{background:#06101a!important;border-color:#1a3047!important}.lg-thumb{background:#2f80ed!important}.lg-switch button.on{color:#fff!important}
+.lg-discord{box-shadow:0 14px 34px rgba(47,128,237,.18)!important}
+/* Enterprise utility layer */
+.qx-enterprise-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin:0 0 18px;border:1px solid #17304a;border-radius:14px;background:linear-gradient(100deg,rgba(8,18,30,.96),rgba(8,14,22,.93));box-shadow:0 12px 30px rgba(0,0,0,.24);position:relative;overflow:hidden}
+.qx-enterprise-bar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#56a6ff,#2f80ed)}
+.qx-status{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#7f96ad}.qx-status i{width:7px;height:7px;border-radius:50%;background:#36d399;box-shadow:0 0 10px rgba(54,211,153,.8)}
+.qx-actions{display:flex;flex-wrap:wrap;gap:7px}.qx-actions button{height:34px;padding:0 11px!important;font-size:11px!important}
+.qx-admin-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-bottom:18px}.qx-admin-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.qx-tool{padding:14px;border:1px solid #17304a;border-radius:14px;background:linear-gradient(180deg,#0b1724,#08111b);cursor:pointer;transition:.25s var(--qx-ease);text-align:left;color:#dbe8f5}
+.qx-tool:hover{border-color:rgba(47,128,237,.5);transform:translateY(-2px);box-shadow:0 12px 25px rgba(0,0,0,.24)}
+.qx-tool .qxi{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(47,128,237,.12);color:#64b0ff;border:1px solid rgba(47,128,237,.18);margin-bottom:10px}
+.qx-tool b{display:block;font-size:12px;margin-bottom:4px}.qx-tool span{font-size:10px;color:#6f8398;line-height:1.45}
+.qx-admin-summary{display:grid;gap:10px}.qx-mini{padding:12px 14px;border-radius:12px;border:1px solid #17304a;background:#09131f;display:flex;justify-content:space-between;gap:12px}.qx-mini span{font-size:10px;color:#687e95}.qx-mini strong{font-size:12px;color:#dce8f5}
+.qx-table-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid #193047}.qx-table-head .qx-filter{max-width:240px}
+.qx-filter{height:36px!important;padding:0 12px!important;font-size:11px!important}
+.qx-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#4f7aa5;font-weight:800;margin-bottom:7px}.qx-title{font-size:22px!important;letter-spacing:-.03em}.qx-sub{color:#6f8398!important;font-size:12px!important}
+.qx-blue-text{color:#69b1ff!important}.qx-dim{color:#627991!important}.qx-danger{color:#ff7481!important}
+.qx-admin-hero{padding:20px;margin-bottom:18px;background:radial-gradient(500px 180px at 0% 0%,rgba(47,128,237,.16),transparent 70%),linear-gradient(180deg,#091522,#07101a);border:1px solid #183653;border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.25);position:relative;overflow:hidden}
+.qx-admin-hero::after{content:"";position:absolute;right:-80px;top:-100px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(47,128,237,.20),transparent 68%);filter:blur(12px);pointer-events:none}
+@media(max-width:900px){.qx-admin-grid{grid-template-columns:1fr}.qx-admin-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.qx-enterprise-bar{align-items:flex-start;flex-direction:column}.qx-actions{width:100%}.qx-actions button{flex:1}.qx-admin-tools{grid-template-columns:1fr}.qx-table-head{align-items:stretch;flex-direction:column}.qx-filter{max-width:none!important}.qx-title{font-size:19px!important}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
 </head>
 <body>
 
@@ -1455,8 +1648,41 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ADMIN -->
         <section id="page-admin" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.admin">Admin Panel</h1>
-          <p class="text-xs mb-6" style="color:#5a5a6e">Solo visible para OWNER / admin</p>
+          <div class="qx-admin-hero">
+            <div style="position:relative;z-index:1">
+              <div class="qx-kicker">Qyrex Control Center</div>
+              <h1 class="qx-title font-bold mb-2" data-i18n="nav.admin">Admin Panel</h1>
+              <p class="qx-sub mb-0">Centro operativo para gestionar usuarios, scripts, publicaciones, seguridad y mantenimiento.</p>
+            </div>
+          </div>
+          <div class="qx-enterprise-bar">
+            <div class="qx-status"><i></i><span>Sistema operativo</span><span class="qx-dim">·</span><span id="qxAdminLastRefresh">Sin sincronizar</span></div>
+            <div class="qx-actions">
+              <button class="btn-ghost" onclick="qxAdminRefreshAll()">↻ Actualizar todo</button>
+              <button class="btn-ghost" onclick="qxAdminHealth()">◉ Comprobar API</button>
+              <button class="btn-ghost" onclick="qxExportAdminData()">⇩ Exportar datos</button>
+            </div>
+          </div>
+          <div class="qx-admin-grid">
+            <div class="card" style="padding:16px">
+              <div class="qx-kicker">Acciones rápidas</div>
+              <div class="qx-admin-tools">
+                <button class="qx-tool" onclick="document.getElementById('resetUser').focus()"><div class="qxi">⌁</div><b>Cuenta</b><span>Restablecer acceso de un usuario.</span></button>
+                <button class="qx-tool" onclick="document.getElementById('premUser').focus()"><div class="qxi">◆</div><b>Premium</b><span>Asignar o retirar acceso premium.</span></button>
+                <button class="qx-tool" onclick="document.getElementById('vipGenAmount').focus()"><div class="qxi">◇</div><b>Licencias VIP</b><span>Generar un lote de códigos.</span></button>
+                <button class="qx-tool" onclick="document.getElementById('blIp').focus()"><div class="qxi">⌘</div><b>Seguridad IP</b><span>Gestionar bloqueos y motivos.</span></button>
+              </div>
+            </div>
+            <div class="card" style="padding:16px">
+              <div class="qx-kicker">Estado operativo</div>
+              <div class="qx-admin-summary">
+                <div class="qx-mini"><span>API</span><strong id="qxApiStatus">Pendiente</strong></div>
+                <div class="qx-mini"><span>Última actualización</span><strong id="qxAdminClock">—</strong></div>
+                <div class="qx-mini"><span>Sesión</span><strong id="qxAdminSession">Admin</strong></div>
+                <div class="qx-mini"><span>Entorno</span><strong>Production</strong></div>
+              </div>
+            </div>
+          </div>
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="adminStats">
             <div class="card p-4"><div class="text-xs" style="color:#6b6b80">Users</div><div class="text-2xl font-bold" id="aUsers">—</div></div>
             <div class="card p-4"><div class="text-xs" style="color:#6b6b80">SCRIPTS</div><div class="text-2xl font-bold" id="aScripts">—</div></div>
@@ -1498,7 +1724,7 @@ local Players = game:GetService(&quot;Players&quot;)
           </div>
 
           <div class="card overflow-hidden mb-6">
-            <div class="px-5 py-3 border-b text-sm font-semibold" style="border-color:#1e1e2a">Usuarios</div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Usuarios</div><div class="text-[10px] qx-dim">Directorio de cuentas registradas</div></div><input id="qxAdminUserFilter" class="qx-filter" placeholder="Buscar usuario…" oninput="qxFilterAdminRows('adminUsers',this.value,0)"/></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>User</th><th>Role</th><th>Premium</th><th>Desde</th></tr></thead>
@@ -1508,10 +1734,7 @@ local Players = game:GetService(&quot;Players&quot;)
           </div>
 
           <div class="card overflow-hidden mb-6">
-            <div class="px-5 py-3 border-b text-sm font-semibold flex justify-between" style="border-color:#1e1e2a">
-              <span>Todos los scripts</span>
-              <button class="btn-ghost text-xs" onclick="loadAdminScripts()">Refresh</button>
-            </div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Todos los scripts</div><div class="text-[10px] qx-dim">Inventario global y actividad</div></div><div class="qx-actions"><input id="qxAdminScriptFilter" class="qx-filter" placeholder="Buscar script…" oninput="qxFilterAdminRows('adminScripts',this.value,0)"/><button class="btn-ghost text-xs" onclick="loadAdminScripts()">↻ Refresh</button></div></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>Name</th><th>Owner</th><th>Runs</th><th></th></tr></thead>
@@ -1531,7 +1754,7 @@ local Players = game:GetService(&quot;Players&quot;)
           </div>
 
           <div class="card overflow-hidden">
-            <div class="px-5 py-3 border-b text-sm font-semibold" style="border-color:#1e1e2a">Hub público</div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Hub público</div><div class="text-[10px] qx-dim">Contenido publicado y visualizaciones</div></div><input id="qxAdminHubFilter" class="qx-filter" placeholder="Buscar publicación…" oninput="qxFilterAdminRows('adminHub',this.value,0)"/></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>Name</th><th>Author</th><th>Views</th><th></th></tr></thead>
@@ -2916,7 +3139,7 @@ async function fillHubSelect(){
   } catch {}
 }
 
-async function loadAdmin(){
+async function loadAdminCore(){
   if (!currentUser || currentUser.role !== 'admin') { toast('Solo admin', 'err'); return; }
   try {
     const st = await fetch('/api/admin/stats', { headers: headers() }).then(r=>r.json());
@@ -2941,6 +3164,74 @@ async function loadAdmin(){
     }).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
   } catch {}
 }
+
+async function loadAdmin(){
+  await loadAdminCore();
+  qxAdminPostLoad();
+}
+
+function qxAdminPostLoad(){
+  const stamp = new Date();
+  const el = document.getElementById('qxAdminLastRefresh');
+  if (el) el.textContent = 'Sincronizado ' + stamp.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const clock = document.getElementById('qxAdminClock');
+  if (clock) clock.textContent = stamp.toLocaleString();
+  const sess = document.getElementById('qxAdminSession');
+  if (sess) sess.textContent = currentUser?.username ? '@' + currentUser.username : 'Admin';
+  qxAdminHealth(true);
+}
+
+async function qxAdminRefreshAll(){
+  try { toast('Sincronizando centro de control…'); await loadAdmin(); toast('Panel actualizado','ok'); }
+  catch(e){ toast('No se pudo actualizar el panel','err'); }
+}
+
+async function qxAdminHealth(silent=false){
+  const out=document.getElementById('qxApiStatus');
+  if(out) out.textContent='Comprobando…';
+  try{
+    const t=performance.now();
+    const r=await fetch('/api/health',{cache:'no-store'});
+    const ms=Math.round(performance.now()-t);
+    const d=await r.text();
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    if(out){out.textContent='Online · '+ms+' ms';out.style.color='#59e1af'}
+    if(!silent) toast('API online · '+ms+' ms','ok');
+    return d;
+  }catch(e){
+    if(out){out.textContent='No disponible';out.style.color='#ff7481'}
+    if(!silent) toast('La API no respondió','err');
+    return '';
+  }
+}
+
+function qxFilterAdminRows(tbodyId,query,col){
+  const q=String(query||'').toLowerCase().trim();
+  const tb=document.getElementById(tbodyId); if(!tb) return;
+  Array.from(tb.rows).forEach(row=>{
+    const text=String(row.cells[col||0]?.textContent||'').toLowerCase();
+    row.style.display=(!q||text.includes(q))?'':'none';
+  });
+}
+
+async function qxExportAdminData(){
+  try{
+    const [users,scripts,hub]=await Promise.all([
+      fetch('/api/admin/users',{headers:headers()}).then(r=>r.ok?r.json():[]),
+      fetch('/api/admin/scripts',{headers:headers()}).then(r=>r.ok?r.json():[]),
+      fetch('/api/hub').then(r=>r.ok?r.json():[])
+    ]);
+    const payload={exportedAt:new Date().toISOString(),admin:currentUser?.username||'',users,scripts,hub};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='qyrex-admin-export-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('Exportación preparada','ok');
+  }catch(e){ toast('No se pudo exportar','err'); }
+}
+
+setInterval(()=>{
+  const el=document.getElementById('qxAdminClock');
+  if(el && document.getElementById('page-admin')?.classList.contains('hidden')===false) el.textContent=new Date().toLocaleString();
+},1000);
 
 async function loadAdminScripts(){
   try {
@@ -3871,5 +4162,58 @@ function closeLegal(){ document.getElementById('qxModal').classList.remove('show
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
 </script>
+
+<script id="qyrex-enterprise-v2-js">
+(function(){
+  function ready(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn,{once:true}); else fn(); }
+  ready(function(){
+    const app=document.getElementById('appView');
+    if(!app || document.getElementById('qxEnterpriseRail')) return;
+    const main=app.querySelector('main.main-content');
+    if(!main) return;
+    const content=main.querySelector('.p-8');
+    if(!content) return;
+    const rail=document.createElement('div');
+    rail.id='qxEnterpriseRail'; rail.className='qx-enterprise-rail';
+    rail.innerHTML='<div class="qx-rail-left"><span class="qx-status"><i></i> Systems operational</span><button class="qx-rail-btn" type="button" data-qx-shortcut="create">+ New script</button><button class="qx-rail-btn" type="button" data-qx-shortcut="scripts">Scripts</button><button class="qx-rail-btn" type="button" data-qx-shortcut="keys">Keys</button></div><div class="qx-rail-right"><span class="qx-time" id="qxClock">--:--:--</span><button class="qx-rail-btn" type="button" data-qx-refresh>Refresh workspace</button></div>';
+    content.insertBefore(rail,content.firstChild);
+    function goSafe(page){ try{ if(typeof window.go==='function') window.go(page); }catch(_){} }
+    rail.querySelector('[data-qx-shortcut="create"]').onclick=()=>goSafe('create');
+    rail.querySelector('[data-qx-shortcut="scripts"]').onclick=()=>goSafe('scripts');
+    rail.querySelector('[data-qx-shortcut="keys"]').onclick=()=>goSafe('keys');
+    rail.querySelector('[data-qx-refresh]').onclick=()=>{
+      const f=window.loadScripts||window.loadAdmin||window.loadProviders;
+      try{ if(typeof f==='function') f(); }catch(_){}
+      rail.querySelector('[data-qx-refresh]').textContent='Workspace refreshed';
+      setTimeout(()=>rail.querySelector('[data-qx-refresh]').textContent='Refresh workspace',1500);
+    };
+    const clock=rail.querySelector('#qxClock');
+    const tick=()=>{ const d=new Date(); clock.textContent=d.toLocaleTimeString([],{hour12:false}); };
+    tick(); setInterval(tick,1000);
+
+    // Subtle page-transition observer: only presentation, never changes navigation logic.
+    const pages=main.querySelectorAll('.page');
+    const obs=new MutationObserver(()=>{
+      pages.forEach(p=>{ if(!p.classList.contains('hidden')) p.animate([{opacity:.72,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:260,easing:'cubic-bezier(.22,1,.36,1)'}); });
+    });
+    pages.forEach(p=>obs.observe(p,{attributes:true,attributeFilter:['class']}));
+
+    // Button click feedback.
+    app.addEventListener('click',function(e){
+      const b=e.target.closest('.btn-primary,.btn-ghost,.icon-btn,.nav-item'); if(!b) return;
+      b.animate([{transform:'scale(1)'},{transform:'scale(.985)'},{transform:'scale(1)'}],{duration:150,easing:'ease-out'});
+    },{passive:true});
+  });
+})();
+</script>
+
+<style id="qyrex-admin-accent">
+#adminStats>.card{padding:16px!important}
+#adminStats>.card:nth-child(1){border-top:2px solid rgba(47,128,237,.8)!important}
+#adminStats>.card:nth-child(2){border-top:2px solid rgba(86,166,255,.68)!important}
+#adminStats>.card:nth-child(3){border-top:2px solid rgba(35,116,207,.72)!important}
+#adminStats>.card:nth-child(4){border-top:2px solid rgba(64,137,224,.72)!important}
+#adminStats>.card .text-xs{color:#5f7790!important}
+</style>
 </body>
 </html>
