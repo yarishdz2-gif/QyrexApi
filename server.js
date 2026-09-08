@@ -2535,6 +2535,15 @@ function siteShell(html){
   return text;
 }
 
+// Backward-compatible aliases for older frontends.
+// Canonical endpoints are /api/sites and /api/sites/me.
+app.all('/sites/me', (req,res,next)=>{
+  const isGet = req.method === 'GET';
+  const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  req.url = (isGet ? '/api/sites/me' : '/api/sites') + q;
+  next();
+});
+
 app.get('/api/sites/me', auth, needMongo, async (req,res)=>{
   try{
     const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
@@ -2610,23 +2619,15 @@ app.use(async (req,res,next)=>{
   }catch(e){ return next(); }
 });
 
-const publicDir = path.join(__dirname, 'public');
-const rootIndex = path.join(__dirname, 'index.html');
-const publicIndex = path.join(publicDir, 'index.html');
-
-// Servir assets desde /public cuando exista y mantener compatibilidad con instalaciones
-// donde index.html está en la raíz. Esto evita los 404 causados por la estructura del ZIP.
-app.use(express.static(publicDir));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Nunca devolver HTML en rutas /api/*
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada: ' + req.method + ' ' + req.path });
 });
 
-app.get('*', (req, res, next) => {
-  const target = fs.existsSync(publicIndex) ? publicIndex : rootIndex;
-  if (!fs.existsSync(target)) return res.status(500).send('Qyrex: index.html no encontrado en /public ni en la raíz.');
-  res.sendFile(target, err => err ? next(err) : undefined);
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Errores no capturados -> JSON
