@@ -1002,6 +1002,26 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
   "url":"https://qyrex.hopto.org/",
   "description":"Plataforma web para gestión, protección y distribución de scripts, keys HWID y analítica operativa."
 }</script>
+
+<style id="qyrex-final-polish">
+  /* Qyrex final UI polish */
+  .sidebar-close-btn{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  .sidebar{left:0!important;right:auto!important;border-right:1px solid rgba(56,189,248,.14)!important;background:
+    linear-gradient(180deg,rgba(6,16,31,.98),rgba(3,9,18,.98))!important;
+    box-shadow:14px 0 42px rgba(0,0,0,.32)!important}
+  .sidebar::after{content:"";position:absolute;inset:auto 0 0;height:180px;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(56,189,248,.045))}
+  .nav-item{position:relative}
+  .nav-item.active::after{content:"";position:absolute;left:-1px;top:9px;bottom:9px;width:3px;border-radius:0 4px 4px 0;background:#38bdf8;box-shadow:0 0 16px rgba(56,189,248,.55)}
+  .nav-section{color:#5fa9d8!important;letter-spacing:.12em}
+  .user-pill{background:linear-gradient(135deg,rgba(15,31,52,.9),rgba(7,14,25,.9))!important;border-color:rgba(56,189,248,.12)!important}
+  .notif-dot{background:#38bdf8!important;box-shadow:0 0 0 3px rgba(56,189,248,.12),0 0 14px rgba(56,189,248,.7)!important}
+  .section-resource{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:10px 13px;border:1px solid rgba(56,189,248,.12);border-radius:12px;background:linear-gradient(90deg,rgba(14,165,233,.075),rgba(14,165,233,.025));}
+  .section-resource span{font-size:11px;color:#79b8da;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .section-resource a{font-size:11px;color:#7dd3fc;text-decoration:none;font-weight:700;white-space:nowrap}
+  .section-resource a:hover{text-decoration:underline}
+  .notif-item.unread{background:rgba(56,189,248,.055)!important;border-color:rgba(56,189,248,.13)!important}
+  @media(max-width:900px){.sidebar-close-btn{display:none!important}.section-resource{margin-bottom:14px}}
+</style>
 </head>
 <body>
 <a class="qx-skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -1173,9 +1193,6 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
       <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" aria-label="Ocultar barra lateral" title="Ocultar/mostrar barra lateral">
         <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <button type="button" class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Cerrar">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
       <header class="sidebar-brand flex items-center gap-3 px-5 py-5">
         <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/ loading="lazy">
         <div class="min-w-0">
@@ -1315,6 +1332,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
       <div class="p-8">
         <!-- OVERVIEW -->
         <section id="page-overview" class="page">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Resumen del workspace · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="ov-hero">
             <div class="flex flex-wrap items-center gap-5">
               <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/ loading="lazy">
@@ -1360,6 +1378,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 
         <!-- SCRIPTS LIST -->
         <section id="page-scripts" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Gestión de scripts · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <h1 id="page-scripts-title" class="text-2xl font-bold" data-i18n="nav.lua">Lua Scripts</h1>
             <div class="flex items-center gap-3">
@@ -1376,6 +1395,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 
         <!-- SCRIPT HUB -->
         <section id="page-hub" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Script Hub · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h1 id="page-hub-title" class="text-2xl font-bold" data-i18n="nav.hub">Script Hub</h1>
@@ -1417,6 +1437,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 
         <!-- KEY SYSTEM -->
         <section id="page-keys" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Keys & Providers · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h1 id="page-keys-title" class="text-2xl font-bold" data-i18n="page.keys">Key System</h1>
@@ -1497,6 +1518,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 
         <!-- CREATE SCRIPT (estilo UNKIE) -->
         <section id="page-create" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Crear y publicar · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="card max-w-3xl overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:#1e1e2a">
               <div class="flex items-center gap-3">
@@ -1614,6 +1636,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
         <section id="page-logs" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Registros del sistema · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-2" data-i18n="nav.logs">Logs</h1>
           <p class="text-xs mb-4" style="color:#5a5a6e" data-i18n="logs.sub">Quién ejecuta tus scripts · ban por HWID o IP</p>
           <div class="log-summary" id="logsSummary">Cargando…</div>
@@ -1626,6 +1649,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ANALYTICS / EXECUTIONS CON GRÁFICAS -->
         <section id="page-executions" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Analítica de ejecuciones · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 id="page-executions-title" class="text-2xl font-bold mb-6" data-i18n="nav.analytics">Analytics</h1>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             <div class="card p-5">
@@ -1655,6 +1679,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- API INFO -->
         <section id="page-apiinfo" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Información de API · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="nav.apiinfo">API Info</h1>
           <div class="card p-6 max-w-2xl space-y-4">
             <div>
@@ -1676,6 +1701,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ADMIN -->
         <section id="page-admin" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Centro de administración · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="qx-admin-hero">
             <div style="position:relative;z-index:1">
               <div class="qx-kicker">Qyrex Control Center</div>
@@ -1795,6 +1821,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- WEBHOOKS -->
         <section id="page-webhooks" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Webhooks · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-2" data-i18n="nav.webhooks">Webhooks</h1>
           <p class="text-xs mb-6" style="color:#5a5a6e">Alertas a Discord cuando verifican una key o ejecutan un script</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
@@ -1807,6 +1834,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- LEADERBOARD -->
         <section id="page-leaderboard" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Leaderboard · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="nav.leaderboard">Leaderboard</h1>
           <div class="card overflow-hidden max-w-2xl">
             <table>
@@ -1818,6 +1846,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ASSETS -->
         <section id="page-assets" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Assets · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-2" data-i18n="nav.assets">My Assets</h1>
           <p class="text-xs mb-6" style="color:#5a5a6e">Nube privada: texto, URLs, snippets UI (máx 20 free / 100 VIP)</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
@@ -1831,12 +1860,14 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- TEMPLATES -->
         <section id="page-templates" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Plantillas · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="page.templates">Templates / Snippets</h1>
           <div id="tplList" class="grid gap-3 max-w-3xl"></div>
         </section>
 
         <!-- STATUS -->
         <section id="page-status" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Estado del sistema · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="nav.status">System Status</h1>
           <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mb-6">
             <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">API</div><div id="stApi" class="text-lg font-bold">—</div></div>
@@ -1852,6 +1883,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- PLAYGROUND -->
         <section id="page-playground" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>API Playground · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="nav.playground">API Playground</h1>
           <div class="card p-6 max-w-2xl space-y-3">
             <div class="flex gap-2">
@@ -1867,6 +1899,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- CHANGELOG -->
         <section id="page-changelog" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Historial de cambios · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <h1 class="text-2xl font-bold mb-6" data-i18n="nav.changelog">Changelog</h1>
           <div class="space-y-4 max-w-2xl">
             <div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist, límite 15 scripts (ilimitado VIP).</div></div>
@@ -1876,6 +1909,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
         <section id="page-studio" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Entorno de desarrollo · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
               <h1 class="text-2xl font-bold" data-i18n="nav.studio">Studio</h1>
@@ -1918,6 +1952,7 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- SETTINGS -->
         <section id="page-settings" class="page hidden">
+          <aside class="section-resource" aria-label="Recurso de sección"><span>Cuenta y preferencias · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" target="_blank" rel="noopener noreferrer">qyrex.hopto.org/scripts</a></aside>
           <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h1 class="text-2xl font-bold" data-i18n="settings.account">Tu cuenta</h1></div><button type="button" class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
           <div class="grid gap-4 max-w-4xl">
             <div class="card overflow-hidden"><div class="profile-banner" id="profileBanner"><div class="profile-avatar-xl" id="profileAvatarLarge">?</div></div><div class="p-6 pt-8"><div class="flex flex-wrap items-end justify-between gap-4"><div><div class="text-xl font-bold" id="profileDisplayName">—</div><div class="text-xs" style="color:#68687e" id="profileHandle">@—</div></div><div id="profileBadges" class="flex flex-wrap gap-1"></div></div><p id="profileBioPreview" class="text-sm mt-3" style="color:#9696aa">Sin biografía.</p></div></div>
@@ -2540,9 +2575,22 @@ function scriptPublicUrl(id){ return location.origin + '/script/' + id; }
 function readAccountImage(input,kind){const file=input?.files?.[0];if(!file)return;if(file.size>500000){toast('Imagen demasiado grande (máx. 500 KB)','err');input.value='';return}const fr=new FileReader();fr.onload=()=>{const el=document.getElementById(kind==='avatar'?'accountAvatarInput':'accountBannerInput');if(el)el.value=String(fr.result||'')};fr.readAsDataURL(file)}
 function renderAccountVisual(d){const name=d.displayName||d.username||'?';const a=document.getElementById('profileAvatarLarge');if(a)setAvatar(a,{avatar:d.avatar},name);const b=document.getElementById('profileBanner');if(b)b.style.backgroundImage=d.banner?'url("'+d.banner.replace(/"/g,'')+'")':'linear-gradient(135deg,#171720,#0b0b10)';const dn=document.getElementById('profileDisplayName');if(dn)dn.textContent=name;const h=document.getElementById('profileHandle');if(h)h.textContent='@'+(d.username||'—');const bio=document.getElementById('profileBioPreview');if(bio)bio.textContent=d.bio||'Sin biografía.';const inp=document.getElementById('profileDisplayNameInput');if(inp)inp.value=name;const bi=document.getElementById('profileBioInput');if(bi)bi.value=d.bio||''}
 function toggleNotifications(){const p=document.getElementById('notifPanel');if(!p)return;p.classList.toggle('show');if(p.classList.contains('show'))loadNotifications()}
-function renderNotifications(list){const el=document.getElementById('notifList'),dot=document.getElementById('notifDot');if(!el)return;const unread=(list||[]).filter(x=>!x.read).length;if(dot)dot.style.display=unread?'block':'none';if(!list?.length){el.innerHTML='<div class="notif-empty">'+t('notif.empty')+'</div>';return}el.innerHTML=list.map(n=>'<div class="notif-item '+(!n.read?'unread':'')+'"><div class="notif-icon">'+(n.type==='warning'?'⚠':n.type==='success'?'✓':'●')+'</div><div class="min-w-0"><div class="text-xs font-semibold">'+esc(n.title)+'</div><div class="text-[11px] mt-1" style="color:#78788e">'+esc(n.message)+'</div><div class="text-[10px] mt-2" style="color:#4f4f66">'+(n.createdAt?new Date(n.createdAt).toLocaleString():'Ahora')+'</div></div></div>').join('')}
+function renderNotifications(list){
+  const el=document.getElementById('notifList'),dot=document.getElementById('notifDot');
+  if(!el)return;
+  const clearedAt=Number(localStorage.getItem('qrex_notifications_cleared_at')||0);
+  const normalized=(list||[]).map(n=>{
+    const created=n?.createdAt?new Date(n.createdAt).getTime():Date.now();
+    const locallyRead=created<=clearedAt;
+    return {...n,read:!!n.read||locallyRead};
+  });
+  const unread=normalized.filter(x=>!x.read).length;
+  if(dot)dot.style.display=unread?'block':'none';
+  if(!normalized.length){el.innerHTML='<div class="notif-empty">'+t('notif.empty')+'</div>';return}
+  el.innerHTML=normalized.map(n=>'<div class="notif-item '+(!n.read?'unread':'')+'" role="article"><div class="notif-icon">'+(n.type==='warning'?'⚠':n.type==='success'?'✓':'●')+'</div><div class="min-w-0"><div class="text-xs font-semibold">'+esc(n.title)+'</div><div class="text-[11px] mt-1" style="color:#78788e">'+esc(n.message)+'</div><div class="text-[10px] mt-2" style="color:#4f4f66">'+(n.createdAt?new Date(n.createdAt).toLocaleString():'Ahora')+'</div></div></div>').join('')
+}
 async function loadNotifications(){try{const r=await fetch('/api/notifications',{headers:headers()});if(!r.ok)return;const d=await r.json();renderNotifications(d.notifications||[])}catch{}}
-async function markAllNotificationsRead(){try{await fetch('/api/notifications/read-all',{method:'POST',headers:headers()});loadNotifications()}catch{}}
+async function markAllNotificationsRead(){try{await fetch('/api/notifications/read-all',{method:'POST',headers:headers()});localStorage.setItem('qrex_notifications_cleared_at',String(Date.now()));const dot=document.getElementById('notifDot');if(dot)dot.style.display='none';await loadNotifications()}catch(e){const dot=document.getElementById('notifDot');if(dot)dot.style.display='none';localStorage.setItem('qrex_notifications_cleared_at',String(Date.now()));}}
 document.addEventListener('click',e=>{const w=document.getElementById('notifWrap');if(w&&!w.contains(e.target))document.getElementById('notifPanel')?.classList.remove('show')});
 
 async function loadAccountData(){
