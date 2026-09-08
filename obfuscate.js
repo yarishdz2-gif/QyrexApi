@@ -1,219 +1,279 @@
 /**
- * QyrexObf 1.0.2 — anti-dump hardened (still Luau-safe)
- * Keeps working decimal payload + affine transform.
- * Adds: double-nest wrap, decoy loadstrings, delayed reconstruct,
- * soft AT, wipe locals, no long-lived clear source string.
+ * QyrexObf 1.0.2 — max soft protections fused from
+ * Hercules · Prometheus · MoonSec patterns · Qyrex core
+ * Stable decimal double-nest, Luau/Roblox safe (no hardlocks).
  */
 'use strict';
-
 const crypto = require('crypto');
 const VERSION = '1.0.2';
-const MAX_SOURCE = 1_500_000;
-const CHUNK_SIZE_MIN = 72;
-const CHUNK_SIZE_MAX = 156;
-const NEST_LEVELS = 2; // outer wraps inner loader → dumpers see intermediate first
-
 const ri = (n) => crypto.randomInt(0, n);
-
-const LUA_RESERVED = new Set([
-  'and','break','do','else','elseif','end','false','for','function','goto','if','in',
-  'local','nil','not','or','repeat','return','then','true','until','while',
+const RES = new Set([
+  'and','break','do','else','elseif','end','false','for','function','goto',
+  'if','in','local','nil','not','or','repeat','return','then','true','until','while',
 ]);
-
 function rid() {
-  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let out = '';
+  const L = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let o;
   do {
-    out = 'q';
-    const len = 5 + ri(5);
-    for (let i = 0; i < len; i++) out += letters[ri(letters.length)];
-  } while (LUA_RESERVED.has(out));
-  return out;
+    o = 'q';
+    for (let i = 0; i < 6 + ri(5); i++) o += L[ri(L.length)];
+  } while (RES.has(o));
+  return o;
 }
 
-function modInverse256(a) {
-  for (let x = 1; x < 256; x++) {
-    if (((a * x) % 256 + 256) % 256 === 1) return x;
-  }
-  throw new Error('Invalid numeric key');
+function modInv(a) {
+  for (let x = 1; x < 256; x++) if (((a * x) % 256 + 256) % 256 === 1) return x;
+  throw new Error('key');
 }
-
-function decimalEncode(buf, a, b) {
+function decEnc(buf, a, b) {
   let out = '';
   for (let i = 0; i < buf.length; i++) {
-    const y = (a * buf[i] + b + (i % 251)) % 256;
-    out += String(y).padStart(3, '0');
+    out += String((a * buf[i] + b + (i % 251)) % 256).padStart(3, '0');
   }
   return out;
 }
-
-function decimalDecode(decimal, a, b) {
-  const inv = modInverse256(a);
-  if (decimal.length % 3 !== 0) throw new Error('Invalid decimal payload length');
-  const out = Buffer.alloc(decimal.length / 3);
-  for (let i = 0, j = 0; i < decimal.length; i += 3, j++) {
-    const y = Number(decimal.slice(i, i + 3));
-    if (!Number.isInteger(y) || y < 0 || y > 255) throw new Error('Invalid decimal byte');
+function decDec(d, a, b) {
+  const inv = modInv(a);
+  const out = Buffer.alloc(d.length / 3);
+  for (let i = 0, j = 0; i < d.length; i += 3, j++) {
+    const y = Number(d.slice(i, i + 3));
     const z = ((y - b - (j % 251)) % 256 + 256) % 256;
     out[j] = (inv * z) % 256;
   }
   return out;
 }
-
-function rollingHash32(buf) {
+function hash32(buf) {
   let h = 216613;
-  for (let i = 0; i < buf.length; i++) {
-    h = (h * 257 + buf[i] + 97) % 1000003;
-  }
+  for (let i = 0; i < buf.length; i++) h = (h * 257 + buf[i] + 97) % 1000003;
   return h;
 }
-
-function luaQuote(value) {
-  return JSON.stringify(String(value));
-}
-
-function chunkDecimal(decimal) {
+function chunkDec(d) {
   const out = [];
   let p = 0;
-  while (p < decimal.length) {
-    const room = CHUNK_SIZE_MIN + ri(CHUNK_SIZE_MAX - CHUNK_SIZE_MIN + 1);
+  while (p < d.length) {
+    const room = 72 + ri(84);
     const size = Math.max(3, room - (room % 3));
-    out.push(decimal.slice(p, p + size));
+    out.push(d.slice(p, p + size));
     p += size;
   }
   return out;
 }
 
-/**
- * Build one loader level.
- * antiDump: if true, add decoys + no persistent source local before loadstring
- */
-function buildLoader(decimalPayload, a, b, expectedHash, sourceLen, antiDump) {
-  const V = Array.from({ length: 28 }, rid);
-  const parts = chunkDecimal(decimalPayload);
-  const payloadTable = parts.map(luaQuote).join(',');
-  const L = [];
-
-  L.push(`--[[ Protected by QyrexObf v${VERSION} | qyrex.hopto.org ]]\n`);
-  L.push('return(function(...)');
-  L.push(`local ${V[0]}={${payloadTable}};`);
-  L.push(`local ${V[1]}=${sourceLen};local ${V[2]}=${a};local ${V[3]}=${b};local ${V[4]}=${expectedHash};`);
-  L.push(`local ${V[5]}=type;local ${V[6]}=string;local ${V[7]}=table;local ${V[8]}=pcall;`);
-  L.push(`local ${V[9]}=0;`);
-
-  /* soft AT — score only, never hard-kill clean Roblox */
-  L.push(`${V[8]}(function()`);
-  L.push(`local ${V[10]}=${V[5]}(game);if ${V[10]}=='userdata' or ${V[10]}=='table' then ${V[9]}=${V[9]}+1 end;`);
-  L.push(`if ${V[5]}(_G)=='table' then ${V[9]}=${V[9]}+1 end;`);
-  L.push(`if typeof and game~=nil and typeof(game)=='Instance' then ${V[9]}=${V[9]}+1 end;`);
-  L.push(`if math and math.floor(3.9)==3 then ${V[9]}=${V[9]}+1 end;`);
-  L.push(`if ${V[6]}.byte('A')==65 then ${V[9]}=${V[9]}+1 end;`);
-  L.push(`end);`);
-  L.push(`${V[8]}(function() if game and game.JobId=='00000000-0000-0000-0000-000000000000' then ${V[9]}=${V[9]}-5 end end);`);
-  L.push(`${V[8]}(function() if game and (game.PlaceId==8916037983 or game.GameId==8916037983) then ${V[9]}=${V[9]}-5 end end);`);
-  L.push(`${V[8]}(function() if getmetatable and getmetatable(_G)~=nil then ${V[9]}=${V[9]}-3 end end);`);
-  L.push(`${V[8]}(function() if debug and debug.gethook then local ok,h=${V[8]}(debug.gethook);if ok and h~=nil then ${V[9]}=${V[9]}-4 end end end);`);
-  L.push(`${V[8]}(function() local bad=false;local function has(k) local ok,v=${V[8]}(function() return rawget(_G,k) end);return ok and v~=nil end;`);
-  L.push(`if has('process')or has('lune')or has('lute')or has('window')or has('document')or has('Buffer')then bad=true end;`);
-  L.push(`if bad then ${V[9]}=${V[9]}-8 end end);`);
-
-  /* modular inverse */
-  L.push(`local ${V[11]}=1;while ((${V[2]}*${V[11]})%256)~=1 do ${V[11]}=${V[11]}+1;if ${V[11]}>255 then return end end;`);
-
-  /* join decimal + decode to chars table (not one big clear string yet) */
-  L.push(`local ${V[12]}=${V[7]}.concat(${V[0]});${V[0]}=nil;if #${V[12]}~=${V[1]}*3 then return end;`);
-  L.push(`local ${V[13]}={};local ${V[14]}=1;`);
-  L.push(`for ${V[15]}=1,#${V[12]},3 do`);
-  L.push(`local ${V[16]}=${V[6]}.sub(${V[12]},${V[15]},${V[15]}+2)+0;`);
-  L.push(`if ${V[16]}<0 or ${V[16]}>255 then return end;`);
-  L.push(`local ${V[17]}=(((${V[16]}-${V[3]}-(((${V[14]}-1)%251)))%256)+256)%256;`);
-  L.push(`${V[13]}[${V[14]}]=${V[6]}.char(((${V[17]}*${V[11]})%256));${V[14]}=${V[14]}+1;`);
-  L.push(`end;${V[12]}=nil;`);
-
-  /* integrity on reconstructed bytes via char table */
-  L.push(`local ${V[18]}=216613;for ${V[14]}=1,#${V[13]} do local ${V[16]}=${V[6]}.byte(${V[13]}[${V[14]}]);${V[18]}=(${V[18]}*257+${V[16]}+97)%1000003 end;`);
-  L.push(`if ${V[18]}~=${V[4]} or #${V[13]}~=${V[1]} then return end;`);
-
-  /* resolve loader */
-  L.push(`local ${V[19]}=loadstring;if ${V[5]}(${V[19]})~='function' then ${V[19]}=load end;if ${V[5]}(${V[19]})~='function' then return end;`);
-  L.push(`${V[8]}(function() if iscclosure and not iscclosure(${V[19]}) then ${V[9]}=${V[9]}-2 end end);`);
-
-  if (antiDump) {
-    /* DECOY flood — pollute loadstring hooks with junk first */
-    L.push(`for ${V[20]}=1,14 do ${V[8]}(function() ${V[19]}('--'..tostring(${V[20]}*97)..string.rep('\\n',40)) end) end;`);
-    /* split source into random pieces → separate tiny loadstrings that return fragments (noise for dumpers) */
-    L.push(`local ${V[21]}={};local ${V[22]}=1;local ${V[23]}=#${V[13]};`);
-    L.push(`while ${V[22]}<=${V[23]} do`);
-    L.push(`local ${V[24]}=math.min(${V[22]}+40+((${V[22]}*7)%30),${V[23]});`);
-    L.push(`local ${V[25]}={};for ${V[26]}=${V[22]},${V[24]} do ${V[25]}[#${V[25]}+1]=${V[13]}[${V[26]}] end;`);
-    L.push(`${V[21]}[#${V[21]}+1]=${V[7]}.concat(${V[25]});${V[22]}=${V[24]}+1;`);
-    L.push(`end;${V[13]}=nil;`);
-    /* assemble only inside loadstring argument, wipe ASAP */
-    L.push(`local ${V[27]}=${V[7]}.concat(${V[21]});${V[21]}=nil;`);
-    L.push(`local ${V[14]},${V[15]}=${V[8]}(${V[19]},${V[27]});${V[27]}=nil;`);
-  } else {
-    L.push(`local ${V[27]}=${V[7]}.concat(${V[13]});${V[13]}=nil;`);
-    L.push(`local ${V[14]},${V[15]}=${V[8]}(${V[19]},${V[27]});${V[27]}=nil;`);
-  }
-
-  L.push(`if not ${V[14]} or ${V[5]}(${V[15]})~='function' then return end;`);
-  L.push(`return ${V[15]}(...);`);
-  L.push('end)(...)');
-  return L.join(' ');
+function opaqueTrue() {
+  const n = 10 + ri(90);
+  const a = 1 + ri(40);
+  const b = a + 1 + ri(40);
+  const choices = [
+    `${n}==${n}`,
+    `not (${n}~=${n})`,
+    `${n}>=${n}`,
+    `${a}+${b - a}==${b}`,
+    `(not (${a}>=${b}))==(${a}<${b})`,
+    `true`,
+  ];
+  return choices[ri(choices.length)];
+}
+function opaqueFalse() {
+  const n = 10 + ri(90);
+  const a = 1 + ri(40);
+  const b = a + 1 + ri(40);
+  const choices = [
+    `${n}~=${n}`,
+    `${n}>${n}`,
+    `${n}%${n}~=0`,
+    `false`,
+    `(not (${a}<${b}))==(${a}>=${b})`,
+  ];
+  return choices[ri(choices.length)];
 }
 
-function obfuscateOnce(source, antiDump) {
-  const src = String(source ?? '');
-  if (!src.trim()) throw new Error('Empty code');
-  const raw = Buffer.from(src, 'utf8');
-  if (raw.length > MAX_SOURCE) throw new Error('Too large');
+function emitGarbage(L, count) {
+  for (let i = 0; i < count; i++) {
+    const v = rid();
+    const kind = ri(4);
+    if (kind === 0) {
+      L.push(`local ${v}=${1 + ri(99)}; `);
+    } else if (kind === 1) {
+      L.push(`if ${opaqueFalse()} then local ${v}=${1 + ri(50)} end; `);
+    } else if (kind === 2) {
+      L.push(`for ${v}=1,${1 + ri(2)} do local _=${ri(20)} end; `);
+    } else {
+      L.push(`do local ${v}=${ri(100)}; ${v}=${v}+0 end; `);
+    }
+  }
+}
 
-  const a = 1 + 2 * ri(128);
-  const b = ri(256);
-  const decimal = decimalEncode(raw, a, b);
-  if (!/^\d+$/.test(decimal)) throw new Error('decimal payload violation');
-  if (decimal.length !== raw.length * 3) throw new Error('decimal length mismatch');
-  const back = decimalDecode(decimal, a, b);
-  if (!back.equals(raw)) throw new Error('numeric roundtrip failed');
+function emitAntiTamper(V, L) {
+  const S = V[9];
+  const pcall = V[8];
+  const type = V[5];
+  const str = V[6];
 
-  const expectedHash = rollingHash32(raw);
-  return buildLoader(decimal, a, b, expectedHash, raw.length, antiDump);
+  // Watermark (Hercules/Prometheus style)
+  L.push(`local ${V[25]}='QyrexObf v${VERSION} | qyrex.hopto.org'; `);
+
+  // Prometheus pcall integrity
+  L.push(`local ${V[10]}=false; local ${V[21]}=${pcall}(function() ${V[10]}=true end) and ${V[10]}; if not ${V[21]} then ${S}=${S}-12 end; `);
+
+  // Hercules expanded native probes
+  L.push(`${pcall}(function() `);
+  L.push(`if ${type}(assert)~='function' or ${type}(error)~='function' or ${type}(pcall)~='function' or ${type}(xpcall)~='function' then ${S}=${S}-10 end; `);
+  L.push(`if ${type}(type)~='function' or ${type}(tostring)~='function' or ${type}(tonumber)~='function' or ${type}(select)~='function' then ${S}=${S}-8 end; `);
+  L.push(`if ${type}(next)~='function' or ${type}(rawget)~='function' or ${type}(rawset)~='function' or ${type}(rawequal)~='function' then ${S}=${S}-8 end; `);
+  L.push(`if ${type}(setmetatable)~='function' or ${type}(getmetatable)~='function' then ${S}=${S}-6 end; `);
+  L.push(`if ${type}(string)~='table' or ${type}(table)~='table' or ${type}(math)~='table' then ${S}=${S}-10 end; `);
+  L.push(`if ${type}(${str}.byte)~='function' or ${type}(${str}.char)~='function' or ${type}(${str}.sub)~='function' or ${type}(${str}.len)~='function' then ${S}=${S}-8 end; `);
+  L.push(`if ${type}(table.concat)~='function' or ${type}(table.insert)~='function' then ${S}=${S}-6 end; `);
+  L.push(`if ${str}.byte('A')~=65 or ${str}.char(66)~='B' or #${str}.char(67)~=1 then ${S}=${S}-8 end; `);
+  L.push(`if math.floor(3.9)~=3 or math.abs(-2)~=2 or math.max(1,9)~=9 or math.min(1,9)~=1 then ${S}=${S}-6 end; `);
+  L.push(`if rawequal and not rawequal(pcall,pcall) then ${S}=${S}-6 end; `);
+  L.push(`end); `);
+
+  // Prometheus pcall must fail on type error
+  L.push(`${pcall}(function() local ok=${pcall}(function() return (1-('x')) end); if ok then ${S}=${S}-8 end end); `);
+  L.push(`${pcall}(function() local ok=${pcall}(error,'\\0',0); if ok then ${S}=${S}-10 end end); `);
+
+  // Opaque predicates (Hercules)
+  for (let i = 0; i < 4; i++) {
+    L.push(`${pcall}(function() if not (${opaqueTrue()}) then ${S}=${S}-6 end end); `);
+  }
+  for (let i = 0; i < 3; i++) {
+    L.push(`${pcall}(function() if (${opaqueFalse()}) then ${S}=${S}-6 end end); `);
+  }
+
+  // Env / Roblox
+  L.push(`${pcall}(function() local t=${type}(game); if t=='userdata' or t=='table' then ${S}=${S}+1 end; if ${type}(_G)=='table' then ${S}=${S}+1 end end); `);
+  L.push(`${pcall}(function() if typeof and game~=nil and typeof(game)=='Instance' then ${S}=${S}+1 end end); `);
+  L.push(`${pcall}(function() if game and type(game)=='table' then ${S}=${S}-8 end end); `);
+  L.push(`${pcall}(function() if game and game.JobId=='00000000-0000-0000-0000-000000000000' then ${S}=${S}-10 end end); `);
+  L.push(`${pcall}(function() if game and (game.PlaceId==8916037983 or game.GameId==8916037983) then ${S}=${S}-10 end end); `);
+  L.push(`${pcall}(function() if getmetatable and getmetatable(_G)~=nil then ${S}=${S}-5 end end); `);
+
+  // Debug / hooks
+  L.push(`${pcall}(function() if debug and debug.gethook then local ok,h=${pcall}(debug.gethook); if ok and h~=nil then ${S}=${S}-8 end end end); `);
+  L.push(`${pcall}(function() if debug and debug.sethook then end end); `);
+  L.push(`${pcall}(function() if iscclosure and loadstring and not iscclosure(loadstring) then ${S}=${S}-5 end end); `);
+  L.push(`${pcall}(function() if hookfunction or hookfunc or replaceclosure then ${S}=${S}-4 end end); `);
+  L.push(`${pcall}(function() if getgc and getreg then ${S}=${S}-2 end end); `);
+
+  // Sandbox pollution (expanded)
+  L.push(`${pcall}(function() local function has(k) local ok,v=${pcall}(function() return rawget(_G,k) end); return ok and v~=nil end; `);
+  const badGlobals = [
+    'process','lune','lute','window','document','Buffer','navigator','globalThis','__dirname',
+    'XMLHttpRequest','setTimeout','fetch','wally','rojo','selene','plugin','fs','Deno','Packages',
+    'game:GetService','HttpService', // skip HttpService as real - don't
+  ];
+  // remove false positives
+  const safeBad = [
+    'process','lune','lute','window','document','Buffer','navigator','globalThis','__dirname',
+    'XMLHttpRequest','setTimeout','wally','rojo','selene','Deno','lemur','jsdom','love',
+  ];
+  L.push(`if ${safeBad.map((k) => `has('${k}')`).join(' or ')} then ${S}=${S}-14 end end); `);
+
+  // tostring proxy / _G pollution
+  L.push(`${pcall}(function() local t={}; local k=tostring(t); if _G[k]~=nil then ${S}=${S}-8 end end); `);
+  L.push(`${pcall}(function() if newproxy then local ok,u=${pcall}(newproxy,true); if ok and type(u)=='userdata' then end end end); `);
+
+  // getfenv / setfenv probes (executor dependent)
+  L.push(`${pcall}(function() if getfenv then local e=getfenv(0); if type(e)~='table' then ${S}=${S}-3 end end end); `);
+
+  // Stats / DataModel light checks
+  L.push(`${pcall}(function() if game and game.GetService then local ok,s=${pcall}(function() return game:GetService('RunService') end); if ok and s and typeof and typeof(s)=='Instance' then ${S}=${S}+1 end end end); `);
+
+  // Garbage dead code (Hercules)
+  emitGarbage(L, 6);
+}
+
+function buildDecimalLoader(decimal, a, b, expectedHash, sourceLen) {
+  const V = Array.from({ length: 28 }, rid);
+  const parts = chunkDec(decimal);
+  const payloadTable = parts.map((p) => JSON.stringify(p)).join(',');
+  const L = [];
+  L.push(`--[[ Protected by QyrexObf v${VERSION} | qyrex.hopto.org ]] `);
+  L.push('return(function(...) ');
+  L.push(`local ${V[0]}={${payloadTable}}; `);
+  L.push(`local ${V[1]}=${sourceLen}; local ${V[2]}=${a}; local ${V[3]}=${b}; local ${V[4]}=${expectedHash}; `);
+  L.push(`local ${V[5]}=type; local ${V[6]}=string; local ${V[7]}=table; local ${V[8]}=pcall; local ${V[9]}=0; `);
+
+  emitAntiTamper(V, L);
+  emitGarbage(L, 4);
+
+  L.push(`local ${V[11]}=1; while ((${V[2]}*${V[11]})%256)~=1 do ${V[11]}=${V[11]}+1; if ${V[11]}>255 then return end end; `);
+  L.push(`local ${V[12]}=${V[7]}.concat(${V[0]}); ${V[0]}=nil; if #${V[12]}~=${V[1]}*3 then return end; `);
+  L.push(`local ${V[13]}={}; local ${V[14]}=1; `);
+  L.push(`for ${V[15]}=1,#${V[12]},3 do `);
+  L.push(`local ${V[16]}=${V[6]}.sub(${V[12]},${V[15]},${V[15]}+2)+0; if ${V[16]}<0 or ${V[16]}>255 then return end; `);
+  L.push(`local ${V[17]}=(((${V[16]}-${V[3]}-(((${V[14]}-1)%251)))%256)+256)%256; `);
+  L.push(`${V[13]}[${V[14]}]=${V[6]}.char(((${V[17]}*${V[11]})%256)); ${V[14]}=${V[14]}+1; `);
+  L.push(`end; ${V[12]}=nil; `);
+  L.push(`local ${V[18]}=216613; for ${V[14]}=1,#${V[13]} do local ${V[16]}=${V[6]}.byte(${V[13]}[${V[14]}]); ${V[18]}=(${V[18]}*257+${V[16]}+97)%1000003 end; `);
+  L.push(`if ${V[18]}~=${V[4]} or #${V[13]}~=${V[1]} then return end; `);
+  L.push(`local ${V[19]}=loadstring; if ${V[5]}(${V[19]})~='function' then ${V[19]}=load end; if ${V[5]}(${V[19]})~='function' then return end; `);
+  // more decoys
+  L.push(`for ${V[20]}=1,18 do ${V[8]}(function() ${V[19]}('--qy'..tostring(${V[20]})..'\\nlocal function _d() return '..tostring(${V[20]}*17)..' end\\nreturn _d()') end) end; `);
+  L.push(`local ${V[22]}=${V[7]}.concat(${V[13]}); ${V[13]}=nil; `);
+  L.push(`local ${V[23]},${V[24]}=${V[8]}(${V[19]},${V[22]}); ${V[22]}=nil; `);
+  L.push(`if not ${V[23]} or ${V[5]}(${V[24]})~='function' then return end; `);
+  L.push(`return ${V[24]}(...); end)(...)`);
+  return L.join('');
+}
+
+function obfuscateDecimal(source, nests) {
+  let src = String(source);
+  let lastCode = null;
+  const levels = Math.max(1, nests | 0);
+  for (let n = 0; n < levels; n++) {
+    const raw = Buffer.from(src, 'utf8');
+    if (raw.length > 1500000) throw new Error('Too large');
+    const a = 1 + 2 * ri(128);
+    const b = ri(256);
+    const decimal = decEnc(raw, a, b);
+    if (!decDec(decimal, a, b).equals(raw)) throw new Error('roundtrip failed');
+    lastCode = buildDecimalLoader(decimal, a, b, hash32(raw), raw.length);
+    src = lastCode;
+  }
+  return lastCode;
 }
 
 function obfuscate(source) {
   const src = String(source ?? '');
   if (!src.trim()) throw new Error('Empty code');
-
-  // Level 0: user source (anti-dump tricks on)
-  let code = obfuscateOnce(src, true);
-
-  // Nested wraps: each outer layer encodes the previous loader.
-  // A simple loadstring dumper only sees the outermost intermediate first.
-  for (let nest = 1; nest < NEST_LEVELS; nest++) {
-    code = obfuscateOnce(code, true);
+  const code = obfuscateDecimal(src, 2);
+  if (code.includes('dolocal') || code.includes('thenlocal') || code.includes('endlocal')) {
+    throw new Error('internal spacing error');
   }
-
   return {
     code,
     stats: {
       inputBytes: Buffer.byteLength(src, 'utf8'),
       outputBytes: Buffer.byteLength(code, 'utf8'),
       mode: `QyrexObf-${VERSION}`,
-      nestLevels: NEST_LEVELS,
+      nestLevels: 2,
       layers: [
-        'decimal-affine-payload',
-        'numeric-integrity',
-        'soft-anti-tamper',
-        'sandbox-probes',
-        'jobid-placeid',
-        'decoy-loadstring-flood',
-        'split-reassembly',
-        'immediate-wipe',
-        NEST_LEVELS + '-level-nest',
-        'luau-stable',
+        'decimal-affine',
+        'integrity-hash',
+        'watermark',
+        'prometheus-pcall-sanity',
+        'hercules-native-probes-full',
+        'opaque-predicates-true-false',
+        'garbage-dead-code',
+        'sandbox-env-expanded',
+        'jobid-placeid-sandbox-place',
+        'metatable-g-check',
+        'debug-hook-probe',
+        'hookfunction-probe',
+        'getgc-getreg-probe',
+        'tostring-proxy-probe',
+        'error-integrity',
+        'getfenv-probe',
+        'runservice-fingerprint',
+        'iscclosure-probe',
+        'decoy-loadstring-x18',
+        'double-nest',
+        'luau-roblox-stable',
       ],
       verified: true,
-      payloadAlphabet: '0123456789',
+      fusedFrom: ['Hercules', 'Prometheus', 'MoonSec-patterns', 'Qyrex'],
     },
   };
 }
