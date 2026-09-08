@@ -731,6 +731,145 @@
     main .top-tools .lang-switch{display:none}
   }
 
+
+
+/* ================================================================
+   QYREX UI // ULTRA VISUAL LAYER v6
+   Frontend-only skin: no API contracts, ids or handlers changed.
+   ================================================================ */
+:root{
+  --qx-purple:#9b7cff;
+  --qx-purple-2:#6d4aff;
+  --qx-cyan:#50dcff;
+  --qx-blue:#4d7cff;
+  --qx-surface:rgba(15,16,27,.76);
+  --qx-surface-2:rgba(20,21,35,.82);
+  --qx-line:rgba(255,255,255,.09);
+  --qx-line-strong:rgba(155,124,255,.32);
+  --qx-text:#f7f7fb;
+  --qx-muted:#8c8fa8;
+  --qx-ease:cubic-bezier(.22,1,.36,1);
+}
+html{scroll-behavior:smooth}
+body.qx-ultra{background:#05060b!important;color:var(--qx-text)}
+body.qx-ultra #appView{position:relative;isolation:isolate;overflow:hidden;background:
+  radial-gradient(900px 500px at 12% 0%,rgba(109,74,255,.13),transparent 65%),
+  radial-gradient(820px 520px at 92% 12%,rgba(80,220,255,.09),transparent 68%),
+  linear-gradient(180deg,#06070d 0%,#070812 48%,#05060b 100%)}
+body.qx-ultra #appView::before,
+body.qx-ultra #appView::after{content:"";position:fixed;pointer-events:none;z-index:0;border-radius:999px;filter:blur(70px);opacity:.6}
+body.qx-ultra #appView::before{width:420px;height:420px;left:-170px;top:12%;background:rgba(109,74,255,.14);animation:qxFloat 18s ease-in-out infinite alternate}
+body.qx-ultra #appView::after{width:360px;height:360px;right:-140px;bottom:5%;background:rgba(80,220,255,.10);animation:qxFloat 22s ease-in-out infinite alternate-reverse}
+@keyframes qxFloat{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(38px,-26px,0) scale(1.11)}}
+@keyframes qxSpin{to{transform:rotate(360deg)}}
+@keyframes qxGlow{0%,100%{opacity:.55;filter:blur(0)}50%{opacity:1;filter:blur(.2px)}}
+@keyframes qxReveal{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes qxNav{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes qxShimmer{0%{background-position:-220% 0}100%{background-position:220% 0}}
+
+body.qx-ultra .main-content{position:relative;z-index:1;background:transparent}
+body.qx-ultra .main-content>div:first-child{border-color:rgba(255,255,255,.07)!important;box-shadow:0 1px 0 rgba(255,255,255,.025)}
+body.qx-ultra .sidebar{
+  background:linear-gradient(180deg,rgba(9,10,18,.95),rgba(7,8,14,.94))!important;
+  border-right:1px solid rgba(255,255,255,.075)!important;
+  box-shadow:14px 0 44px rgba(0,0,0,.24),inset -1px 0 rgba(155,124,255,.04)!important;
+  backdrop-filter:blur(20px) saturate(1.15)!important;
+}
+body.qx-ultra .sidebar::before{content:"";position:absolute;left:0;top:0;width:2px;height:100%;background:linear-gradient(180deg,var(--qx-purple),var(--qx-cyan),transparent);opacity:.42;animation:qxGlow 4s ease-in-out infinite}
+body.qx-ultra .sidebar .nav-section{color:#676b83}
+body.qx-ultra .sidebar .nav-item{
+  position:relative;overflow:hidden;min-height:42px;
+  background:transparent!important;color:#8f93aa;border:1px solid transparent!important;
+  transition:transform .26s var(--qx-ease),color .2s,background .25s,border-color .25s,box-shadow .25s!important;
+}
+body.qx-ultra .sidebar .nav-item::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);transform:translateX(-115%);transition:transform .5s var(--qx-ease);pointer-events:none}
+body.qx-ultra .sidebar .nav-item:hover::after{transform:translateX(115%)}
+body.qx-ultra .sidebar .nav-item:hover{transform:translateX(2px)!important;background:rgba(255,255,255,.045)!important;color:#f7f7fb!important;border-color:rgba(255,255,255,.07)!important}
+body.qx-ultra .sidebar .nav-item.active{
+  background:linear-gradient(135deg,rgba(155,124,255,.17),rgba(80,220,255,.055))!important;
+  border-color:rgba(155,124,255,.28)!important;color:#fff!important;
+  box-shadow:0 10px 28px rgba(29,19,63,.22),inset 0 1px rgba(255,255,255,.06)!important;
+}
+body.qx-ultra .sidebar .nav-item.active::before{background:linear-gradient(180deg,var(--qx-purple),var(--qx-cyan))!important;box-shadow:0 0 16px rgba(155,124,255,.7)}
+body.qx-ultra .sidebar .nav-item svg{transition:transform .28s var(--qx-ease),color .2s,opacity .2s}
+body.qx-ultra .sidebar .nav-item:hover svg{transform:scale(1.08)}
+body.qx-ultra .sidebar .nav-item.active svg{color:#cdbfff;filter:drop-shadow(0 0 8px rgba(155,124,255,.32))}
+body.qx-ultra .user-pill{background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(155,124,255,.035))!important;border-color:rgba(255,255,255,.08)!important;box-shadow:0 12px 28px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.04)}
+body.qx-ultra .avatar{background:linear-gradient(135deg,#9b7cff,#50dcff)!important;box-shadow:0 0 0 1px rgba(255,255,255,.18),0 8px 22px rgba(80,220,255,.15)}
+
+body.qx-ultra .card{
+  background:linear-gradient(145deg,rgba(18,19,31,.82),rgba(12,13,22,.74))!important;
+  border-color:rgba(255,255,255,.075)!important;
+  border-radius:18px!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04)!important;
+  backdrop-filter:blur(16px) saturate(1.12);
+}
+body.qx-ultra .card:hover{transform:translateY(-2px);border-color:rgba(155,124,255,.24)!important;box-shadow:0 20px 44px rgba(0,0,0,.28),0 0 30px rgba(109,74,255,.055),inset 0 1px rgba(255,255,255,.05)!important}
+body.qx-ultra input,body.qx-ultra textarea,body.qx-ultra select{
+  background:rgba(8,9,16,.74)!important;border-color:rgba(255,255,255,.075)!important;color:#f3f4f8!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025);transition:border-color .2s,box-shadow .25s,transform .2s,background .2s!important}
+body.qx-ultra input:hover,body.qx-ultra textarea:hover,body.qx-ultra select:hover{border-color:rgba(155,124,255,.2)!important;background:rgba(10,11,20,.9)!important}
+body.qx-ultra input:focus,body.qx-ultra textarea:focus,body.qx-ultra select:focus{border-color:rgba(155,124,255,.65)!important;box-shadow:0 0 0 3px rgba(155,124,255,.11),0 0 28px rgba(109,74,255,.08)!important;transform:translateY(-1px)}
+body.qx-ultra .btn-primary,.qx-ultra .btn-primary{
+  position:relative;overflow:hidden;background:linear-gradient(135deg,#fff,#dcd7ff)!important;color:#090910!important;border-color:rgba(255,255,255,.72)!important;
+  box-shadow:0 10px 30px rgba(155,124,255,.18),0 4px 12px rgba(255,255,255,.08)!important}
+body.qx-ultra .btn-primary::after{content:"";position:absolute;top:0;bottom:0;width:35%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-180%);animation:qxShimmer 4.6s ease-in-out infinite;pointer-events:none}
+body.qx-ultra .btn-primary:hover{transform:translateY(-2px) scale(1.008)!important;box-shadow:0 15px 36px rgba(155,124,255,.27)!important}
+body.qx-ultra .btn-primary:active{transform:translateY(0) scale(.992)!important}
+body.qx-ultra .btn-ghost,body.qx-ultra .icon-btn{background:rgba(255,255,255,.025)!important;border-color:rgba(255,255,255,.08)!important;color:#a6aac0!important}
+body.qx-ultra .btn-ghost:hover,body.qx-ultra .icon-btn:hover{background:rgba(155,124,255,.08)!important;border-color:rgba(155,124,255,.25)!important;color:#fff!important;transform:translateY(-1px)}
+
+body.qx-ultra .ov-hero{
+  position:relative;overflow:hidden;border-radius:24px!important;
+  background:linear-gradient(135deg,rgba(155,124,255,.12),rgba(80,220,255,.045) 52%,rgba(255,255,255,.025))!important;
+  border:1px solid rgba(155,124,255,.18)!important;box-shadow:0 24px 60px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.05)!important}
+body.qx-ultra .ov-hero::before{content:"";position:absolute;width:260px;height:260px;right:-90px;top:-140px;border-radius:50%;background:rgba(80,220,255,.12);filter:blur(25px);pointer-events:none}
+body.qx-ultra .ov-logo{box-shadow:0 0 0 1px rgba(255,255,255,.16),0 18px 42px rgba(109,74,255,.25)!important;border-radius:18px!important}
+body.qx-ultra .ov-title{letter-spacing:-.04em;text-shadow:0 0 28px rgba(155,124,255,.11)}
+body.qx-ultra .ov-kicker{color:#b7a9ff!important}
+body.qx-ultra .vip-top-btn{border-color:rgba(155,124,255,.3)!important;background:linear-gradient(135deg,rgba(155,124,255,.18),rgba(80,220,255,.08))!important;color:#eeeaff!important;box-shadow:0 8px 25px rgba(109,74,255,.12)}
+body.qx-ultra .vip-top-btn:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(109,74,255,.2)}
+body.qx-ultra .notif-btn,.qx-ultra .lang-btn{background:rgba(10,11,20,.72)!important;border-color:rgba(255,255,255,.08)!important;box-shadow:inset 0 1px rgba(255,255,255,.03)}
+body.qx-ultra .notif-panel,.qx-ultra .lang-menu{background:rgba(12,13,22,.96)!important;border-color:rgba(155,124,255,.2)!important;box-shadow:0 26px 60px rgba(0,0,0,.45)!important;backdrop-filter:blur(20px)}
+
+body.qx-ultra .editor-wrap{background:rgba(7,8,14,.78)!important;border-color:rgba(255,255,255,.08)!important;border-radius:18px!important;box-shadow:0 18px 44px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.035)!important}
+body.qx-ultra .editor-header{background:linear-gradient(90deg,rgba(155,124,255,.045),transparent)!important;border-color:rgba(255,255,255,.06)!important}
+body.qx-ultra .studio-status{background:rgba(155,124,255,.02)!important;border-color:rgba(255,255,255,.05)!important}
+body.qx-ultra #sSource{background:#08090f!important}
+
+body.qx-ultra table tbody tr{transition:background .2s,transform .2s}
+body.qx-ultra table tbody tr:hover{background:rgba(155,124,255,.045)!important}
+body.qx-ultra th{color:#737790!important;border-color:rgba(255,255,255,.06)!important}
+body.qx-ultra td{border-color:rgba(255,255,255,.045)!important}
+body.qx-ultra .toast{background:rgba(15,16,27,.92)!important;border-color:rgba(155,124,255,.22)!important;box-shadow:0 22px 55px rgba(0,0,0,.5),0 0 30px rgba(109,74,255,.07)!important;backdrop-filter:blur(18px)}
+
+body.qx-ultra .page.qx-page-enter{animation:qxReveal .42s var(--qx-ease) both}
+body.qx-ultra .page .card,.qx-ultra .settings-hero,.qx-ultra .ov-stat,.qx-ultra .stat-card{will-change:transform}
+body.qx-ultra .card[data-qx-reveal]{opacity:0;transform:translateY(12px)}
+body.qx-ultra .card.qx-revealed{animation:qxReveal .5s var(--qx-ease) both}
+body.qx-ultra .sidebar .nav-item.qx-nav-in{animation:qxNav .38s var(--qx-ease) both}
+
+body.qx-ultra ::selection{background:rgba(155,124,255,.3);color:#fff}
+body.qx-ultra ::-webkit-scrollbar{width:8px;height:8px}
+body.qx-ultra ::-webkit-scrollbar-track{background:transparent}
+body.qx-ultra ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(155,124,255,.45),rgba(80,220,255,.35));border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+body.qx-ultra ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(155,124,255,.7),rgba(80,220,255,.55));background-clip:padding-box}
+
+.qx-cursor-glow{position:fixed;left:0;top:0;width:240px;height:240px;border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(155,124,255,.07) 0%,rgba(80,220,255,.025) 32%,transparent 70%);mix-blend-mode:screen;opacity:0;transition:opacity .25s ease}
+body.qx-ultra.qx-pointer .qx-cursor-glow{opacity:1}
+.qx-ripple{position:absolute!important;border-radius:999px;pointer-events:none;background:rgba(255,255,255,.32);transform:scale(0);animation:qxRipple .65s ease-out forwards}
+@keyframes qxRipple{to{transform:scale(3.5);opacity:0}}
+
+@media (max-width:900px){
+  body.qx-ultra .main-content>div:first-child{background:rgba(7,8,15,.6)!important;backdrop-filter:blur(16px)}
+  body.qx-ultra .card:hover{transform:none}
+  .qx-cursor-glow{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  body.qx-ultra #appView::before,body.qx-ultra #appView::after,body.qx-ultra .btn-primary::after{animation:none!important}
+  .qx-cursor-glow{display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -3818,6 +3957,142 @@ function openLegal(k){
 }
 function closeLegal(){ document.getElementById('qxModal').classList.remove('show'); }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
+
+
+
+/* ================================================================
+   QYREX UI // ULTRA INTERACTIONS v6
+   Uses existing DOM only; falls back silently when optional nodes are absent.
+   ================================================================ */
+(function(){
+  function ready(fn){
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn,{once:true});
+    else fn();
+  }
+  ready(function(){
+    document.body.classList.add('qx-ultra');
+
+    // Cursor aura: desktop-only and passive.
+    var glow=document.createElement('div');
+    glow.className='qx-cursor-glow';
+    document.body.appendChild(glow);
+    var pointerTimer=0, mx=0, my=0;
+    document.addEventListener('pointermove',function(e){
+      if(e.pointerType==='touch') return;
+      mx=e.clientX; my=e.clientY;
+      if(!pointerTimer){
+        pointerTimer=requestAnimationFrame(function(){
+          pointerTimer=0;
+          glow.style.left=mx+'px'; glow.style.top=my+'px';
+        });
+      }
+      document.body.classList.add('qx-pointer');
+    },{passive:true});
+    document.addEventListener('pointerleave',function(){document.body.classList.remove('qx-pointer')},{passive:true});
+
+    // Ripple on buttons/controls without touching onclick handlers.
+    document.addEventListener('click',function(e){
+      var b=e.target.closest && e.target.closest('button,.btn-primary,.btn-ghost,.icon-btn,.nav-item');
+      if(!b || b.disabled || b.classList.contains('qx-no-ripple')) return;
+      var r=document.createElement('span');
+      var rect=b.getBoundingClientRect();
+      var size=Math.max(rect.width,rect.height)*.35;
+      r.className='qx-ripple';
+      r.style.width=r.style.height=size+'px';
+      r.style.left=(e.clientX-rect.left-size/2)+'px';
+      r.style.top=(e.clientY-rect.top-size/2)+'px';
+      if(getComputedStyle(b).position==='static') b.style.position='relative';
+      b.appendChild(r);
+      setTimeout(function(){r.remove()},700);
+    },true);
+
+    // Animate navigation in once per load.
+    document.querySelectorAll('.sidebar .nav-item').forEach(function(el,i){
+      el.classList.add('qx-nav-in');
+      el.style.animationDelay=(Math.min(i,14)*.025)+'s';
+    });
+
+    function animatePage(page){
+      if(!page) return;
+      page.classList.remove('qx-page-enter');
+      void page.offsetWidth;
+      page.classList.add('qx-page-enter');
+      page.querySelectorAll('.card,.ov-stat,.stat-card,.settings-hero').forEach(function(card,i){
+        card.classList.remove('qx-revealed');
+        card.setAttribute('data-qx-reveal','1');
+        card.style.animationDelay=(Math.min(i,10)*.035)+'s';
+        requestAnimationFrame(function(){card.classList.add('qx-revealed')});
+      });
+    }
+
+    var observer=null;
+    if('IntersectionObserver' in window){
+      observer=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            entry.target.classList.add('qx-revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },{threshold:.08});
+      document.querySelectorAll('#appView .card,#appView .ov-stat,#appView .stat-card,#appView .settings-hero').forEach(function(el){
+        el.setAttribute('data-qx-reveal','1');
+        observer.observe(el);
+      });
+    }
+
+    // Hook existing SPA navigation without replacing its go() function.
+    if(typeof window.go==='function'){
+      var originalGo=window.go;
+      window.go=function(){
+        var result=originalGo.apply(this,arguments);
+        requestAnimationFrame(function(){
+          var visible=document.querySelector('#appView .page:not(.hidden):not([style*="display: none"])');
+          if(visible) animatePage(visible);
+        });
+        return result;
+      };
+    }
+
+    // Subtle tilt on cards; disabled for touch/coarse pointers and reduced motion.
+    var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!reduce && window.matchMedia && window.matchMedia('(pointer:fine)').matches){
+      document.addEventListener('pointermove',function(e){
+        var card=e.target.closest && e.target.closest('#appView .card');
+        if(!card || card.dataset.qxTilt==='off') return;
+        var rect=card.getBoundingClientRect();
+        if(rect.width<220 || rect.height<80) return;
+        var px=(e.clientX-rect.left)/rect.width-.5;
+        var py=(e.clientY-rect.top)/rect.height-.5;
+        card.style.setProperty('--qx-rx',(-py*1.6)+'deg');
+        card.style.setProperty('--qx-ry',(px*1.8)+'deg');
+        card.style.transform='translateY(-2px) perspective(900px) rotateX(var(--qx-rx)) rotateY(var(--qx-ry))';
+      },{passive:true});
+      document.addEventListener('pointerout',function(e){
+        var card=e.target.closest && e.target.closest('#appView .card');
+        if(!card || card.contains(e.relatedTarget)) return;
+        card.style.transform='';
+      },{passive:true});
+    }
+
+    // Improve topbar visual state while scrolling, without layout changes.
+    var main=document.querySelector('#appView .main-content');
+    if(main){
+      main.addEventListener('scroll',function(){});
+      window.addEventListener('scroll',function(){
+        var top=document.querySelector('#appView .main-content > .flex.items-center');
+        if(!top) return;
+        top.style.boxShadow=window.scrollY>8?'0 10px 28px rgba(0,0,0,.16)':'0 1px 0 rgba(255,255,255,.025)';
+      },{passive:true});
+    }
+
+    // Initial reveal.
+    setTimeout(function(){
+      var initial=document.querySelector('#appView .page:not(.hidden):not([style*="display: none"])');
+      if(initial) animatePage(initial);
+    },50);
+  });
+})();
 
 </script>
 </body>
