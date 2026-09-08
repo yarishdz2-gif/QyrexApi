@@ -2,10 +2,30 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>QrexApi &middot; Panel privado de scripts</title>
-<meta name="description" content="Panel QrexApi: obfuscacion Lua, key system HWID, webhooks y metricas en vivo."/>
+<meta name="theme-color" content="#07111f"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/>
+<meta name="googlebot" content="noindex,nofollow,noarchive"/>
+<title>QrexApi | Secure Script Management Platform</title>
+<meta name="description" content="QrexApi: plataforma privada para gestionar scripts Lua, keys HWID, publicaciones, webhooks, analytics y herramientas de administración."/>
+<meta name="keywords" content="QrexApi, Lua, Luau, script management, HWID keys, API, webhooks, developer dashboard"/>
+<meta name="application-name" content="QrexApi"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="QrexApi | Secure Script Management Platform"/>
+<meta property="og:description" content="Gestiona scripts, keys, webhooks, analytics y operaciones desde un dashboard privado."/>
+<meta property="og:url" content="/"/>
+<meta property="og:site_name" content="QrexApi"/>
+<meta property="og:image" content="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png"/>
+<meta property="og:image:alt" content="Logotipo de QrexApi"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="QrexApi | Secure Script Management Platform"/>
+<meta name="twitter:description" content="Dashboard privado de QrexApi para scripts, keys, webhooks y analytics."/>
+<meta name="twitter:image" content="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png"/>
+<link rel="canonical" href="/"/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"QrexApi","applicationCategory":"DeveloperApplication","operatingSystem":"Web","description":"Private developer dashboard for scripts, API keys, HWID controls, webhooks and analytics."}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
@@ -15,7 +35,7 @@
   .vip-head-safe{display:none;height:0}.main-content{position:relative;z-index:1}
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,sans-serif;background:var(--bg,#0a0a0f);color:var(--text,#e4e4ed);margin:0}
-  :root{--lg-loader-bg:none;--bg:#0a0a0f;--card:#111118;--accent:#e8e8ed;--accent2:#38BDF8;--border:#1e1e2a}
+  :root{--lg-loader-bg:none;--bg:#0a0a0f;--card:#111118;--accent:#e8e8ed;--accent2:#ffffff;--border:#1e1e2a}
   body.theme-neon{--bg:#050510;--card:#0a0a18;--accent:#00ff9d;--accent2:#00d4ff;--border:#1a2a22}
   body.theme-cyber{--bg:#0a0014;--card:#12001f;--accent:#ff00aa;--accent2:#00f0ff;--border:#2a1040}
   body.theme-blood{--bg:#0f0505;--card:#1a0a0a;--accent:#dc2626;--accent2:#f87171;--border:#2a1515}
@@ -74,7 +94,7 @@
   .badge{background:#161618;color:#f4f4f5;font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500}
   .badge-green{background:#0d1f14;color:#34d399;border:1px solid #1a3a28}
   .user-pill{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:8px;border-radius:10px;background:#111118;border:1px solid #1e1e2a}
-  .avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#e8e8ed,#3f3f46);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#38BDF8}
+  .avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#e8e8ed,#3f3f46);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
   .tab-bar{display:flex;gap:0;border:1px solid #252533;border-radius:10px;overflow:hidden;background:#0c0c12}
   .tab-bar button{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;background:transparent;color:#6b6b80;cursor:pointer}
   .tab-bar button.active{background:#161618;color:#f4f4f5}
@@ -82,8 +102,8 @@
   .editor-wrap{border:1px solid #252533;border-radius:12px;overflow:hidden;background:#0c0c12;display:flex;flex-direction:column}
   .editor-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #1e1e2a;flex-wrap:wrap;gap:8px}
   .editor-body{display:flex;flex:1;min-height:320px;max-height:520px;overflow:hidden;position:relative}
-  .line-nums{color:#4a4a5a;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:12px 10px 12px 12px;user-select:none;text-align:right;line-height:1.55;min-width:48px;width:48px;flex-shrink:0;overflow:hidden;background:#0a0a10;border-right:1px solid #1a1a24;#38BDF8-space:pre;box-sizing:border-box}
-  #sSource{border:none;border-radius:0;background:#0c0c12;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.55;resize:none;padding:12px 14px;flex:1;min-width:0;overflow:auto;#38BDF8-space:pre;tab-size:2;color:#e4e4ed}
+  .line-nums{color:#4a4a5a;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:12px 10px 12px 12px;user-select:none;text-align:right;line-height:1.55;min-width:48px;width:48px;flex-shrink:0;overflow:hidden;background:#0a0a10;border-right:1px solid #1a1a24;white-space:pre;box-sizing:border-box}
+  #sSource{border:none;border-radius:0;background:#0c0c12;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.55;resize:none;padding:12px 14px;flex:1;min-width:0;overflow:auto;white-space:pre;tab-size:2;color:#e4e4ed}
   .studio-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
   .studio-toolbar .btn-ghost{padding:5px 10px;font-size:11px}
   .ai-panel{border-top:1px solid #1e1e2a;background:#0a0a10;padding:10px 12px;max-height:140px;overflow:auto}
@@ -137,7 +157,7 @@
   .lg-mark b{font-size:19px;letter-spacing:-.02em}
   .lg-kicker{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#6d6d85;font-weight:600}
   .lg-title{font-size:32px;line-height:1.15;font-weight:700;letter-spacing:-.03em;margin:14px 0 12px}
-  .lg-title em{font-style:normal;color:#38BDF8}
+  .lg-title em{font-style:normal;color:#ffffff}
   @keyframes shift{to{background-position:200% 0}}
   .lg-sub{font-size:13.5px;line-height:1.65;color:#7b7b92;max-width:34ch}
   .lg-points{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:11px}
@@ -150,7 +170,7 @@
   .lg-panel{padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
   .lg-switch{position:relative;display:flex;padding:4px;border-radius:12px;background:#0b0b12;border:1px solid #1e1e2a;margin-bottom:22px}
   .lg-switch button{flex:1;position:relative;z-index:2;padding:9px 0;border:0;background:transparent;color:#6b6b80;font-size:13px;font-weight:600;cursor:pointer;transition:color .2s}
-  .lg-switch button.on{color:#38BDF8}
+  .lg-switch button.on{color:#fff}
   .lg-thumb{position:absolute;z-index:1;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);border-radius:9px;
     background:#f5f5f5;transition:transform .28s cubic-bezier(.22,1,.36,1)}
   .lg-thumb.right{transform:translateX(100%)}
@@ -158,7 +178,7 @@
   .lg-field input{padding:13px 14px;transition:border-color .2s,box-shadow .2s,background .2s}
   .lg-field input:focus{border-color:#e8e8ed;box-shadow:0 0 0 3px rgba(255,255,255,.18)}
   .lg-discord{position:relative;overflow:hidden;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 16px;border-radius:11px;
-    border:1px solid #3a3f7a;background:linear-gradient(135deg,#5865f2,#4650d8);color:#38BDF8;font-size:14px;font-weight:600;
+    border:1px solid #3a3f7a;background:linear-gradient(135deg,#5865f2,#4650d8);color:#fff;font-size:14px;font-weight:600;
     text-decoration:none;transition:transform .18s,box-shadow .18s,filter .18s}
   .lg-discord::after{content:"";position:absolute;top:0;bottom:0;width:38%;pointer-events:none;
     background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:translateX(-120%);animation:sheen 4.5s ease-in-out infinite}
@@ -174,7 +194,7 @@
   .lg-mobile-mark b{font-size:17px;letter-spacing:-.02em}
   .lg-topbar{position:absolute;top:14px;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:12px;pointer-events:none;animation:fadeDown .6s cubic-bezier(.22,1,.36,1) both}
   .lg-topbar img{width:44px;height:44px;border-radius:13px;object-fit:cover;animation:pulseRing 4s ease-in-out infinite}
-  .lg-topbar b{font-size:22px;letter-spacing:-.03em;color:#38BDF8;font-weight:700}
+  .lg-topbar b{font-size:22px;letter-spacing:-.03em;color:#fff;font-weight:700}
   @media(max-width:880px){
     .lg-mobile-mark{display:none}
     .lg-shell{grid-template-columns:1fr;max-width:440px;margin-top:8px}
@@ -258,7 +278,7 @@
   .qx-modal-close{margin-top:22px;width:100%}
 
 
-  .notif-wrap{position:relative;margin-left:auto}.notif-btn{width:40px;height:40px;border:1px solid #242433;border-radius:12px;background:#111118;color:#b9b9c8;display:grid;place-items:center;cursor:pointer;position:relative}.notif-btn:hover{color:#38BDF8;border-color:#3a3a4e}.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:#ff5d7a;box-shadow:0 0 0 3px #111118;display:none}.notif-panel{position:absolute;right:0;top:48px;width:min(390px,calc(100vw - 28px));padding:14px;border:1px solid #29293c;border-radius:18px;background:rgba(13,13,20,.98);box-shadow:0 28px 80px rgba(0,0,0,.5);backdrop-filter:blur(18px);z-index:100;display:none}.notif-panel.show{display:block}.notif-list{max-height:360px;overflow:auto;display:grid;gap:7px}.notif-item{display:flex;gap:10px;padding:11px;border-radius:13px;background:#101019;border:1px solid #232338}.notif-item.unread{border-color:#38384f;background:#131320}.notif-icon{width:31px;height:31px;border-radius:9px;background:#191922;display:grid;place-items:center;flex:0 0 auto}.notif-empty{padding:28px 8px;text-align:center;color:#67677f;font-size:12px}.profile-banner{height:170px;border-radius:20px;border:1px solid #242436;background:linear-gradient(135deg,#171720,#0b0b10);background-size:cover;background-position:center;position:relative;overflow:hidden}.profile-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(5,5,10,.7) 100%)}.profile-avatar-xl{width:92px;height:92px;border-radius:24px;border:4px solid #111118;background:#171721;position:absolute;left:24px;bottom:-16px;z-index:2;overflow:hidden;display:grid;place-items:center;font-size:30px;font-weight:800}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.profile-upload{border:1px dashed #2c2c40;border-radius:14px;padding:12px;background:#0e0e15}.profile-upload input{display:none}@media(max-width:700px){.notif-panel{position:fixed;right:14px;top:68px}.profile-grid{grid-template-columns:1fr}.profile-banner{height:140px}}
+  .notif-wrap{position:relative;margin-left:auto}.notif-btn{width:40px;height:40px;border:1px solid #242433;border-radius:12px;background:#111118;color:#b9b9c8;display:grid;place-items:center;cursor:pointer;position:relative}.notif-btn:hover{color:#fff;border-color:#3a3a4e}.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:#ff5d7a;box-shadow:0 0 0 3px #111118;display:none}.notif-panel{position:absolute;right:0;top:48px;width:min(390px,calc(100vw - 28px));padding:14px;border:1px solid #29293c;border-radius:18px;background:rgba(13,13,20,.98);box-shadow:0 28px 80px rgba(0,0,0,.5);backdrop-filter:blur(18px);z-index:100;display:none}.notif-panel.show{display:block}.notif-list{max-height:360px;overflow:auto;display:grid;gap:7px}.notif-item{display:flex;gap:10px;padding:11px;border-radius:13px;background:#101019;border:1px solid #232338}.notif-item.unread{border-color:#38384f;background:#131320}.notif-icon{width:31px;height:31px;border-radius:9px;background:#191922;display:grid;place-items:center;flex:0 0 auto}.notif-empty{padding:28px 8px;text-align:center;color:#67677f;font-size:12px}.profile-banner{height:170px;border-radius:20px;border:1px solid #242436;background:linear-gradient(135deg,#171720,#0b0b10);background-size:cover;background-position:center;position:relative;overflow:hidden}.profile-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(5,5,10,.7) 100%)}.profile-avatar-xl{width:92px;height:92px;border-radius:24px;border:4px solid #111118;background:#171721;position:absolute;left:24px;bottom:-16px;z-index:2;overflow:hidden;display:grid;place-items:center;font-size:30px;font-weight:800}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.profile-upload{border:1px dashed #2c2c40;border-radius:14px;padding:12px;background:#0e0e15}.profile-upload input{display:none}@media(max-width:700px){.notif-panel{position:fixed;right:14px;top:68px}.profile-grid{grid-template-columns:1fr}.profile-banner{height:140px}}
 
   .vip-top-btn{position:fixed;top:14px;right:66px;z-index:5001;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(251,191,36,.28);background:linear-gradient(135deg,rgba(251,191,36,.16),rgba(245,158,11,.07));color:#fbbf24;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.16);transition:transform .2s,box-shadow .2s,border-color .2s}
   .vip-top-btn:hover{transform:translateY(-1px);border-color:rgba(251,191,36,.48);box-shadow:0 10px 26px rgba(0,0,0,.22)}
@@ -277,9 +297,9 @@
   .vip-compare-card{padding:16px;border-radius:16px;border:1px solid #272735;background:linear-gradient(180deg,#12121a,#0d0d13)}
   .vip-compare-card.pro{border-color:rgba(251,191,36,.34);background:linear-gradient(180deg,rgba(39,31,11,.55),#111016)}
   .vc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.vc-badge{display:inline-flex;padding:4px 8px;border-radius:8px;background:#1a1a24;color:#b5b5c6;font-size:9px;font-weight:900;letter-spacing:.12em}.vc-badge.vip{background:rgba(251,191,36,.11);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
-  .vc-title{font-size:14px;font-weight:800;margin-top:8px}.vc-state{font-size:9px;font-weight:900;color:#77778c;#38BDF8-space:nowrap}.vc-state.vip{color:#fbbf24}.vc-list{display:grid;gap:8px;margin-top:14px;color:#8e8ea2;font-size:11px}.vc-list div{display:flex;gap:8px;align-items:flex-start}.vc-list div span{color:#6f6f82;font-weight:900}.pro .vc-list div span{color:#fbbf24}
-  .vip-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px 8px;color:#e4e4eb;font-size:12px;font-weight:800}.vip-section-title small{color:#606074;font-size:9px;font-weight:600}.vip-matrix{margin:0 24px 12px;border:1px solid #252532;border-radius:15px;overflow:hidden;background:#0c0c12}.vip-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 74px;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid #1d1d27;font-size:10px;color:#8a8a9d}.vip-row:first-child{border-top:0}.vip-row b{text-align:center;color:#c2c2cf;font-size:10px}.vip-row .gold{color:#fbbf24}.vip-row-head{background:#101018;border-top:0;color:#6f6f81!important;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.vip-row-head b{color:#fbbf24}.vip-row-head b:first-of-type{color:#9a9aaa}.vip-value{margin:0 24px 8px;padding:12px 14px;border:1px solid rgba(251,191,36,.13);border-radius:14px;background:linear-gradient(90deg,rgba(251,191,36,.08),rgba(251,191,36,.02));display:flex;align-items:center;justify-content:space-between;gap:14px}.vip-value>div:first-child{min-width:0}.vip-save{padding:7px 9px;border-radius:9px;background:rgba(251,191,36,.1);color:#fbbf24;font-size:9px;font-weight:900;#38BDF8-space:nowrap;border:1px solid rgba(251,191,36,.16)}
-  @media (max-width:760px){.vip-plans{grid-template-columns:1fr}.vip-top-btn{top:10px;right:58px;padding:8px 10px}.vip-top-btn span{display:inline}.vip-top-btn{font-size:11px}.vip-compare{grid-template-columns:1fr}.vip-row{grid-template-columns:minmax(0,1fr) 58px 58px;font-size:9px}.vip-row b{font-size:9px}.vip-section-title{align-items:flex-start;flex-direction:column}.vip-value{align-items:flex-start;flex-direction:column}.vip-save{#38BDF8-space:normal}}
+  .vc-title{font-size:14px;font-weight:800;margin-top:8px}.vc-state{font-size:9px;font-weight:900;color:#77778c;white-space:nowrap}.vc-state.vip{color:#fbbf24}.vc-list{display:grid;gap:8px;margin-top:14px;color:#8e8ea2;font-size:11px}.vc-list div{display:flex;gap:8px;align-items:flex-start}.vc-list div span{color:#6f6f82;font-weight:900}.pro .vc-list div span{color:#fbbf24}
+  .vip-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px 8px;color:#e4e4eb;font-size:12px;font-weight:800}.vip-section-title small{color:#606074;font-size:9px;font-weight:600}.vip-matrix{margin:0 24px 12px;border:1px solid #252532;border-radius:15px;overflow:hidden;background:#0c0c12}.vip-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 74px;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid #1d1d27;font-size:10px;color:#8a8a9d}.vip-row:first-child{border-top:0}.vip-row b{text-align:center;color:#c2c2cf;font-size:10px}.vip-row .gold{color:#fbbf24}.vip-row-head{background:#101018;border-top:0;color:#6f6f81!important;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.vip-row-head b{color:#fbbf24}.vip-row-head b:first-of-type{color:#9a9aaa}.vip-value{margin:0 24px 8px;padding:12px 14px;border:1px solid rgba(251,191,36,.13);border-radius:14px;background:linear-gradient(90deg,rgba(251,191,36,.08),rgba(251,191,36,.02));display:flex;align-items:center;justify-content:space-between;gap:14px}.vip-value>div:first-child{min-width:0}.vip-save{padding:7px 9px;border-radius:9px;background:rgba(251,191,36,.1);color:#fbbf24;font-size:9px;font-weight:900;white-space:nowrap;border:1px solid rgba(251,191,36,.16)}
+  @media (max-width:760px){.vip-plans{grid-template-columns:1fr}.vip-top-btn{top:10px;right:58px;padding:8px 10px}.vip-top-btn span{display:inline}.vip-top-btn{font-size:11px}.vip-compare{grid-template-columns:1fr}.vip-row{grid-template-columns:minmax(0,1fr) 58px 58px;font-size:9px}.vip-row b{font-size:9px}.vip-section-title{align-items:flex-start;flex-direction:column}.vip-value{align-items:flex-start;flex-direction:column}.vip-save{white-space:normal}}
 
   /* ===== Dashboard pro (mismo vibe que login) ===== */
   #appView{position:relative;background:#07070c;min-height:100vh}
@@ -390,7 +410,7 @@
     .qx-modal-box{width:100%;max-height:85vh;overflow:auto;border-radius:16px 16px 12px 12px}
     table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
     thead,tbody,tr{width:100%}
-    th,td{#38BDF8-space:nowrap;padding:10px 12px;font-size:12px}
+    th,td{white-space:nowrap;padding:10px 12px;font-size:12px}
     .user-pill{margin:8px;padding:10px}
     .tab-bar button{padding:12px 8px;font-size:12px}
     .studio-toolbar{gap:8px}
@@ -577,10 +597,10 @@
 
   .log-card{background:#12121a;border:1px solid #1e1e2a;border-radius:16px;padding:14px 16px;margin-bottom:12px}
   .log-card .log-top{display:flex;align-items:center;gap:12px}
-  .log-av{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#e8e8ed,#3f3f46);display:flex;align-items:center;justify-content:center;font-weight:700;color:#38BDF8;flex-shrink:0;font-size:14px}
+  .log-av{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#e8e8ed,#3f3f46);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;font-size:14px}
   .log-meta{flex:1;min-width:0}
   .log-meta .ex{font-size:12px;color:#f4f4f5;font-weight:600}
-  .log-meta .un{font-size:13px;color:#e4e4ed;font-weight:600;overflow:hidden;text-overflow:ellipsis;#38BDF8-space:nowrap}
+  .log-meta .un{font-size:13px;color:#e4e4ed;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .log-time{font-size:11px;color:#6b6b80;flex-shrink:0}
   .log-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .log-actions button{font-size:12px;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
@@ -615,14 +635,14 @@
   }
   .sidebar-collapse-btn:hover{background:#23243a;border-color:rgba(255,255,255,.35);transform:scale(1.08)}
   .sidebar-collapse-btn svg{width:17px;height:17px;transition:transform .35s var(--qx-ease)}
-  .nav-item{position:relative;min-height:44px;border:1px solid transparent!important;overflow:hidden;#38BDF8-space:nowrap}
-  .nav-item::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 6px 6px 0;background:#38BDF8;transform:scaleY(0);transition:transform .22s var(--qx-ease)}
+  .nav-item{position:relative;min-height:44px;border:1px solid transparent!important;overflow:hidden;white-space:nowrap}
+  .nav-item::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 6px 6px 0;background:#fff;transform:scaleY(0);transition:transform .22s var(--qx-ease)}
   .nav-item.active{box-shadow:inset 0 1px rgba(255,255,255,.07),0 6px 20px rgba(0,0,0,.14)!important}
   .nav-item.active::before{transform:scaleY(1)}
   .nav-item:hover{transform:translateX(2px)}
-  .nav-section{#38BDF8-space:nowrap;transition:opacity .22s,transform .25s!important}
+  .nav-section{white-space:nowrap;transition:opacity .22s,transform .25s!important}
   .sidebar .flex.items-center.gap-3.px-5.py-5{padding-top:24px!important;padding-bottom:22px!important;min-width:280px}
-  .sidebar .user-pill{margin:10px 10px 14px;transition:padding .35s var(--qx-ease),margin .35s var(--qx-ease);#38BDF8-space:nowrap;overflow:hidden}
+  .sidebar .user-pill{margin:10px 10px 14px;transition:padding .35s var(--qx-ease),margin .35s var(--qx-ease);white-space:nowrap;overflow:hidden}
   body.sidebar-collapsed .sidebar{width:var(--sidebar-mini)!important}
   body.sidebar-collapsed #appView main.main-content{margin-left:var(--sidebar-mini)!important;width:calc(100% - var(--sidebar-mini))!important}
   body.sidebar-collapsed .sidebar-collapse-btn svg{transform:rotate(180deg)}
@@ -638,7 +658,7 @@
   body.sidebar-collapsed .sidebar .user-pill{width:64px;height:54px;margin:10px auto 14px;padding:10px;justify-content:center}
   body.sidebar-collapsed .sidebar .avatar{width:34px;height:34px}
   .sidebar .nav-item[title]{position:relative}
-  body.sidebar-collapsed .sidebar .nav-item:hover::after{content:attr(data-page);position:fixed;left:94px;padding:7px 10px;border-radius:9px;background:#171827;border:1px solid rgba(255,255,255,.1);color:#38BDF8;font-size:11px;box-shadow:0 10px 30px rgba(0,0,0,.3);text-transform:capitalize;z-index:100}
+  body.sidebar-collapsed .sidebar .nav-item:hover::after{content:attr(data-page);position:fixed;left:94px;padding:7px 10px;border-radius:9px;background:#171827;border:1px solid rgba(255,255,255,.1);color:#fff;font-size:11px;box-shadow:0 10px 30px rgba(0,0,0,.3);text-transform:capitalize;z-index:100}
   .main-content > .flex.items-center{min-height:74px;background:rgba(7,8,15,.34);backdrop-filter:blur(12px)}
 
   @media (max-width:900px){
@@ -655,7 +675,7 @@
   .stat-val,.ov-stat .val{font-variant-numeric:tabular-nums}
 
   .ov-logo,.lg-mark img,.lg-topbar img,.lg-mobile-mark img,
-  .qx-ring img,.mt-brand img,.sidebar img[alt="Qrex"],.sidebar img[alt="QrexApi"]{
+  .qx-ring img,.mt-brand img,.sidebar img[alt="QrexApi logo"],.sidebar img[alt="QrexApi logo"]{
     object-fit:cover!important;object-position:center;flex-shrink:0;
     background:#12121a;display:block
   }
@@ -693,8 +713,8 @@
     width:100%;text-align:left;padding:10px 12px;border:0;border-radius:10px;
     background:transparent;color:#c8c8d4;font-size:13px;font-weight:600;cursor:pointer
   }
-  .lang-menu button:hover{background:#16161f;color:#38BDF8}
-  .lang-menu button.on{background:#161618;color:#38BDF8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+  .lang-menu button:hover{background:#16161f;color:#fff}
+  .lang-menu button.on{background:#161618;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
   .lang-menu button small{font-size:10px;letter-spacing:.08em;color:#6b6b80;font-weight:800}
   .lang-switch-login{position:fixed;top:16px;right:16px;z-index:5002;pointer-events:auto}
   .lg-topbar{padding:0 110px}
@@ -736,7 +756,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style id="qyrex-ultimate-enterprise">
-:root{--qe-bg:#07111f;--qe-panel:#38BDF8;--qe-panel2:#0e1c31;--qe-text:#e5f7ff;--qe-muted:#83a9c2;--qe-border:#17324e;--qe-brand:#38BDF8;--qe-brand2:#0EA5E9;--qe-soft:#08243a;--qe-shadow:0 18px 50px rgba(15,23,42,.08);--qe-radius:18px}
+:root{--qe-bg:#f5f7fb;--qe-panel:#ffffff;--qe-panel2:#f8fafc;--qe-text:#172033;--qe-muted:#687386;--qe-border:#e5e9f0;--qe-brand:#2563eb;--qe-brand2:#1d4ed8;--qe-soft:#eff6ff;--qe-shadow:0 18px 50px rgba(15,23,42,.08);--qe-radius:18px}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:radial-gradient(circle at 85% 0%,rgba(37,99,235,.08),transparent 32%),radial-gradient(circle at 10% 15%,rgba(14,165,233,.05),transparent 30%),var(--qe-bg)!important;color:var(--qe-text)!important}
 h1,h2,h3,.ov-title,.lg-title,.vip-price{font-family:"Manrope",Inter,ui-sans-serif,sans-serif!important;letter-spacing:-.035em!important}
 #appView{background:transparent!important}
@@ -753,16 +773,16 @@ h1,h2,h3,.ov-title,.lg-title,.vip-price{font-family:"Manrope",Inter,ui-sans-seri
 .page{animation:qe-enter .45s cubic-bezier(.2,.8,.2,1) both!important}
 .card{background:rgba(255,255,255,.9)!important;border:1px solid var(--qe-border)!important;border-radius:var(--qe-radius)!important;box-shadow:var(--qe-shadow)!important}
 .card:hover{transform:translateY(-2px);border-color:#d8e0ea!important;box-shadow:0 24px 60px rgba(15,23,42,.10)!important}
-.btn-primary{background:linear-gradient(135deg,var(--qe-brand),var(--qe-brand2))!important;color:#38BDF8!important;border:none!important;border-radius:11px!important;box-shadow:0 10px 24px rgba(37,99,235,.20)!important}
+.btn-primary{background:linear-gradient(135deg,var(--qe-brand),var(--qe-brand2))!important;color:#fff!important;border:none!important;border-radius:11px!important;box-shadow:0 10px 24px rgba(37,99,235,.20)!important}
 .btn-primary:hover{box-shadow:0 14px 30px rgba(37,99,235,.28)!important;filter:none!important}
-.btn-ghost,.icon-btn{background:#38BDF8!important;border:1px solid #dfe5ed!important;color:#667085!important;border-radius:10px!important}
+.btn-ghost,.icon-btn{background:#fff!important;border:1px solid #dfe5ed!important;color:#667085!important;border-radius:10px!important}
 .btn-ghost:hover,.icon-btn:hover{background:#f8fafc!important;border-color:#cbd5e1!important;color:#24314a!important}
-input,textarea,select{background:#38BDF8!important;border:1px solid #dfe5ed!important;color:#172033!important;border-radius:11px!important}
+input,textarea,select{background:#fff!important;border:1px solid #dfe5ed!important;color:#172033!important;border-radius:11px!important}
 input::placeholder,textarea::placeholder{color:#98a2b3!important}
 input:focus,textarea:focus,select:focus{border-color:#93c5fd!important;box-shadow:0 0 0 4px rgba(37,99,235,.10)!important}
 .badge,.chip{background:#f1f5f9!important;color:#475467!important;border:1px solid #e2e8f0!important}
 .badge-green{background:#ecfdf3!important;color:#15803d!important;border-color:#bbf7d0!important}
-.ov-hero{background:linear-gradient(135deg,#38BDF8 0%,#f7fbff 60%,#eef6ff 100%)!important;border:1px solid #dbe5f0!important;border-radius:22px!important;box-shadow:0 25px 70px rgba(15,23,42,.08)!important;position:relative;overflow:hidden}
+.ov-hero{background:linear-gradient(135deg,#ffffff 0%,#f7fbff 60%,#eef6ff 100%)!important;border:1px solid #dbe5f0!important;border-radius:22px!important;box-shadow:0 25px 70px rgba(15,23,42,.08)!important;position:relative;overflow:hidden}
 .ov-hero:after{content:"";position:absolute;width:340px;height:340px;right:-150px;top:-150px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.16),transparent 68%);pointer-events:none}
 .ov-kicker{color:#2563eb!important;font-weight:800!important;letter-spacing:.1em!important;text-transform:uppercase}
 .ov-title{color:#111827!important}
@@ -772,15 +792,15 @@ input:focus,textarea:focus,select:focus{border-color:#93c5fd!important;box-shado
 .editor-header,.studio-status{border-color:#243244!important}
 .line-nums{background:#0b1220!important;color:#64748b!important;border-color:#1e293b!important}
 #sSource{background:#0f172a!important;color:#e2e8f0!important}
-.search-box input{background:#38BDF8!important}
-.vip-top-btn{background:#38BDF8!important;color:#2453a6!important;border:1px solid #dbe5f0!important;border-radius:10px!important;padding:8px 12px!important;font-weight:800!important}
-.notif-btn{background:#38BDF8!important;border:1px solid #dfe5ed!important;color:#667085!important;border-radius:10px!important}
-.lg-shell{max-width:1080px!important;background:#38BDF8!important;border:1px solid #dfe5ed!important;border-radius:24px!important;box-shadow:0 40px 100px rgba(15,23,42,.13)!important}
+.search-box input{background:#fff!important}
+.vip-top-btn{background:#fff!important;color:#2453a6!important;border:1px solid #dbe5f0!important;border-radius:10px!important;padding:8px 12px!important;font-weight:800!important}
+.notif-btn{background:#fff!important;border:1px solid #dfe5ed!important;color:#667085!important;border-radius:10px!important}
+.lg-shell{max-width:1080px!important;background:#fff!important;border:1px solid #dfe5ed!important;border-radius:24px!important;box-shadow:0 40px 100px rgba(15,23,42,.13)!important}
 .lg-aside{background:linear-gradient(160deg,#0f2747,#12355f 55%,#1d4f86)!important;border-right:none!important}
-.lg-kicker{color:#bfdbfe!important}.lg-title,.lg-sub,.lg-foot{color:#38BDF8!important}.lg-title em{color:#dbeafe!important}.lg-points li{color:#dbeafe!important}.lg-points span{background:rgba(255,255,255,.10)!important;color:#38BDF8!important;border-color:rgba(255,255,255,.18)!important}
-.lg-panel{background:#38BDF8!important}.lg-switch{background:#f3f6fa!important;border-color:#e5e9f0!important}.lg-switch button{color:#7a8494!important}.lg-switch button.on{color:#172033!important}.lg-thumb{background:#38BDF8!important;box-shadow:0 3px 10px rgba(15,23,42,.09)!important}.lg-discord{box-shadow:0 8px 22px rgba(88,101,242,.16)!important}
+.lg-kicker{color:#bfdbfe!important}.lg-title,.lg-sub,.lg-foot{color:#fff!important}.lg-title em{color:#dbeafe!important}.lg-points li{color:#dbeafe!important}.lg-points span{background:rgba(255,255,255,.10)!important;color:#fff!important;border-color:rgba(255,255,255,.18)!important}
+.lg-panel{background:#fff!important}.lg-switch{background:#f3f6fa!important;border-color:#e5e9f0!important}.lg-switch button{color:#7a8494!important}.lg-switch button.on{color:#172033!important}.lg-thumb{background:#fff!important;box-shadow:0 3px 10px rgba(15,23,42,.09)!important}.lg-discord{box-shadow:0 8px 22px rgba(88,101,242,.16)!important}
 @keyframes qe-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media(max-width:900px){.main-content{margin-left:0!important}.sidebar{background:#38BDF8!important}}
+@media(max-width:900px){.main-content{margin-left:0!important}.sidebar{background:#fff!important}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -790,7 +810,7 @@ input:focus,textarea:focus,select:focus{border-color:#93c5fd!important;box-shado
 <style id="qyrex-enterprise-v2">
 :root{
  --qx-blue:#1769e0;--qx-blue-2:#0e4fb5;--qx-navy:#0b1730;--qx-ink:#101828;--qx-muted:#667085;
- --qx-line:#e4e7ec;--qx-surface:#38BDF8;--qx-bg:#f5f8fc;--qx-soft:#eef5ff;
+ --qx-line:#e4e7ec;--qx-surface:#ffffff;--qx-bg:#f5f8fc;--qx-soft:#eef5ff;
  --qx-success:#12b76a;--qx-warning:#f79009;--qx-danger:#f04438;--qx-radius:16px;
  --qx-shadow:0 10px 35px rgba(16,24,40,.08);--qx-shadow-hover:0 18px 50px rgba(23,105,224,.13);
  --qx-ease:cubic-bezier(.22,1,.36,1);
@@ -804,30 +824,30 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 #appView .sidebar{background:rgba(10,23,48,.98)!important;border-right:1px solid rgba(255,255,255,.08)!important;box-shadow:10px 0 35px rgba(8,18,38,.08)!important}
 #appView .sidebar .nav-section{color:#8da3c7!important;font-weight:800;letter-spacing:.12em}
 #appView .sidebar .nav-item{color:#b8c6da!important;border-color:transparent!important;border-radius:12px!important}
-#appView .sidebar .nav-item:hover{color:#38BDF8!important;background:rgba(23,105,224,.14)!important;border-color:rgba(86,150,255,.16)!important}
-#appView .sidebar .nav-item.active{color:#38BDF8!important;background:linear-gradient(135deg,rgba(23,105,224,.95),rgba(14,79,181,.86))!important;border-color:rgba(255,255,255,.08)!important;box-shadow:0 8px 20px rgba(8,57,134,.28)!important}
+#appView .sidebar .nav-item:hover{color:#fff!important;background:rgba(23,105,224,.14)!important;border-color:rgba(86,150,255,.16)!important}
+#appView .sidebar .nav-item.active{color:#fff!important;background:linear-gradient(135deg,rgba(23,105,224,.95),rgba(14,79,181,.86))!important;border-color:rgba(255,255,255,.08)!important;box-shadow:0 8px 20px rgba(8,57,134,.28)!important}
 #appView .sidebar .user-pill{background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.09)!important}
 #appView .main-content{background:transparent!important}
 #appView .main-content>div.flex.items-center{background:rgba(255,255,255,.82)!important;border-color:var(--qx-line)!important;backdrop-filter:blur(18px)!important}
 #appView .card{background:rgba(255,255,255,.94)!important;border:1px solid var(--qx-line)!important;border-radius:var(--qx-radius)!important;box-shadow:var(--qx-shadow)!important;color:var(--qx-ink)!important}
 #appView .card:hover{transform:translateY(-2px);box-shadow:var(--qx-shadow-hover)!important;border-color:#cfe0fb!important}
-#appView input,#appView textarea,#appView select{background:#38BDF8!important;color:#1d2939!important;border:1px solid #d0d5dd!important;border-radius:12px!important}
+#appView input,#appView textarea,#appView select{background:#fff!important;color:#1d2939!important;border:1px solid #d0d5dd!important;border-radius:12px!important}
 #appView input::placeholder,#appView textarea::placeholder{color:#98a2b3!important}
 #appView input:focus,#appView textarea:focus,#appView select:focus{border-color:var(--qx-blue)!important;box-shadow:0 0 0 4px rgba(23,105,224,.10)!important}
-#appView .btn-primary{background:linear-gradient(135deg,var(--qx-blue),var(--qx-blue-2))!important;color:#38BDF8!important;border:1px solid var(--qx-blue)!important;box-shadow:0 8px 20px rgba(23,105,224,.22)!important;border-radius:11px!important}
+#appView .btn-primary{background:linear-gradient(135deg,var(--qx-blue),var(--qx-blue-2))!important;color:#fff!important;border:1px solid var(--qx-blue)!important;box-shadow:0 8px 20px rgba(23,105,224,.22)!important;border-radius:11px!important}
 #appView .btn-primary:hover{filter:brightness(1.03);box-shadow:0 12px 28px rgba(23,105,224,.28)!important}
-#appView .btn-ghost,#appView .icon-btn{background:#38BDF8!important;color:#475467!important;border-color:#d0d5dd!important}
+#appView .btn-ghost,#appView .icon-btn{background:#fff!important;color:#475467!important;border-color:#d0d5dd!important}
 #appView .btn-ghost:hover,#appView .icon-btn:hover{background:var(--qx-soft)!important;color:var(--qx-blue)!important;border-color:#b7d0f5!important}
 #appView .ov-hero{background:linear-gradient(135deg,#0b1730 0%,#123568 52%,#1769e0 100%)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 22px 60px rgba(11,23,48,.22)!important;border-radius:22px!important;position:relative;overflow:hidden}
 #appView .ov-hero:after{content:"";position:absolute;width:430px;height:430px;right:-170px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 68%);pointer-events:none}
 #appView .ov-hero *{position:relative;z-index:1}
 #appView .ov-kicker{color:#b7d3ff!important;letter-spacing:.13em!important;font-weight:800!important}
-#appView .ov-title{color:#38BDF8!important;letter-spacing:-.045em!important;font-weight:800!important}
+#appView .ov-title{color:#fff!important;letter-spacing:-.045em!important;font-weight:800!important}
 #appView .ov-sub{color:#d8e6fb!important}
 #appView .ov-stat{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:14px!important;backdrop-filter:blur(10px)}
-#appView .ov-cta{background:#38BDF8!important;color:#0b1730!important;border-color:#38BDF8!important;box-shadow:0 8px 25px rgba(0,0,0,.16)!important}
-#appView .vip-top-btn{background:linear-gradient(135deg,#1769e0,#123f96)!important;border-color:#1769e0!important;color:#38BDF8!important;box-shadow:0 8px 20px rgba(23,105,224,.2)!important}
-#appView .notif-btn,.lang-btn{background:#38BDF8!important;color:#475467!important;border-color:#d0d5dd!important}
+#appView .ov-cta{background:#fff!important;color:#0b1730!important;border-color:#fff!important;box-shadow:0 8px 25px rgba(0,0,0,.16)!important}
+#appView .vip-top-btn{background:linear-gradient(135deg,#1769e0,#123f96)!important;border-color:#1769e0!important;color:#fff!important;box-shadow:0 8px 20px rgba(23,105,224,.2)!important}
+#appView .notif-btn,.lang-btn{background:#fff!important;color:#475467!important;border-color:#d0d5dd!important}
 #appView .editor-wrap{background:#0b1220!important;border-color:#17233a!important;box-shadow:0 14px 38px rgba(11,23,48,.14)!important}
 #appView .editor-header{background:#101a2b!important;border-color:#20304a!important}
 #appView .editor-body{background:#0b1220!important}
@@ -844,7 +864,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .qx-rail-left,.qx-rail-right{display:flex;align-items:center;gap:10px;min-width:0}
 .qx-status{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:9px;background:#ecfdf3;color:#067647;font-size:11px;font-weight:800;border:1px solid #abefc6}
 .qx-status i{width:7px;height:7px;border-radius:50%;background:#12b76a;box-shadow:0 0 0 3px rgba(18,183,106,.12);animation:qxPulse 2.2s infinite}
-.qx-rail-btn{height:32px;padding:0 10px;border-radius:9px;background:#38BDF8;border:1px solid #d0d5dd;color:#475467;font-size:11px;font-weight:800;cursor:pointer;transition:.2s var(--qx-ease)}
+.qx-rail-btn{height:32px;padding:0 10px;border-radius:9px;background:#fff;border:1px solid #d0d5dd;color:#475467;font-size:11px;font-weight:800;cursor:pointer;transition:.2s var(--qx-ease)}
 .qx-rail-btn:hover{transform:translateY(-1px);border-color:#b7d0f5;color:var(--qx-blue);background:#f7fbff}
 .qx-time{font-variant-numeric:tabular-nums;color:#667085;font-size:11px;font-weight:700}
 @keyframes qxPulse{0%,100%{opacity:1}50%{opacity:.5}}
@@ -869,10 +889,10 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .lg-title{font-family:Manrope,Inter,sans-serif!important;font-weight:800!important;letter-spacing:-.05em!important}
 .lg-title em{color:#73adff!important}
 .lg-discord{background:linear-gradient(135deg,#1769e0,#0e4fb5)!important;border-color:#2d79e6!important}
-.lg-switch{background:#0b1425!important;border-color:#263651!important}.lg-thumb{background:#38BDF8!important}
-.lg-panel input{background:#0c1729!important;border-color:#2a3c58!important;color:#38BDF8!important}
+.lg-switch{background:#0b1425!important;border-color:#263651!important}.lg-thumb{background:#fff!important}
+.lg-panel input{background:#0c1729!important;border-color:#2a3c58!important;color:#fff!important}
 .lg-panel input:focus{border-color:#4e93f7!important;box-shadow:0 0 0 4px rgba(78,147,247,.14)!important}
-.lg-panel .btn-primary{background:linear-gradient(135deg,#1769e0,#0e4fb5)!important;color:#38BDF8!important;border-color:#1769e0!important}
+.lg-panel .btn-primary{background:linear-gradient(135deg,#1769e0,#0e4fb5)!important;color:#fff!important;border-color:#1769e0!important}
 
 @media(max-width:900px){
  .qx-enterprise-rail{align-items:flex-start;flex-direction:column}.qx-rail-right{width:100%;justify-content:space-between}.qx-rail-left{width:100%;overflow:auto}
@@ -893,7 +913,7 @@ body{background:
   radial-gradient(1100px 650px at 78% -12%,rgba(47,128,237,.13),transparent 62%),
   radial-gradient(900px 650px at -12% 110%,rgba(17,78,143,.16),transparent 64%),
   #05070b!important}
-body::selection{background:rgba(47,128,237,.34);color:#38BDF8}
+body::selection{background:rgba(47,128,237,.34);color:#fff}
 h1,h2,h3,h4,.ov-title,.lg-title,.vip-price,.stat-val{font-family:'Space Grotesk',Manrope,Inter,sans-serif!important}
 .sidebar{background:linear-gradient(180deg,#07101b 0%,#050a11 100%)!important;border-right:1px solid #14263a!important;box-shadow:14px 0 42px rgba(0,0,0,.34)!important}
 .sidebar .flex.items-center.gap-3.px-5.py-5{border-bottom:1px solid rgba(47,128,237,.10)!important}
@@ -902,7 +922,7 @@ h1,h2,h3,h4,.ov-title,.lg-title,.vip-price,.stat-val{font-family:'Space Grotesk'
 .nav-item::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(47,128,237,.13),transparent 70%);opacity:0;transition:opacity .22s var(--qx-ease);pointer-events:none}
 .nav-item:hover{background:rgba(47,128,237,.09)!important;color:#eaf3ff!important;border-color:rgba(47,128,237,.18)!important;transform:translateX(2px)}
 .nav-item:hover::after,.nav-item.active::after{opacity:1}
-.nav-item.active{background:linear-gradient(90deg,rgba(47,128,237,.20),rgba(47,128,237,.07))!important;color:#38BDF8!important;border-color:rgba(47,128,237,.34)!important;box-shadow:inset 3px 0 0 var(--qx-blue),0 10px 25px rgba(0,0,0,.20)!important}
+.nav-item.active{background:linear-gradient(90deg,rgba(47,128,237,.20),rgba(47,128,237,.07))!important;color:#fff!important;border-color:rgba(47,128,237,.34)!important;box-shadow:inset 3px 0 0 var(--qx-blue),0 10px 25px rgba(0,0,0,.20)!important}
 .nav-item svg{color:#6683a2}
 .nav-item.active svg,.nav-item:hover svg{color:var(--qx-blue-2)}
 .user-pill{background:rgba(10,16,25,.88)!important;border:1px solid #17283b!important;box-shadow:0 14px 30px rgba(0,0,0,.22)}
@@ -916,7 +936,7 @@ h1,h2,h3,h4,.ov-title,.lg-title,.vip-price,.stat-val{font-family:'Space Grotesk'
 input,textarea,select{background:#07101a!important;border-color:#1a2b3f!important;color:#e8f1fb!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
 input::placeholder,textarea::placeholder{color:#52677f!important}
 input:focus,textarea:focus,select:focus{border-color:rgba(47,128,237,.72)!important;box-shadow:0 0 0 3px rgba(47,128,237,.13),0 0 28px rgba(47,128,237,.08)!important}
-.btn-primary{background:linear-gradient(135deg,#2f80ed,#1967c8)!important;color:#38BDF8!important;border:1px solid rgba(110,178,255,.34)!important;box-shadow:0 10px 28px rgba(47,128,237,.24)!important;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,#2f80ed,#1967c8)!important;color:#fff!important;border:1px solid rgba(110,178,255,.34)!important;box-shadow:0 10px 28px rgba(47,128,237,.24)!important;position:relative;overflow:hidden}
 .btn-primary::after{content:"";position:absolute;top:-120%;left:-40%;width:25%;height:340%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transition:transform .65s var(--qx-ease)}
 .btn-primary:hover::after{transform:translateX(520%) rotate(25deg)}
 .btn-primary:hover{filter:brightness(1.08);box-shadow:0 15px 34px rgba(47,128,237,.34)!important}
@@ -931,7 +951,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 .stat-val{color:#f2f7fd!important;text-shadow:0 0 22px rgba(47,128,237,.10)}
 .vip-top-btn{background:linear-gradient(135deg,#0d1c2c,#102842)!important;color:#77b6ff!important;border-color:#214d7d!important;box-shadow:0 8px 22px rgba(0,0,0,.25)!important}
 .lang-btn,.notif-btn,.icon-btn{background:#09131f!important;border-color:#1b3249!important;color:#9fb4c9!important}
-.lang-btn:hover,.notif-btn:hover,.icon-btn:hover{border-color:rgba(47,128,237,.55)!important;color:#38BDF8!important;background:#0d1b2a!important}
+.lang-btn:hover,.notif-btn:hover,.icon-btn:hover{border-color:rgba(47,128,237,.55)!important;color:#fff!important;background:#0d1b2a!important}
 .toast{background:#08111c!important;border-color:#1b3148!important;box-shadow:var(--qx-shadow)!important}
 .toast.ok{border-color:rgba(54,211,153,.4)!important}.toast.err{border-color:rgba(255,101,116,.38)!important}
 .editor-wrap{background:#050b12!important;border-color:#193049!important}
@@ -940,7 +960,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 .line-nums{background:#04090e!important;border-right-color:#102538!important;color:#40566c!important}
 #sSource{background:#050b12!important;color:#d7e2ed!important}
 .ai-panel{background:#06101a!important;border-color:#142a40!important}
-.ai-chip{background:#0a1724!important;border-color:#1a334d!important;color:#91a8bf!important}.ai-chip:hover{border-color:#347ec6!important;background:#0d2033!important;color:#38BDF8!important}
+.ai-chip{background:#0a1724!important;border-color:#1a334d!important;color:#91a8bf!important}.ai-chip:hover{border-color:#347ec6!important;background:#0d2033!important;color:#fff!important}
 ::-webkit-scrollbar-thumb{background:#1d3855!important}::-webkit-scrollbar-track{background:#07101a!important}
 /* Login rebrand */
 #loginView{background:
@@ -952,7 +972,7 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 .lg-mark b,.lg-title,.lg-title em,.lg-topbar b{color:#f3f8fd!important}.lg-kicker,.lg-sub,.lg-points li,.lg-foot{color:#7890a7!important}
 .lg-points span{background:#0b1826!important;border-color:#1a3854!important;color:#6fb4ff!important}
 .lg-dot{background:#3bd49d!important;box-shadow:0 0 12px #3bd49d!important}
-.lg-switch{background:#06101a!important;border-color:#1a3047!important}.lg-thumb{background:#2f80ed!important}.lg-switch button.on{color:#38BDF8!important}
+.lg-switch{background:#06101a!important;border-color:#1a3047!important}.lg-thumb{background:#2f80ed!important}.lg-switch button.on{color:#fff!important}
 .lg-discord{box-shadow:0 14px 34px rgba(47,128,237,.18)!important}
 /* Enterprise utility layer */
 .qx-enterprise-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin:0 0 18px;border:1px solid #17304a;border-radius:14px;background:linear-gradient(100deg,rgba(8,18,30,.96),rgba(8,14,22,.93));box-shadow:0 12px 30px rgba(0,0,0,.24);position:relative;overflow:hidden}
@@ -977,63 +997,92 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 </style>
 
 
-<style id="qyrexfinal-sky-theme">
-:root{--sky:#38BDF8;--sky2:#0EA5E9;--navy:#06101d;--panel:#0a1626;--panel2:#0e1d30;--ink:#e5f7ff;--muted:#7fa4bc;--line:#17334d}
-html,body{background:linear-gradient(180deg,#050b13 0%,#071321 45%,#06101d 100%)!important;color:var(--ink)!important}
-body{font-family:"Manrope","Inter",system-ui,sans-serif!important}
-h1,h2,h3,h4,.ov-title,.lg-title,.vip-price{font-family:"Sora","Manrope",system-ui,sans-serif!important;letter-spacing:-.035em}
-.card,.sidebar,.lg-shell,.editor-wrap,.tab-bar,.user-pill,.notif-panel,.profile-upload,.vip-matrix,.profile-banner,.settings-hero{background:linear-gradient(145deg,rgba(10,22,38,.96),rgba(7,16,29,.96))!important;border-color:var(--line)!important;box-shadow:0 18px 50px rgba(0,0,0,.28),inset 0 1px rgba(56,189,248,.04)!important}
-.sidebar{background:linear-gradient(180deg,#071523,#050d17)!important}
-.sidebar .nav-item{color:#86a8bd!important}.sidebar .nav-item:hover,.sidebar .nav-item.active{color:#dff6ff!important;background:linear-gradient(90deg,rgba(56,189,248,.13),rgba(14,165,233,.05))!important;border-color:rgba(56,189,248,.18)!important}
-.sidebar .nav-item::before{background:var(--sky)!important}
-.btn-primary{background:linear-gradient(135deg,var(--sky),var(--sky2))!important;color:#03121e!important;box-shadow:0 10px 30px rgba(14,165,233,.24)!important;font-weight:800!important}
-.btn-ghost,.icon-btn{background:#091827!important;border-color:#17334d!important;color:#8fb3c8!important}.btn-ghost:hover,.icon-btn:hover{color:var(--sky)!important;border-color:rgba(56,189,248,.5)!important;background:#0c2236!important}
-input,textarea,select,#sSource{background:#071522!important;border-color:#17334d!important;color:#ddf4ff!important}input:focus,textarea:focus,select:focus,.editor-wrap:focus-within{border-color:var(--sky)!important;box-shadow:0 0 0 3px rgba(56,189,248,.12)!important}
-.ov-hero{background:radial-gradient(circle at 100% 0,rgba(56,189,248,.13),transparent 35%),linear-gradient(135deg,#0b1727,#091a2b 55%,#082238)!important;border-color:#1a4260!important}.ov-kicker,.lg-kicker{color:#61c9f5!important}
-.search-box svg,.lang-btn svg{color:#51bfe9!important}.lang-btn{background:#081726!important;border-color:#17334d!important;color:#d8f3ff!important}.lang-menu{background:#081726!important;border-color:#17334d!important}.lang-menu button:hover,.lang-menu button.on{background:#0d263c!important;color:var(--sky)!important}
-.notif-btn{background:#091827!important;border-color:#17334d!important;color:#8fb3c8!important}.notif-btn:hover{color:var(--sky)!important;border-color:rgba(56,189,248,.45)!important}
-.chip,.badge{background:#0b2032!important;border-color:#173e59!important;color:#74d5fa!important}.badge-green{background:#09271f!important;color:#63ddb3!important;border-color:#155943!important}
-.avatar{background:linear-gradient(135deg,#38BDF8,#0b4264)!important;color:#03121e!important}.ov-logo,.lg-mark img,.lg-topbar img{box-shadow:0 0 0 1px rgba(56,189,248,.28),0 12px 32px rgba(14,165,233,.15)!important}
-#loginView{background:radial-gradient(circle at 15% 15%,rgba(56,189,248,.11),transparent 28%),radial-gradient(circle at 85% 80%,rgba(14,165,233,.09),transparent 30%),#040b13!important}.lg-shell{border-color:#1b405c!important}.lg-aside{background:linear-gradient(160deg,rgba(56,189,248,.08),transparent 55%)!important}.lg-discord{filter:saturate(.72);border-color:#2c5470!important}.lg-switch,.lg-field input{background:#071522!important;border-color:#17334d!important}.lg-thumb{background:var(--sky)!important}.lg-switch button.on{color:#03121e!important}.lg-switch button{color:#6f96ad!important}
-#appView:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(56,189,248,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.025) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 82%);z-index:0}
-.main-content{position:relative;z-index:1!important}.main-content>div:first-of-type{border-color:#153149!important;background:rgba(5,14,24,.74)!important}.mobile-topbar{background:rgba(5,14,24,.94)!important;border-color:#153149!important}
-::selection{background:rgba(56,189,248,.3);color:#fff}
-@media(max-width:900px){.sidebar{background:#071320!important}}
+<style id="qx-production-a11y">
+:root{
+  --qx-sky:#38bdf8;--qx-sky-2:#0ea5e9;--qx-ink:#06111d;--qx-ink-2:#091827;
+  --qx-surface:#0b1724;--qx-surface-2:#0e2032;--qx-line:#19344d;--qx-text:#e7f5ff;--qx-muted:#7893ad;
+  --qx-focus:0 0 0 3px rgba(56,189,248,.28);--qx-ease:cubic-bezier(.2,.8,.2,1)
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(900px 500px at 70% -10%,rgba(14,165,233,.12),transparent 65%),#050b12}
+::selection{background:rgba(56,189,248,.28);color:#fff}
+:focus-visible{outline:none!important;box-shadow:var(--qx-focus)!important}
+.skip-link{position:fixed;left:16px;top:16px;z-index:10000;transform:translateY(-150%);padding:10px 14px;border:1px solid rgba(56,189,248,.55);border-radius:10px;background:#06111d;color:#e7f5ff;text-decoration:none;font-weight:800;font-size:12px;transition:transform .2s var(--qx-ease)}
+.skip-link:focus{transform:none}
+.qx-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.btn-primary{background:linear-gradient(135deg,var(--qx-sky),var(--qx-sky-2))!important;color:#03111b!important;border-color:rgba(125,211,252,.7)!important;box-shadow:0 10px 28px rgba(14,165,233,.22)!important}
+.btn-primary:hover{filter:brightness(1.05);box-shadow:0 14px 34px rgba(14,165,233,.3)!important}
+.card{background:linear-gradient(180deg,rgba(11,23,36,.97),rgba(7,16,27,.97))!important;border-color:#17344d!important}
+.sidebar{background:linear-gradient(180deg,#071422,#050c15)!important;border-color:#15324b!important}
+.nav-item:hover{background:rgba(56,189,248,.08)!important;border-color:rgba(56,189,248,.2)!important;color:#dff5ff!important}
+.nav-item.active{background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(14,165,233,.05))!important;border-color:rgba(56,189,248,.28)!important;box-shadow:inset 3px 0 0 var(--qx-sky),0 8px 24px rgba(0,0,0,.22)!important;color:#f2fbff!important}
+input,textarea,select{background:#07121e!important;border-color:#19364f!important;color:#e7f5ff!important}
+input:focus,textarea:focus,select:focus{border-color:var(--qx-sky)!important}
+.btn-ghost{border-color:#1b3a54!important;color:#9db4c9!important;background:rgba(7,18,30,.58)!important}
+.btn-ghost:hover{border-color:rgba(56,189,248,.55)!important;color:#e7f5ff!important;background:rgba(56,189,248,.07)!important}
+.avatar{background:linear-gradient(135deg,#38bdf8,#0f3550)!important;color:#04111d!important}
+.badge-green{background:rgba(16,185,129,.10)!important;border-color:rgba(16,185,129,.28)!important}
+.qx-tool{background:linear-gradient(180deg,#0b1a29,#08121d)!important;border-color:#1b3b56!important}
+.qx-tool:hover{border-color:rgba(56,189,248,.5)!important;box-shadow:0 14px 28px rgba(0,0,0,.3),0 0 0 1px rgba(56,189,248,.08) inset!important}
+.qx-admin-hero{background:radial-gradient(520px 200px at 0% 0%,rgba(56,189,248,.16),transparent 72%),linear-gradient(180deg,#081827,#06101a)!important;border-color:#1a3e5a!important}
+.qx-blue-text{color:#7dd3fc!important}
+.qx-status i{background:var(--qx-sky)!important;box-shadow:0 0 12px rgba(56,189,248,.8)!important}
+.editor-wrap:focus-within{border-color:var(--qx-sky)!important;box-shadow:0 0 0 1px rgba(56,189,248,.18)}
+.lang-btn:hover,.icon-btn:hover{border-color:rgba(56,189,248,.45)!important;color:#e7f5ff!important}
+.toast{background:#071422!important;border-color:#1b3a54!important}
+#toasts{aria-live:polite}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page{animation:none!important}.sidebar{animation:none!important}}
+@media (max-width:700px){.qx-admin-grid{grid-template-columns:1fr!important}.qx-admin-tools{grid-template-columns:1fr!important}}
+</style>
+
+<style id="qx-footer-style">
+.qx-site-footer{display:flex;align-items:center;justify-content:center;gap:9px;padding:20px 16px;font-size:10px;color:#617b93;background:#050c14;border-top:1px solid #13283b}
+.qx-site-footer a{color:#7dd3fc;text-decoration:none}.qx-site-footer a:hover{text-decoration:underline}.qx-site-footer a:focus-visible{text-decoration:underline}
+@media(max-width:600px){.qx-site-footer{flex-wrap:wrap;line-height:1.6}}
+</style>
+
+<style id="qx-workspace-health-style">
+.qx-workspace-health{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin:0 0 18px;padding:18px 20px;background:linear-gradient(135deg,rgba(14,165,233,.09),rgba(6,17,29,.96));border-color:#173b56!important}
+.qx-workspace-health h2{margin:0 0 5px;font-size:15px;letter-spacing:-.02em}.qx-workspace-health p{margin:0;color:#718aa2;font-size:11px;line-height:1.55}
+.qx-health-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.qx-health-items>div{padding:10px;border:1px solid #17364f;background:#07131f;border-radius:11px;display:grid;grid-template-columns:auto 1fr;gap:2px 7px;align-items:center}.qx-health-items b{font-size:10px;color:#83a0b8}.qx-health-items strong{grid-column:2;font-size:10px;color:#dff5ff}.qx-health-dot{width:7px;height:7px;border-radius:50%;background:#38bdf8;box-shadow:0 0 10px rgba(56,189,248,.75);grid-row:1 / span 2}
+@media(max-width:760px){.qx-workspace-health{grid-template-columns:1fr}.qx-health-items{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+<h1 class="qx-sr-only">QrexApi — Plataforma privada de gestión de scripts</h1>
 
 <!-- LOGIN -->
 
 <!-- LOADER GLOBAL -->
-<div class="qx-loader show" id="qxLoader">
-  <div class="qx-ring"><img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/></div>
+<div class="qx-loader show" id="qxLoader" role="status" aria-live="polite" aria-busy="true">
+  <div class="qx-ring"><img loading="eager" fetchpriority="high" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" /></div>
   <div class="qx-ltext" id="qxLoaderText" data-i18n-html="login.loading">Cargando <b>QrexApi</b>...</div>
   <div class="qx-bar"><i></i></div>
 </div>
 
 <!-- MODALES LEGALES -->
-<div class="qx-modal" id="qxModal" onclick="if(event.target===this)closeLegal()">
+<div class="qx-modal" id="qxModal" role="dialog" aria-modal="true" aria-labelledby="qxModalTitle" onclick="if(event.target===this)closeLegal()">
   <div class="qx-modal-box">
     <h3 id="qxModalTitle">Terminos</h3>
     <div class="qx-upd" id="qxModalDate">Ultima actualizacion: agosto 2026</div>
     <div id="qxModalBody"></div>
-    <button class="btn-primary qx-modal-close" onclick="closeLegal()" data-i18n="login.ok">Entendido</button>
+    <button type="button" class="btn-primary qx-modal-close" onclick="closeLegal()" data-i18n="login.ok">Entendido</button>
   </div>
 </div>
 
-<div class="toast-wrap" id="toasts"></div>
-<div id="loginView" class="min-h-screen flex items-center justify-center p-6">
+<div class="toast-wrap" id="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
+<section id="loginView" class="min-h-screen flex items-center justify-center p-6" aria-labelledby="loginHeading">
   <div class="lg-topbar">
-    <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
+    <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" />
     <b>QrexApi</b>
   </div>
   <div class="lang-switch lang-switch-login" data-lang-switch>
     <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
       <span data-lang-label>ES</span>
     </button>
-    <div class="lang-menu" role="listbox">
+    <div class="lang-menu" role="listbox" aria-label="Seleccionar idioma">
       <button type="button" data-set-lang="es">Español <small>ES</small></button>
       <button type="button" data-set-lang="en">English <small>EN</small></button>
       <button type="button" data-set-lang="pt">Português <small>PT</small></button>
@@ -1051,11 +1100,11 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
     <section class="lg-aside">
       <div>
         <div class="lg-mark">
-          <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
+          <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" />
           <b>QrexApi</b>
         </div>
         <p class="lg-kicker" style="margin-top:34px" data-i18n="login.kicker">Panel privado</p>
-        <h1 class="lg-title" data-i18n="login.title">Tus scripts, bajo llave.</h1>
+        <h2 id="loginHeading" class="lg-title" data-i18n="login.title">Tus scripts, bajo llave.</h2>
         <p class="lg-sub" data-i18n="login.sub">Subes el script, generas las keys y ves quien lo ejecuta. Sin vueltas.</p>
         <ul class="lg-points">
           <li><span>&#10003;</span> <span data-i18n="login.p1">Loadstrings con version y rollback</span></li>
@@ -1068,14 +1117,14 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
 
     <section class="lg-panel">
       <div class="lg-mobile-mark">
-        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" />
         <b>QrexApi</b>
       </div>
 
       <div class="lg-switch">
         <i class="lg-thumb" id="tabThumb"></i>
-        <button id="tabLogin" class="on" onclick="setTab('login')" data-i18n="login.enter">Entrar</button>
-        <button id="tabReg" onclick="setTab('register')" data-i18n="login.register">Registrarse</button>
+        <button type="button" id="tabLogin" class="on" onclick="setTab('login')" data-i18n="login.enter">Entrar</button>
+        <button type="button" id="tabReg" onclick="setTab('register')" data-i18n="login.register">Registrarse</button>
       </div>
 
       <a class="lg-discord" href="/auth/discord">
@@ -1085,30 +1134,30 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
 
       <div class="lg-or" data-i18n="login.or">o con tu cuenta</div>
 
-      <div class="lg-field"><input id="authUser" type="text" placeholder="Usuario" data-i18n-placeholder="login.user" autocomplete="username"/></div>
-      <div class="lg-field"><input id="authPass" type="password" placeholder="Contraseña" data-i18n-placeholder="login.pass" autocomplete="current-password"/></div>
-      <button id="authBtn" onclick="doAuth()" class="btn-primary w-full" style="padding:13px">Entrar</button>
+      <div class="lg-field"><input id="authUser" type="text" placeholder="Usuario" data-i18n-placeholder="login.user" autocomplete="username" aria-label="Nombre de usuario" /></div>
+      <div class="lg-field"><input id="authPass" type="password" placeholder="Contraseña" data-i18n-placeholder="login.pass" autocomplete="current-password" aria-label="Contraseña" /></div>
+      <button type="button" id="authBtn" onclick="doAuth()" class="btn-primary w-full" style="padding:13px">Entrar</button>
       <p id="loginErr" class="text-red-400 text-sm text-center hidden mt-3"></p>
 
       <p class="lg-legal" data-i18n-html="login.legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de QrexApi.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
-      <div class="lg-links">
-        <button onclick="openLegal('terms')" data-i18n="login.terms">Terminos</button><span>&middot;</span>
-        <button onclick="openLegal('privacy')" data-i18n="login.privacy">Privacidad</button><span>&middot;</span>
-        <button onclick="openLegal('cookies')" data-i18n="login.cookies">Cookies</button><span>&middot;</span>
-        <button onclick="openLegal('support')" data-i18n="login.support">Soporte</button>
-      </div>
+      <nav class="lg-links" aria-label="Enlaces legales y soporte">
+        <button type="button" onclick="openLegal('terms')" data-i18n="login.terms">Terminos</button><span>&middot;</span>
+        <button type="button" onclick="openLegal('privacy')" data-i18n="login.privacy">Privacidad</button><span>&middot;</span>
+        <button type="button" onclick="openLegal('cookies')" data-i18n="login.cookies">Cookies</button><span>&middot;</span>
+        <button type="button" onclick="openLegal('support')" data-i18n="login.support">Soporte</button>
+      </nav>
       <p class="lg-legal" style="margin-top:14px;color:#3f3f52" data-i18n-html="login.rights">&copy; 2026 QrexApi · Todos los derechos reservados</p>
 
     </section>
   </div>
-</div>
+</section>
 
 
 <div id="vipModal" class="vip-modal-backdrop" onclick="if(event.target===this)closeVipModal()">
   <div class="vip-modal" role="dialog" aria-modal="true" aria-labelledby="vipModalTitle">
     <div class="vip-modal-head">
       <div><div id="vipModalTitle" class="text-lg font-bold" style="color:#fbbf24" data-i18n="vip.title">✦ Qyrex VIP Licenses</div><div class="text-xs mt-1" style="color:#757589" data-i18n="vip.sub">Elige una licencia y abre un ticket para comprarla.</div></div>
-      <button class="btn-ghost" onclick="closeVipModal()" aria-label="Cerrar">✕</button>
+      <button type="button" class="btn-ghost" onclick="closeVipModal()" aria-label="Cerrar">✕</button>
     </div>
     <div class="vip-free"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-semibold">FREE</div><div class="text-xs mt-1" data-i18n="vip.freeDesc">Para empezar: acceso básico a Qyrex con límites estándar.</div></div><span class="chip" data-i18n="vip.included">INCLUIDO</span></div></div>
     <div class="vip-compare">
@@ -1130,28 +1179,28 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
     </div>
     <div class="vip-value"><div><div class="text-xs font-bold" style="color:#fbbf24" data-i18n="vip.why">✦ ¿Por qué VIP?</div><div class="text-xs mt-1" data-i18n="vip.whySub">Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.</div></div><div class="vip-save" data-i18n="vip.best">10 MESES • MEJOR VALOR</div></div>
     <div class="vip-plans">
-      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 MES</div><div class="vip-price mt-3">$30 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m1">Acceso VIP por 30 días.</div><button class="btn-primary w-full" onclick="buyVip('1 mes','30 MXN')" data-i18n="vip.buy">Comprar</button></div>
-      <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m10">Una opción de mejor valor para uso prolongado.</div><button class="btn-primary w-full" onclick="buyVip('10 meses','150 MXN')" data-i18n="vip.buy">Comprar</button></div>
-      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 AÑO</div><div class="vip-price mt-3">$500 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m12">Acceso VIP por 12 meses.</div><button class="btn-primary w-full" onclick="buyVip('1 año','500 MXN')" data-i18n="vip.buy">Comprar</button></div>
+      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 MES</div><div class="vip-price mt-3">$30 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m1">Acceso VIP por 30 días.</div><button type="button" class="btn-primary w-full" onclick="buyVip('1 mes','30 MXN')" data-i18n="vip.buy">Comprar</button></div>
+      <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m10">Una opción de mejor valor para uso prolongado.</div><button type="button" class="btn-primary w-full" onclick="buyVip('10 meses','150 MXN')" data-i18n="vip.buy">Comprar</button></div>
+      <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 AÑO</div><div class="vip-price mt-3">$500 <small>MXN</small></div><div class="text-xs mt-2 mb-5" style="color:#77778b" data-i18n="vip.m12">Acceso VIP por 12 meses.</div><button type="button" class="btn-primary w-full" onclick="buyVip('1 año','500 MXN')" data-i18n="vip.buy">Comprar</button></div>
     </div>
     <div class="vip-note" data-i18n-html="vip.note">Al pulsar comprar se abrirá Discord. <b style="color:#a8a8b8">Saca un ticket para contactarte con el owner.</b></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="appView" style="display:none;min-height:100vh">
+<div id="appView" style="display:none;min-height:100vh" role="application" aria-label="QrexApi dashboard">
   <canvas id="vipParticleCanvas"></canvas>
-  <div class="mobile-topbar">
+  <header class="mobile-topbar" aria-label="Barra de navegación móvil">
     <div class="mt-brand">
-      <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex"/>
+      <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" />
       <b>QrexApi</b>
     </div>
     <div class="lang-switch" data-lang-switch>
     <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
       <span data-lang-label>ES</span>
     </button>
-    <div class="lang-menu" role="listbox">
+    <div class="lang-menu" role="listbox" aria-label="Seleccionar idioma">
       <button type="button" data-set-lang="es">Español <small>ES</small></button>
       <button type="button" data-set-lang="en">English <small>EN</small></button>
       <button type="button" data-set-lang="pt">Português <small>PT</small></button>
@@ -1162,112 +1211,112 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
         <span></span><span></span><span></span>
       </span>
     </button>
-  </div>
+  </header>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
   <div class="flex" style="min-height:100vh">
     <aside class="sidebar flex flex-col fixed h-full z-20" id="appSidebar">
       <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" aria-label="Ocultar barra lateral" title="Ocultar/mostrar barra lateral">
-        <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <button type="button" class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Cerrar">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
       <div class="flex items-center gap-3 px-5 py-5">
-        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="Qrex" class="w-9 h-9 rounded-xl object-cover"/>
+        <img src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" class="w-9 h-9 rounded-xl object-cover" loading="lazy" />
         <div class="min-w-0">
           <div class="font-bold text-lg tracking-tight leading-tight">QrexApi</div>
           <a class="qyrex-credit mt-1" href="#" target="_blank" rel="noopener" title="Ofuscador QyrexObf">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l-10 5 10 5 10-5-10-5z"/></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l-10 5 10 5 10-5-10-5z"/></svg>
             Protected by QyrexObf (beta)
           </a>
         </div>
       </div>
       <nav class="flex-1 overflow-y-auto main-scroll pb-4">
         <div class="nav-section" data-i18n="nav.general">GENERAL</div>
-        <button class="nav-item active" data-page="overview" onclick="go('overview')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+        <button type="button" class="nav-item active" data-page="overview" onclick="go('overview')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
           <span data-i18n="nav.overview">Overview</span>
         </button>
-        <button class="nav-item" data-page="executions" onclick="go('executions')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <button type="button" class="nav-item" data-page="executions" onclick="go('executions')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           <span data-i18n="nav.analytics">Analytics</span>
         </button>
-        <button class="nav-item" data-page="logs" onclick="go('logs')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <button type="button" class="nav-item" data-page="logs" onclick="go('logs')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
           <span data-i18n="nav.logs">Logs</span>
         </button>
-        <button class="nav-item" data-page="status" onclick="go('status')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <button type="button" class="nav-item" data-page="status" onclick="go('status')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span data-i18n="nav.status">System Status</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.scripts">SCRIPTS</div>
-        <button class="nav-item" data-page="scripts" onclick="go('scripts')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        <button type="button" class="nav-item" data-page="scripts" onclick="go('scripts')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
           <span data-i18n="nav.lua">Lua Scripts</span>
         </button>
-        <button class="nav-item" data-page="create" onclick="if(!editingId)resetCreateForm();go('create')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        <button type="button" class="nav-item" data-page="create" onclick="if(!editingId)resetCreateForm();go('create')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
           <span data-i18n="nav.create">Create Script</span>
         </button>
-        <button class="nav-item" data-page="studio" onclick="go('studio')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+        <button type="button" class="nav-item" data-page="studio" onclick="go('studio')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
           <span data-i18n="nav.studio">Studio</span>
         </button>
-        <button class="nav-item" data-page="hub" onclick="go('hub')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <button type="button" class="nav-item" data-page="hub" onclick="go('hub')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
           <span data-i18n="nav.hub">Script Hub</span>
         </button>
-        <button class="nav-item" data-page="templates" onclick="go('templates')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+        <button type="button" class="nav-item" data-page="templates" onclick="go('templates')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
           <span data-i18n="nav.templates">Templates</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.keysys">KEY SYSTEM</div>
-        <button class="nav-item" data-page="keys" onclick="go('keys')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        <button type="button" class="nav-item" data-page="keys" onclick="go('keys')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
           <span data-i18n="nav.keys">Keys & Providers</span>
         </button>
-        <button class="nav-item" data-page="webhooks" onclick="go('webhooks')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <button type="button" class="nav-item" data-page="webhooks" onclick="go('webhooks')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           <span data-i18n="nav.webhooks">Webhooks</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.cloud">CLOUD</div>
-        <button class="nav-item" data-page="assets" onclick="go('assets')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        <button type="button" class="nav-item" data-page="assets" onclick="go('assets')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
           <span data-i18n="nav.assets">My Assets</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.community">COMMUNITY</div>
-        <button class="nav-item" data-page="leaderboard" onclick="go('leaderboard')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <button type="button" class="nav-item" data-page="leaderboard" onclick="go('leaderboard')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           <span data-i18n="nav.leaderboard">Leaderboard</span>
         </button>
-        <button class="nav-item" data-page="changelog" onclick="go('changelog')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <button type="button" class="nav-item" data-page="changelog" onclick="go('changelog')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
           <span data-i18n="nav.changelog">Changelog</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.dev">DEVELOPER</div>
-        <button class="nav-item" data-page="apiinfo" onclick="go('apiinfo')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <button type="button" class="nav-item" data-page="apiinfo" onclick="go('apiinfo')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span data-i18n="nav.apiinfo">API Info</span>
         </button>
-        <button class="nav-item" data-page="playground" onclick="go('playground')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <button type="button" class="nav-item" data-page="playground" onclick="go('playground')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span data-i18n="nav.playground">API Playground</span>
         </button>
 
         <div class="nav-section admin-only" style="display:none" data-i18n="nav.adminsec">ADMIN</div>
-        <button class="nav-item admin-only" style="display:none" data-page="admin" onclick="go('admin')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <button type="button" class="nav-item admin-only" style="display:none" data-page="admin" onclick="go('admin')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           <span data-i18n="nav.admin">Admin Panel</span>
         </button>
 
         <div class="nav-section" data-i18n="nav.account">ACCOUNT</div>
-        <button class="nav-item" data-page="settings" onclick="go('settings')">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <button type="button" class="nav-item" data-page="settings" onclick="go('settings')">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           <span data-i18n="nav.settings">Settings</span>
         </button>
 </nav>
@@ -1281,48 +1330,57 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
           </div>
           <div class="text-xs" style="color:#5a5a6e" id="sidebarRole" data-i18n="role.user">Usuario</div>
         </div>
-        <button onclick="logout()" title="Salir" style="background:none;border:none;color:#5a5a6e;cursor:pointer;padding:4px">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <button type="button" onclick="logout()" title="Salir" style="background:none;border:none;color:#5a5a6e;cursor:pointer;padding:4px">
+          <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </button>
       </div>
     </aside>
 
-    <main class="flex-1 min-h-screen main-content" style="margin-left:260px">
+    <main id="main-content" class="flex-1 min-h-screen main-content" style="margin-left:260px" tabindex="-1">
       <div class="vip-head-safe" aria-hidden="true"></div>
       <div class="flex items-center px-8 py-4 border-b" style="border-color:#1a1a24;gap:10px">
         <div class="text-sm flex-1 min-w-0" style="color:#5a5a6e"><span data-i18n="dash.crumb">Dashboard</span> <span style="color:#3a3a4a">›</span> <span id="breadcrumb" style="color:#a0a0b0">Overview</span></div>
         <div class="top-tools">
         <div class="lang-switch" data-lang-switch>
     <button type="button" class="lang-btn" onclick="toggleLangMenu(event,this)" aria-haspopup="listbox" aria-label="Language">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
       <span data-lang-label>ES</span>
     </button>
-    <div class="lang-menu" role="listbox">
+    <div class="lang-menu" role="listbox" aria-label="Seleccionar idioma">
       <button type="button" data-set-lang="es">Español <small>ES</small></button>
       <button type="button" data-set-lang="en">English <small>EN</small></button>
       <button type="button" data-set-lang="pt">Português <small>PT</small></button>
     </div>
   </div>
         <button type="button" class="vip-top-btn" onclick="openVipModal()" aria-label="Ver licencias VIP" data-i18n-title="vip.aria">✦ <span>VIP</span></button>
-        <div class="notif-wrap" id="notifWrap"><button class="notif-btn" onclick="toggleNotifications()" aria-label="Notificaciones"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="notifDot" class="notif-dot"></span></button><div id="notifPanel" class="notif-panel"><div class="flex items-center justify-between mb-2"><div class="font-semibold" data-i18n="notif.title">Notificaciones</div><button class="btn-ghost text-xs" onclick="markAllNotificationsRead()" data-i18n="notif.read">Marcar leídas</button></div><div id="notifList" class="notif-list"><div class="notif-empty" data-i18n="notif.loading">Cargando…</div></div></div></div>
+        <div class="notif-wrap" id="notifWrap"><button type="button" class="notif-btn" onclick="toggleNotifications()" aria-label="Notificaciones"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="notifDot" class="notif-dot"></span></button><div id="notifPanel" class="notif-panel"><div class="flex items-center justify-between mb-2"><div class="font-semibold" data-i18n="notif.title">Notificaciones</div><button type="button" class="btn-ghost text-xs" onclick="markAllNotificationsRead()" data-i18n="notif.read">Marcar leídas</button></div><div id="notifList" class="notif-list"><div class="notif-empty" data-i18n="notif.loading">Cargando…</div></div></div></div>
         </div>
       </div>
 
       <div class="p-8">
         <!-- OVERVIEW -->
         <section id="page-overview" class="page">
+
+<section id="qxWorkspaceHealth" class="card qx-workspace-health" aria-labelledby="qxWorkspaceHealthTitle">
+  <div><div class="qx-kicker">Workspace</div><h2 id="qxWorkspaceHealthTitle">Estado del entorno</h2><p>Controles rápidos para comprobar sesión, conectividad y recursos del panel.</p></div>
+  <div class="qx-health-items" role="list">
+    <div role="listitem"><span class="qx-health-dot" aria-hidden="true"></span><b>Sesión</b><strong id="qxHealthSession">Activa</strong></div>
+    <div role="listitem"><span class="qx-health-dot" aria-hidden="true"></span><b>Interfaz</b><strong id="qxHealthUi">Optimizada</strong></div>
+    <div role="listitem"><span class="qx-health-dot" aria-hidden="true"></span><b>Atajo</b><strong>/ para buscar</strong></div>
+  </div>
+</section>
           <div class="ov-hero">
             <div class="flex flex-wrap items-center gap-5">
-              <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi"/>
+              <img class="ov-logo" src="https://i.ibb.co/wZbspqp2/8-DB6-D99-F-ED18-4697-93-FC-0-B83-CAAA971-A.png" referrerpolicy="no-referrer" decoding="async" alt="QrexApi logo" loading="lazy" />
               <div class="min-w-0">
                 <div class="ov-kicker" data-i18n="ov.kicker">QrexApi · Panel privado</div>
-                <h1 class="ov-title" data-i18n="ov.title">Tus scripts, bajo control.</h1>
+                <h2 class="ov-title" data-i18n="ov.title">Tus scripts, bajo control.</h2>
                 <p class="ov-sub" data-i18n="ov.sub">Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
               </div>
             </div>
             <div class="flex flex-wrap gap-3 mt-7">
               <button type="button" class="ov-cta" onclick="resetCreateForm();go('create')">
-                <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                 <span data-i18n="ov.create">Create Script</span>
               </button>
               <button type="button" class="ov-ghost" onclick="go('scripts')" data-i18n="ov.myscripts">Mis scripts</button>
@@ -1355,15 +1413,15 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
         </section>
 
         <!-- SCRIPTS LIST -->
-        <section id="page-scripts" class="page hidden">
+        <section id="page-scripts" class="page hidden" aria-labelledby="pageTitle-scripts">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h1 class="text-2xl font-bold" data-i18n="nav.lua">Lua Scripts</h1>
+            <h2 id="pageTitle-scripts" class="text-2xl font-bold" data-i18n="nav.lua">Lua Scripts</h2>
             <div class="flex items-center gap-3">
               <div class="search-box">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                <input id="scriptSearch" placeholder="Buscar script..." data-i18n-placeholder="scripts.search" oninput="filterScripts()" />
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <input id="scriptSearch" aria-label="Buscar script" placeholder="Buscar script..." data-i18n-placeholder="scripts.search" oninput="filterScripts()" />
               </div>
-              <button onclick="resetCreateForm();go('create')" class="btn-primary text-sm py-2.5 px-4">+ <span data-i18n="scripts.create">Create</span></button>
+              <button type="button" onclick="resetCreateForm();go('create')" class="btn-primary text-sm py-2.5 px-4">+ <span data-i18n="scripts.create">Create</span></button>
             </div>
           </div>
           <div id="scriptsList" class="grid gap-3"></div>
@@ -1371,13 +1429,13 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
 
 
         <!-- SCRIPT HUB -->
-        <section id="page-hub" class="page hidden">
+        <section id="page-hub" class="page hidden" aria-labelledby="pageTitle-hub">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 class="text-2xl font-bold" data-i18n="nav.hub">Script Hub</h1>
+              <h2 id="pageTitle-hub" class="text-2xl font-bold" data-i18n="nav.hub">Script Hub</h2>
               <p class="text-xs mt-1" style="color:#5a5a6e">Scripts públicos de la comunidad · mínimo 500 ejecuciones para publicar</p>
             </div>
-            <button onclick="document.getElementById('hubPublishCard').classList.toggle('hidden')" class="btn-primary text-sm py-2.5 px-4">+ Publicar</button>
+            <button type="button" onclick="document.getElementById('hubPublishCard').classList.toggle('hidden')" class="btn-primary text-sm py-2.5 px-4">+ Publicar</button>
           </div>
 
           <div id="hubPublishCard" class="card p-6 max-w-2xl mb-6 hidden">
@@ -1386,54 +1444,54 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
             <div class="space-y-4">
               <div>
                 <label class="field">Tu script (500+ runs) <span class="req">*</span></label>
-                <select id="hubScriptSelect"></select>
+                <select id="hubScriptSelect" aria-label="Script para publicar en el Hub" /></select>
               </div>
               <div>
                 <label class="field">Nombre público <span class="req">*</span></label>
-                <input id="hubName" placeholder="Nombre que verán todos"/>
+                <input id="hubName" placeholder="Nombre que verán todos" aria-label="Nombre de la publicación" />
               </div>
               <div>
                 <label class="field">Descripción</label>
-                <input id="hubDesc" placeholder="Opcional"/>
+                <input id="hubDesc" placeholder="Opcional" aria-label="Descripción de la publicación" />
               </div>
               <div class="flex gap-3">
-                <button onclick="publishHub()" class="btn-primary" id="hubPublishBtn">Publicar</button>
-                <button onclick="document.getElementById('hubPublishCard').classList.add('hidden')" class="btn-ghost">Cancelar</button>
+                <button type="button" onclick="publishHub()" class="btn-primary" id="hubPublishBtn">Publicar</button>
+                <button type="button" onclick="document.getElementById('hubPublishCard').classList.add('hidden')" class="btn-ghost">Cancelar</button>
               </div>
               <p id="hubErr" class="text-sm text-red-400 hidden"></p>
             </div>
           </div>
 
           <div class="search-box mb-4" style="max-width:320px">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input id="hubSearch" placeholder="Buscar en el hub..." oninput="filterHub()"/>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input id="hubSearch" placeholder="Buscar en el hub..." oninput="filterHub()" aria-label="Buscar en el Hub" />
           </div>
           <div id="hubList" class="grid gap-3"></div>
         </section>
 
         <!-- KEY SYSTEM -->
-        <section id="page-keys" class="page hidden">
+        <section id="page-keys" class="page hidden" aria-labelledby="pageTitle-keys">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 class="text-2xl font-bold" data-i18n="page.keys">Key System</h1>
+              <h2 id="pageTitle-keys" class="text-2xl font-bold" data-i18n="page.keys">Key System</h2>
               <p class="text-xs mt-1" style="color:#5a5a6e">Providers · Keys · HWID · Verificación Roblox</p>
             </div>
             <div class="flex gap-2">
-              <button onclick="document.getElementById('provCard').classList.toggle('hidden')" class="btn-ghost text-sm">+ Provider</button>
-              <button onclick="document.getElementById('keyGenCard').classList.toggle('hidden')" class="btn-primary text-sm py-2.5 px-4">+ Generate Keys</button>
+              <button type="button" onclick="document.getElementById('provCard').classList.toggle('hidden')" class="btn-ghost text-sm">+ Provider</button>
+              <button type="button" onclick="document.getElementById('keyGenCard').classList.toggle('hidden')" class="btn-primary text-sm py-2.5 px-4">+ Generate Keys</button>
             </div>
           </div>
 
           <div id="provCard" class="card p-6 max-w-xl mb-6 hidden">
             <div class="text-sm font-semibold mb-4">Create Provider</div>
             <div class="space-y-3">
-              <div><label class="field">Provider name <span class="req">*</span></label><input id="provName" placeholder="MyScript"/></div>
+              <div><label class="field">Provider name <span class="req">*</span></label><input id="provName" placeholder="MyScript" aria-label="Nombre del provider" /></div>
               <div class="grid grid-cols-2 gap-3">
-                <div><label class="field">Key validity (hours)</label><input id="provHours" type="number" value="24" min="1"/></div>
-                <div><label class="field">HWID limit</label><input id="provHwid" type="number" value="1" min="1" max="10"/></div>
+                <div><label class="field">Key validity (hours)</label><input id="provHours" type="number" value="24" min="1" aria-label="Horas de validez" /></div>
+                <div><label class="field">HWID limit</label><input id="provHwid" type="number" value="1" min="1" max="10" aria-label="Límite de HWID" /></div>
               </div>
               <div><label class="field">Link system</label>
-                <select id="provLinkType">
+                <select id="provLinkType" aria-label="Tipo de enlace" />
                   <option value="linkvertise">Linkvertise</option>
                   <option value="lootlabs">Lootlabs</option>
                   <option value="workink">Work.ink</option>
@@ -1442,25 +1500,25 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
                 </select>
               </div>
               <div><label class="field">Ad link (Linkvertise / Lootlabs / Work.ink)</label>
-                <input id="provAdLink" placeholder="https://linkvertise.com/... o https://work.ink/..."/>
+                <input id="provAdLink" placeholder="https://linkvertise.com/... o https://work.ink/..." aria-label="Enlace del anuncio" />
                 <p class="text-[11px] mt-1" style="color:#5a5a6e">Destino final del anuncio debe ser tu claim URL (se muestra abajo al crear).</p>
               </div>
-              <button class="btn-primary" onclick="createProvider()">Create Provider</button>
+              <button type="button" class="btn-primary" onclick="createProvider()">Create Provider</button>
             </div>
           </div>
 
           <div id="keyGenCard" class="card p-6 max-w-xl mb-6 hidden">
             <div class="text-sm font-semibold mb-4">Generate Keys</div>
             <div class="space-y-3">
-              <div><label class="field">Provider <span class="req">*</span></label><select id="keyProvSelect"></select></div>
+              <div><label class="field">Provider <span class="req">*</span></label><select id="keyProvSelect" aria-label="Provider de keys" /></select></div>
               <div class="grid grid-cols-3 gap-3">
-                <div><label class="field">Amount</label><input id="keyAmount" type="number" value="1" min="1" max="50"/></div>
-                <div><label class="field">Hours (0=∞)</label><input id="keyHours" type="number" value="24" min="0"/></div>
-                <div><label class="field">HWID limit</label><input id="keyHwidLim" type="number" value="1" min="1" max="10"/></div>
+                <div><label class="field">Amount</label><input id="keyAmount" type="number" value="1" min="1" max="50" aria-label="Cantidad de keys" /></div>
+                <div><label class="field">Hours (0=∞)</label><input id="keyHours" type="number" value="24" min="0" aria-label="Horas de validez de las keys" /></div>
+                <div><label class="field">HWID limit</label><input id="keyHwidLim" type="number" value="1" min="1" max="10" aria-label="Límite de HWID por key" /></div>
               </div>
-              <div><label class="field">Note</label><input id="keyNote" placeholder="opcional"/></div>
-              <button class="btn-primary" onclick="generateKeys()">Generate</button>
-              <textarea id="keyGenOut" readonly class="h-24 font-mono text-xs hidden" style="color:#34d399"></textarea>
+              <div><label class="field">Note</label><input id="keyNote" placeholder="opcional" aria-label="Nota de la key" /></div>
+              <button type="button" class="btn-primary" onclick="generateKeys()">Generate</button>
+              <textarea id="keyGenOut" readonly class="h-24 font-mono text-xs hidden" style="color:#34d399" aria-label="Keys generadas" /></textarea>
             </div>
           </div>
 
@@ -1472,15 +1530,15 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
             <div class="card p-5">
               <div class="text-sm font-semibold mb-2">Loader Lua (copia en tu script)</div>
               <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code></p>
-              <pre id="loaderSnippet" class="text-[10px] overflow-x-auto #38BDF8space-pre-wrap break-all p-3 rounded-lg font-mono" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
-              <button class="btn-ghost text-xs mt-2" onclick="copyLs(document.getElementById('loaderSnippet').textContent)">Copiar loader</button>
+              <pre id="loaderSnippet" class="text-[10px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg font-mono" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
+              <button type="button" class="btn-ghost text-xs mt-2" onclick="copyLs(document.getElementById('loaderSnippet').textContent)">Copiar loader</button>
             </div>
           </div>
 
           <div class="card overflow-hidden">
             <div class="px-5 py-3 border-b text-sm font-semibold flex justify-between items-center" style="border-color:#1e1e2a">
               <span>Keys</span>
-              <button class="btn-ghost text-xs" onclick="loadKeysTable()">Refresh</button>
+              <button type="button" class="btn-ghost text-xs" onclick="loadKeysTable()">Refresh</button>
             </div>
             <div class="overflow-x-auto">
               <table>
@@ -1492,12 +1550,13 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
         </section>
 
         <!-- CREATE SCRIPT (estilo UNKIE) -->
-        <section id="page-create" class="page hidden">
+        <section id="page-create" class="page hidden" aria-labelledby="pageTitle-create">
+          <h2 id="pageTitle-create" class="qx-sr-only">Crear o modificar script Lua</h2>
           <div class="card max-w-3xl overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:#1e1e2a">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#161618">
-                  <svg width="18" height="18" fill="none" stroke="#f4f4f5" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                  <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#f4f4f5" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                 </div>
                 <div>
                   <div class="font-semibold" id="createTitle" data-i18n="nav.create">Create Script</div>
@@ -1510,30 +1569,30 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="field">Name <span class="req">*</span></label>
-                  <input id="sName" placeholder="My script"/>
+                  <input id="sName" placeholder="My script" aria-label="Nombre del script" />
                 </div>
                 <div>
                   <label class="field">Description</label>
-                  <input id="sDesc" placeholder="Optional"/>
+                  <input id="sDesc" placeholder="Optional" aria-label="Descripción del script" />
                 </div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="field">Access mode</label>
-                  <select id="sKeyMode" onchange="document.getElementById('sProvWrap').style.display=this.value==='key'?'block':'none'">
+                  <select id="sKeyMode" onchange="document.getElementById('sProvWrap').style.display=this.value==='key'?'block':'none'" aria-label="Modo de key" />
                     <option value="keyless">Keyless (sin key)</option>
                     <option value="key">Con Key System</option>
                   </select>
                 </div>
                 <div id="sProvWrap" style="display:none">
                   <label class="field">Provider</label>
-                  <select id="sProvider"></select>
+                  <select id="sProvider" aria-label="Provider" /></select>
                 </div>
               </div>
               <div>
                 <label class="field">Protección del código</label>
                 <label class="text-xs" style="color:#8b8b9e">Ofuscación</label>
-                <select id="sObfMode" class="w-full mt-1">
+                <select id="sObfMode" class="w-full mt-1" aria-label="Modo de ofuscación" />
                   <option value="qyrex" selected>QyrexObf (beta) — máximo</option>
                   <option value="none">Sin ofuscar (código visible)</option>
                 </select>
@@ -1578,7 +1637,7 @@ input,textarea,select,#sSource{background:#071522!important;border-color:#17334d
                   <textarea id="sSource" placeholder="-- Escribe tu Lua aquí (Studio)
 -- Los números de línea están a la izquierda y no tapan el código
 local Players = game:GetService(&quot;Players&quot;)
-" oninput="onStudioInput()" onscroll="syncStudioScroll()" onkeydown="studioKey(event)" spellcheck="false"></textarea>
+" oninput="onStudioInput()" onscroll="syncStudioScroll()" onkeydown="studioKey(event)" spellcheck="false" aria-label="Código fuente Lua" /></textarea>
                 </div>
                 <div class="ai-panel" id="aiPanel">
                   <div class="text-xs mb-1" style="color:#6b6b80">Sugerencias rápidas (clic para insertar)</div>
@@ -1593,15 +1652,15 @@ local Players = game:GetService(&quot;Players&quot;)
 
               <div id="createOutWrap" class="hidden">
                 <label class="field">Loadstring</label>
-                <textarea id="createOut" readonly class="h-16 font-mono text-xs" style="color:#34d399"></textarea>
+                <textarea id="createOut" readonly class="h-16 font-mono text-xs" style="color:#34d399" aria-label="Resultado del proceso" /></textarea>
               </div>
             </div>
 
             <div class="flex items-center justify-end gap-3 px-6 py-4 border-t" style="border-color:#1e1e2a;background:#0d0d14">
               <button type="button" onclick="resetCreateForm();go('scripts')" class="btn-ghost px-5 py-2.5" data-i18n="create.cancel">Cancel</button>
               <input type="hidden" id="editId" value=""/>
-              <button id="createBtn" onclick="createScript()" class="btn-primary px-5 py-2.5 flex items-center gap-2">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              <button type="button" id="createBtn" onclick="createScript()" class="btn-primary px-5 py-2.5 flex items-center gap-2">
+                <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                 <span id="createBtnLabel" data-i18n="create.btn">Create</span>
               </button>
             </div>
@@ -1609,20 +1668,20 @@ local Players = game:GetService(&quot;Players&quot;)
         </section>
 
 
-        <section id="page-logs" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.logs">Logs</h1>
+        <section id="page-logs" class="page hidden" aria-labelledby="pageTitle-logs">
+          <h2 id="pageTitle-logs" class="text-2xl font-bold mb-2" data-i18n="nav.logs">Logs</h2>
           <p class="text-xs mb-4" style="color:#5a5a6e" data-i18n="logs.sub">Quién ejecuta tus scripts · ban por HWID o IP</p>
           <div class="log-summary" id="logsSummary">Cargando…</div>
           <div class="mb-4 flex gap-2">
-            <input id="logsSearch" placeholder="Buscar usuario / executor / IP…" data-i18n-placeholder="logs.search" oninput="filterLogs()" class="flex-1"/>
-            <button class="btn-ghost text-sm" onclick="loadLogs()">Refresh</button>
+            <input id="logsSearch" placeholder="Buscar usuario / executor / IP…" data-i18n-placeholder="logs.search" oninput="filterLogs()" class="flex-1" aria-label="Buscar en logs" />
+            <button type="button" class="btn-ghost text-sm" onclick="loadLogs()">Refresh</button>
           </div>
           <div id="logsList"></div>
         </section>
 
         <!-- ANALYTICS / EXECUTIONS CON GRÁFICAS -->
-        <section id="page-executions" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.analytics">Analytics</h1>
+        <section id="page-executions" class="page hidden" aria-labelledby="pageTitle-executions">
+          <h2 id="pageTitle-executions" class="text-2xl font-bold mb-6" data-i18n="nav.analytics">Analytics</h2>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             <div class="card p-5">
               <div class="text-sm font-semibold mb-1">Ejecuciones por día</div>
@@ -1650,8 +1709,8 @@ local Players = game:GetService(&quot;Players&quot;)
         </section>
 
         <!-- API INFO -->
-        <section id="page-apiinfo" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.apiinfo">API Info</h1>
+        <section id="page-apiinfo" class="page hidden" aria-labelledby="pageTitle-apiinfo">
+          <h2 id="pageTitle-apiinfo" class="text-2xl font-bold mb-6" data-i18n="nav.apiinfo">API Info</h2>
           <div class="card p-6 max-w-2xl space-y-4">
             <div>
               <div class="text-xs font-medium mb-1" style="color:#6b6b80">Base URL</div>
@@ -1671,30 +1730,50 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
         <!-- ADMIN -->
-        <section id="page-admin" class="page hidden">
+        <section id="page-admin" class="page hidden" aria-labelledby="pageTitle-admin">
           <div class="qx-admin-hero">
             <div style="position:relative;z-index:1">
               <div class="qx-kicker">Qyrex Control Center</div>
-              <h1 class="qx-title font-bold mb-2" data-i18n="nav.admin">Admin Panel</h1>
+              <h2 id="pageTitle-admin" class="qx-title font-bold mb-2" data-i18n="nav.admin">Admin Panel</h2>
               <p class="qx-sub mb-0">Centro operativo para gestionar usuarios, scripts, publicaciones, seguridad y mantenimiento.</p>
             </div>
           </div>
           <div class="qx-enterprise-bar">
             <div class="qx-status"><i></i><span>Sistema operativo</span><span class="qx-dim">·</span><span id="qxAdminLastRefresh">Sin sincronizar</span></div>
             <div class="qx-actions">
-              <button class="btn-ghost" onclick="qxAdminRefreshAll()">↻ Actualizar todo</button>
-              <button class="btn-ghost" onclick="qxAdminHealth()">◉ Comprobar API</button>
-              <button class="btn-ghost" onclick="qxExportAdminData()">⇩ Exportar datos</button>
+              <button type="button" class="btn-ghost" onclick="qxAdminRefreshAll()">↻ Actualizar todo</button>
+              <button type="button" class="btn-ghost" onclick="qxAdminHealth()">◉ Comprobar API</button>
+              <button type="button" class="btn-ghost" onclick="qxExportAdminData()">⇩ Exportar datos</button>
             </div>
           </div>
+          <section class="card p-4 mb-5" aria-labelledby="adminOpsTitle" style="border-color:#1b3b56!important;background:linear-gradient(180deg,#081827,#07111b)!important">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="qx-kicker">Operaciones</div>
+                <h3 id="adminOpsTitle" class="text-sm font-semibold mb-1">Herramientas del administrador</h3>
+                <p class="text-xs qx-dim mb-0">Accesos rápidos para diagnóstico, mantenimiento y control del panel.</p>
+              </div>
+              <div class="qx-actions" role="group" aria-label="Acciones de administración">
+                <button type="button" class="btn-ghost" onclick="qxAdminHealth()">Estado de API</button>
+                <button type="button" class="btn-ghost" onclick="qxAdminRefreshAll()">Sincronizar</button>
+                <button type="button" class="btn-ghost" onclick="qxExportAdminData()">Exportar snapshot</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <article class="qx-mini"><span>API</span><strong id="qxAdminOpsApi">—</strong></article>
+              <article class="qx-mini"><span>Usuarios</span><strong id="qxAdminOpsUsers">—</strong></article>
+              <article class="qx-mini"><span>Scripts</span><strong id="qxAdminOpsScripts">—</strong></article>
+              <article class="qx-mini"><span>Hub</span><strong id="qxAdminOpsHub">—</strong></article>
+            </div>
+          </section>
           <div class="qx-admin-grid">
             <div class="card" style="padding:16px">
               <div class="qx-kicker">Acciones rápidas</div>
               <div class="qx-admin-tools">
-                <button class="qx-tool" onclick="document.getElementById('resetUser').focus()"><div class="qxi">⌁</div><b>Cuenta</b><span>Restablecer acceso de un usuario.</span></button>
-                <button class="qx-tool" onclick="document.getElementById('premUser').focus()"><div class="qxi">◆</div><b>Premium</b><span>Asignar o retirar acceso premium.</span></button>
-                <button class="qx-tool" onclick="document.getElementById('vipGenAmount').focus()"><div class="qxi">◇</div><b>Licencias VIP</b><span>Generar un lote de códigos.</span></button>
-                <button class="qx-tool" onclick="document.getElementById('blIp').focus()"><div class="qxi">⌘</div><b>Seguridad IP</b><span>Gestionar bloqueos y motivos.</span></button>
+                <button type="button" class="qx-tool" onclick="document.getElementById('resetUser').focus()"><div class="qxi">⌁</div><b>Cuenta</b><span>Restablecer acceso de un usuario.</span></button>
+                <button type="button" class="qx-tool" onclick="document.getElementById('premUser').focus()"><div class="qxi">◆</div><b>Premium</b><span>Asignar o retirar acceso premium.</span></button>
+                <button type="button" class="qx-tool" onclick="document.getElementById('vipGenAmount').focus()"><div class="qxi">◇</div><b>Licencias VIP</b><span>Generar un lote de códigos.</span></button>
+                <button type="button" class="qx-tool" onclick="document.getElementById('blIp').focus()"><div class="qxi">⌘</div><b>Seguridad IP</b><span>Gestionar bloqueos y motivos.</span></button>
               </div>
             </div>
             <div class="card" style="padding:16px">
@@ -1718,10 +1797,10 @@ local Players = game:GetService(&quot;Players&quot;)
             <div class="flex items-center justify-between gap-3 mb-1"><div class="text-sm font-semibold">🔐 Seguridad de cuentas</div><span class="text-[10px] px-2 py-1 rounded" style="background:#191624;color:#b8a7ff;border:1px solid #33284f">ADMIN</span></div>
             <p class="text-xs mb-4" style="color:#6b6b80">Las contraseñas originales no se muestran. Puedes restablecer una contraseña tras confirmar el código de administrador.</p>
             <div class="flex flex-wrap gap-2">
-              <input id="resetUser" placeholder="usuario" style="max-width:150px"/>
-              <input id="resetPass" type="password" placeholder="nueva contraseña" style="max-width:180px"/>
-              <input id="adminActionCode" type="password" placeholder="código admin" style="max-width:130px"/>
-              <button class="btn-primary text-sm" onclick="adminResetPassword()">Restablecer</button>
+              <input id="resetUser" placeholder="usuario" style="max-width:150px" aria-label="Usuario a restablecer" />
+              <input id="resetPass" type="password" placeholder="nueva contraseña" style="max-width:180px" aria-label="Nueva contraseña" />
+              <input id="adminActionCode" type="password" placeholder="código admin" style="max-width:130px" aria-label="Código de acción administrativa" />
+              <button type="button" class="btn-primary text-sm" onclick="adminResetPassword()">Restablecer</button>
             </div>
             <div class="text-[11px] mt-3" style="color:#5a5a6e">Protección doble: sesión admin + código de acción.</div>
           </div>
@@ -1729,10 +1808,10 @@ local Players = game:GetService(&quot;Players&quot;)
           <div class="card p-6 mb-6 max-w-xl">
             <div class="text-sm font-semibold mb-3">Dar / quitar Premium</div>
             <div class="flex flex-wrap gap-2">
-              <input id="premUser" placeholder="username" style="max-width:160px"/>
-              <input id="premDays" type="number" placeholder="días (30)" value="30" style="max-width:110px"/>
-              <button class="btn-primary text-sm" onclick="adminSetPremium(true)">Activar</button>
-              <button class="btn-ghost text-sm" style="color:#f87171;border-color:#3a1a1a" onclick="adminSetPremium(false)">Quitar</button>
+              <input id="premUser" placeholder="username" style="max-width:160px" aria-label="Usuario Premium" />
+              <input id="premDays" type="number" placeholder="días (30)" value="30" style="max-width:110px" aria-label="Días de Premium" />
+              <button type="button" class="btn-primary text-sm" onclick="adminSetPremium(true)">Activar</button>
+              <button type="button" class="btn-ghost text-sm" style="color:#f87171;border-color:#3a1a1a" onclick="adminSetPremium(false)">Quitar</button>
             </div>
           </div>
 
@@ -1740,15 +1819,15 @@ local Players = game:GetService(&quot;Players&quot;)
             <div class="text-sm font-semibold mb-1" style="color:#fbbf24">Llaves VIP (canje)</div>
             <p class="text-xs mb-3" style="color:#5a5a6e">Genera códigos. Cada uno da VIP al canjearlos en Settings.</p>
             <div class="flex flex-wrap gap-2 mb-3">
-              <input id="vipGenAmount" type="number" value="10" min="1" max="100" style="max-width:100px" placeholder="cantidad"/>
-              <input id="vipGenDays" type="number" value="10" min="1" style="max-width:100px" placeholder="días"/>
-              <button class="btn-primary text-sm" onclick="genVipKeysAdmin()">Generar llaves</button>
+              <input id="vipGenAmount" type="number" value="10" min="1" max="100" style="max-width:100px" placeholder="cantidad" aria-label="Cantidad de licencias VIP" />
+              <input id="vipGenDays" type="number" value="10" min="1" style="max-width:100px" placeholder="días" aria-label="Días VIP" />
+              <button type="button" class="btn-primary text-sm" onclick="genVipKeysAdmin()">Generar llaves</button>
             </div>
-            <textarea id="vipGenOut" readonly class="h-28 font-mono text-xs hidden" style="color:#fbbf24"></textarea>
+            <textarea id="vipGenOut" readonly class="h-28 font-mono text-xs hidden" style="color:#fbbf24" aria-label="Licencias VIP generadas" /></textarea>
           </div>
 
           <div class="card overflow-hidden mb-6">
-            <div class="qx-table-head"><div><div class="text-sm font-semibold">Usuarios</div><div class="text-[10px] qx-dim">Directorio de cuentas registradas</div></div><input id="qxAdminUserFilter" class="qx-filter" placeholder="Buscar usuario…" oninput="qxFilterAdminRows('adminUsers',this.value,0)"/></div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Usuarios</div><div class="text-[10px] qx-dim">Directorio de cuentas registradas</div></div><input id="qxAdminUserFilter" class="qx-filter" placeholder="Buscar usuario…" oninput="qxFilterAdminRows('adminUsers',this.value,0)" aria-label="Filtrar usuarios" /></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>User</th><th>Role</th><th>Premium</th><th>Desde</th></tr></thead>
@@ -1758,7 +1837,7 @@ local Players = game:GetService(&quot;Players&quot;)
           </div>
 
           <div class="card overflow-hidden mb-6">
-            <div class="qx-table-head"><div><div class="text-sm font-semibold">Todos los scripts</div><div class="text-[10px] qx-dim">Inventario global y actividad</div></div><div class="qx-actions"><input id="qxAdminScriptFilter" class="qx-filter" placeholder="Buscar script…" oninput="qxFilterAdminRows('adminScripts',this.value,0)"/><button class="btn-ghost text-xs" onclick="loadAdminScripts()">↻ Refresh</button></div></div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Todos los scripts</div><div class="text-[10px] qx-dim">Inventario global y actividad</div></div><div class="qx-actions"><input id="qxAdminScriptFilter" class="qx-filter" placeholder="Buscar script…" oninput="qxFilterAdminRows('adminScripts',this.value,0)" aria-label="Filtrar scripts" /><button type="button" class="btn-ghost text-xs" onclick="loadAdminScripts()">↻ Refresh</button></div></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>Name</th><th>Owner</th><th>Runs</th><th></th></tr></thead>
@@ -1770,15 +1849,15 @@ local Players = game:GetService(&quot;Players&quot;)
           <div class="card p-6 mb-6 max-w-xl">
             <div class="text-sm font-semibold mb-3">IP Blacklist</div>
             <div class="flex gap-2 mb-3">
-              <input id="blIp" placeholder="IP" style="max-width:160px"/>
-              <input id="blReason" placeholder="Razón" style="max-width:160px"/>
-              <button class="btn-primary text-sm" onclick="adminAddBlacklist()">Ban IP</button>
+              <input id="blIp" placeholder="IP" style="max-width:160px" aria-label="IP para bloquear" />
+              <input id="blReason" placeholder="Razón" style="max-width:160px" aria-label="Motivo del bloqueo" />
+              <button type="button" class="btn-primary text-sm" onclick="adminAddBlacklist()">Ban IP</button>
             </div>
             <div id="adminBlacklist" class="text-xs space-y-1" style="color:#8b8b9e"></div>
           </div>
 
           <div class="card overflow-hidden">
-            <div class="qx-table-head"><div><div class="text-sm font-semibold">Hub público</div><div class="text-[10px] qx-dim">Contenido publicado y visualizaciones</div></div><input id="qxAdminHubFilter" class="qx-filter" placeholder="Buscar publicación…" oninput="qxFilterAdminRows('adminHub',this.value,0)"/></div>
+            <div class="qx-table-head"><div><div class="text-sm font-semibold">Hub público</div><div class="text-[10px] qx-dim">Contenido publicado y visualizaciones</div></div><input id="qxAdminHubFilter" class="qx-filter" placeholder="Buscar publicación…" oninput="qxFilterAdminRows('adminHub',this.value,0)" aria-label="Filtrar publicaciones del Hub" /></div>
             <div class="overflow-x-auto">
               <table>
                 <thead><tr><th>Name</th><th>Author</th><th>Views</th><th></th></tr></thead>
@@ -1790,20 +1869,20 @@ local Players = game:GetService(&quot;Players&quot;)
 
 
         <!-- WEBHOOKS -->
-        <section id="page-webhooks" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.webhooks">Webhooks</h1>
+        <section id="page-webhooks" class="page hidden" aria-labelledby="pageTitle-webhooks">
+          <h2 id="pageTitle-webhooks" class="text-2xl font-bold mb-2" data-i18n="nav.webhooks">Webhooks</h2>
           <p class="text-xs mb-6" style="color:#5a5a6e">Alertas a Discord cuando verifican una key o ejecutan un script</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
-            <input id="whUrl" placeholder="https://discord.com/api/webhooks/..."/>
-            <button class="btn-primary" onclick="addWebhook()">Añadir webhook</button>
-            <button class="btn-ghost" onclick="testWebhook()">Probar URL</button>
+            <input id="whUrl" placeholder="https://discord.com/api/webhooks/..." aria-label="URL del webhook" />
+            <button type="button" class="btn-primary" onclick="addWebhook()">Añadir webhook</button>
+            <button type="button" class="btn-ghost" onclick="testWebhook()">Probar URL</button>
           </div>
           <div id="whList" class="grid gap-3 max-w-xl"></div>
         </section>
 
         <!-- LEADERBOARD -->
-        <section id="page-leaderboard" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.leaderboard">Leaderboard</h1>
+        <section id="page-leaderboard" class="page hidden" aria-labelledby="pageTitle-leaderboard">
+          <h2 id="pageTitle-leaderboard" class="text-2xl font-bold mb-6" data-i18n="nav.leaderboard">Leaderboard</h2>
           <div class="card overflow-hidden max-w-2xl">
             <table>
               <thead><tr><th>#</th><th>Dev</th><th>Scripts</th><th>Ejecuciones</th></tr></thead>
@@ -1813,27 +1892,27 @@ local Players = game:GetService(&quot;Players&quot;)
         </section>
 
         <!-- ASSETS -->
-        <section id="page-assets" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2" data-i18n="nav.assets">My Assets</h1>
+        <section id="page-assets" class="page hidden" aria-labelledby="pageTitle-assets">
+          <h2 id="pageTitle-assets" class="text-2xl font-bold mb-2" data-i18n="nav.assets">My Assets</h2>
           <p class="text-xs mb-6" style="color:#5a5a6e">Nube privada: texto, URLs, snippets UI (máx 20 free / 100 VIP)</p>
           <div class="card p-6 max-w-xl mb-6 space-y-3">
-            <input id="assetName" placeholder="Nombre"/>
-            <select id="assetType"><option value="text">Text / Lua</option><option value="url">URL</option><option value="image">Image URL</option></select>
-            <textarea id="assetContent" class="h-28 font-mono text-sm" placeholder="Contenido o URL"></textarea>
-            <button class="btn-primary" onclick="addAsset()">Subir asset</button>
+            <input id="assetName" placeholder="Nombre" aria-label="Nombre del asset" />
+            <select id="assetType" aria-label="Tipo de asset" /><option value="text">Text / Lua</option><option value="url">URL</option><option value="image">Image URL</option></select>
+            <textarea id="assetContent" class="h-28 font-mono text-sm" placeholder="Contenido o URL" aria-label="Contenido del asset" /></textarea>
+            <button type="button" class="btn-primary" onclick="addAsset()">Subir asset</button>
           </div>
           <div id="assetList" class="grid gap-3"></div>
         </section>
 
         <!-- TEMPLATES -->
-        <section id="page-templates" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="page.templates">Templates / Snippets</h1>
+        <section id="page-templates" class="page hidden" aria-labelledby="pageTitle-templates">
+          <h2 id="pageTitle-templates" class="text-2xl font-bold mb-6" data-i18n="page.templates">Templates / Snippets</h2>
           <div id="tplList" class="grid gap-3 max-w-3xl"></div>
         </section>
 
         <!-- STATUS -->
-        <section id="page-status" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.status">System Status</h1>
+        <section id="page-status" class="page hidden" aria-labelledby="pageTitle-status">
+          <h2 id="pageTitle-status" class="text-2xl font-bold mb-6" data-i18n="nav.status">System Status</h2>
           <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mb-6">
             <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">API</div><div id="stApi" class="text-lg font-bold">—</div></div>
             <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">MongoDB</div><div id="stMongo" class="text-lg font-bold">—</div></div>
@@ -1847,23 +1926,23 @@ local Players = game:GetService(&quot;Players&quot;)
         </section>
 
         <!-- PLAYGROUND -->
-        <section id="page-playground" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.playground">API Playground</h1>
+        <section id="page-playground" class="page hidden" aria-labelledby="pageTitle-playground">
+          <h2 id="pageTitle-playground" class="text-2xl font-bold mb-6" data-i18n="nav.playground">API Playground</h2>
           <div class="card p-6 max-w-2xl space-y-3">
             <div class="flex gap-2">
-              <select id="pgMethod" style="max-width:120px"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
-              <input id="pgPath" placeholder="/api/health" value="/api/health"/>
+              <select id="pgMethod" style="max-width:120px" aria-label="Método HTTP" /><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+              <input id="pgPath" placeholder="/api/health" value="/api/health" aria-label="Ruta API" />
             </div>
-            <textarea id="pgBody" class="h-28 font-mono text-xs" placeholder='{"example":true}'></textarea>
-            <label class="flex items-center gap-2 text-xs" style="color:#8b8b9e"><input type="checkbox" id="pgAuth" checked style="width:auto"/> Usar token de sesión</label>
-            <button class="btn-primary" onclick="runPlayground()">Send</button>
+            <textarea id="pgBody" class="h-28 font-mono text-xs" placeholder='{"example":true}' aria-label="Cuerpo JSON" /></textarea>
+            <label class="flex items-center gap-2 text-xs" style="color:#8b8b9e"><input type="checkbox" id="pgAuth" aria-label="Usar token de sesión" checked style="width:auto"/> Usar token de sesión</label>
+            <button type="button" class="btn-primary" onclick="runPlayground()">Send</button>
             <pre id="pgOut" class="text-xs p-3 rounded-lg overflow-auto font-mono" style="background:#0c0c12;color:#34d399;max-height:280px"></pre>
           </div>
         </section>
 
         <!-- CHANGELOG -->
-        <section id="page-changelog" class="page hidden">
-          <h1 class="text-2xl font-bold mb-6" data-i18n="nav.changelog">Changelog</h1>
+        <section id="page-changelog" class="page hidden" aria-labelledby="pageTitle-changelog">
+          <h2 id="pageTitle-changelog" class="text-2xl font-bold mb-6" data-i18n="nav.changelog">Changelog</h2>
           <div class="space-y-4 max-w-2xl">
             <div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist, límite 15 scripts (ilimitado VIP).</div></div>
             <div class="card p-5"><div class="text-sm font-semibold">v1.0 — Launch</div><div class="text-xs mt-2" style="color:#8b8b9e">Auth usuario/contraseña, scripts ofuscados, analytics, access denied page.</div></div>
@@ -1871,23 +1950,23 @@ local Players = game:GetService(&quot;Players&quot;)
         </section>
 
 
-        <section id="page-studio" class="page hidden">
+        <section id="page-studio" class="page hidden" aria-labelledby="pageTitle-studio">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
-              <h1 class="text-2xl font-bold" data-i18n="nav.studio">Studio</h1>
+              <h2 id="pageTitle-studio" class="text-2xl font-bold" data-i18n="nav.studio">Studio</h2>
               <p class="text-xs mt-1" style="color:#5a5a6e">Editor libre · OpenRouter IA · números sin tapar código</p>
             </div>
             <div class="flex gap-2">
-              <button class="btn-ghost text-sm" onclick="studioDownload2()">Download</button>
-              <button class="btn-primary text-sm" onclick="studioToCreate()">Usar en Create →</button>
+              <button type="button" class="btn-ghost text-sm" onclick="studioDownload2()">Download</button>
+              <button type="button" class="btn-primary text-sm" onclick="studioToCreate()">Usar en Create →</button>
             </div>
           </div>
           <div class="card p-4 mb-4 max-w-4xl">
             <div class="text-sm font-semibold mb-1">Generador</div>
             <div class="text-xs mb-2" style="color:#5a5a6e">IA real (OpenRouter). Ej: "aimbot con FOV 120", "ESP highlight", "auto farm de coins"</div>
             <div class="flex gap-2 flex-wrap mb-2">
-              <input id="aiPrompt" class="flex-1 min-w-[180px]" placeholder="hazme un aimbot básico" onkeydown="if(event.key==='Enter')runAiGenerate()"/>
-              <button class="btn-primary" onclick="runAiGenerate()">Generar</button>
+              <input id="aiPrompt" class="flex-1 min-w-[180px]" placeholder="hazme un aimbot básico" onkeydown="if(event.key==='Enter')runAiGenerate()" aria-label="Solicitud para IA" />
+              <button type="button" class="btn-primary" onclick="runAiGenerate()">Generar</button>
             </div>
             <div class="flex flex-wrap gap-2" id="aiQuick"></div>
           </div>
@@ -1906,18 +1985,18 @@ local Players = game:GetService(&quot;Players&quot;)
             </div>
             <div class="editor-body">
               <div class="line-nums" id="studioLineNums">1</div>
-              <textarea id="studioSource" placeholder="-- código libre aquí" oninput="updateStudioLines()" onscroll="document.getElementById('studioLineNums').scrollTop=this.scrollTop" onkeydown="studioKey2(event)" spellcheck="false"></textarea>
+              <textarea id="studioSource" placeholder="-- código libre aquí" oninput="updateStudioLines()" onscroll="document.getElementById('studioLineNums').scrollTop=this.scrollTop" onkeydown="studioKey2(event)" spellcheck="false" aria-label="Código fuente del Studio" /></textarea>
             </div>
             <div class="studio-status"><span id="studioPos2">Ln 1, Col 1</span><span id="studioStats2">0 líneas</span></div>
           </div>
         </section>
 
         <!-- SETTINGS -->
-        <section id="page-settings" class="page hidden">
-          <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h1 class="text-2xl font-bold" data-i18n="settings.account">Tu cuenta</h1></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
+        <section id="page-settings" class="page hidden" aria-labelledby="pageTitle-settings">
+          <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h2 id="pageTitle-settings" class="text-2xl font-bold" data-i18n="settings.account">Tu cuenta</h2></div><button type="button" class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();">↻ Actualizar</button></div>
           <div class="grid gap-4 max-w-4xl">
             <div class="card overflow-hidden"><div class="profile-banner" id="profileBanner"><div class="profile-avatar-xl" id="profileAvatarLarge">?</div></div><div class="p-6 pt-8"><div class="flex flex-wrap items-end justify-between gap-4"><div><div class="text-xl font-bold" id="profileDisplayName">—</div><div class="text-xs" style="color:#68687e" id="profileHandle">@—</div></div><div id="profileBadges" class="flex flex-wrap gap-1"></div></div><p id="profileBioPreview" class="text-sm mt-3" style="color:#9696aa">Sin biografía.</p></div></div>
-            <div class="card p-6"><div class="text-sm font-semibold mb-1">✏️ Perfil</div><div class="text-xs mb-5" style="color:#5a5a6e">Personaliza tu nombre, avatar, banner y biografía.</div><div class="profile-grid"><div><label class="field">Nombre visible</label><input id="profileDisplayNameInput" maxlength="32" placeholder="Tu nombre"/></div><div><label class="field">Username</label><div class="flex gap-2"><input id="accountUsernameInput" maxlength="24" placeholder="tu_usuario"/><button class="btn-ghost text-xs" onclick="saveAccountProfile()">Guardar</button></div></div></div><div class="mt-4"><label class="field">Biografía</label><textarea id="profileBioInput" maxlength="160" rows="3" placeholder="Cuéntale algo a la gente…"></textarea></div><div class="profile-grid mt-4"><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🖼️ Subir avatar</div><div class="text-[11px] mt-1" style="color:#67677d">PNG/JPG/WebP/GIF · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="readAccountImage(this,'avatar')"/></label><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🌌 Subir banner</div><div class="text-[11px] mt-1" style="color:#67677d">Recomendado 1200×400 · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="readAccountImage(this,'banner')"/></label></div><input id="accountAvatarInput" class="mt-3" placeholder="URL del avatar (opcional)"/><input id="accountBannerInput" class="mt-3" placeholder="URL del banner (opcional)"/><button class="btn-primary mt-4" onclick="saveAccountProfile()">Guardar perfil</button></div>
+            <div class="card p-6"><div class="text-sm font-semibold mb-1">✏️ Perfil</div><div class="text-xs mb-5" style="color:#5a5a6e">Personaliza tu nombre, avatar, banner y biografía.</div><div class="profile-grid"><div><label class="field">Nombre visible</label><input id="profileDisplayNameInput" maxlength="32" placeholder="Tu nombre" aria-label="Nombre visible" /></div><div><label class="field">Username</label><div class="flex gap-2"><input id="accountUsernameInput" aria-label="Nombre de usuario de la cuenta" maxlength="24" placeholder="tu_usuario" aria-label="Nombre de usuario de la cuenta" /><button type="button" class="btn-ghost text-xs" onclick="saveAccountProfile()">Guardar</button></div></div></div><div class="mt-4"><label class="field">Biografía</label><textarea id="profileBioInput" maxlength="160" rows="3" placeholder="Cuéntale algo a la gente…" aria-label="Biografía"></textarea></div><div class="profile-grid mt-4"><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🖼️ Subir avatar</div><div class="text-[11px] mt-1" style="color:#67677d">PNG/JPG/WebP/GIF · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="Subir avatar" onchange="readAccountImage(this,'avatar')"/></label><label class="profile-upload cursor-pointer"><div class="text-xs font-semibold">🌌 Subir banner</div><div class="text-[11px] mt-1" style="color:#67677d">Recomendado 1200×400 · máx. 500 KB</div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="Subir banner" onchange="readAccountImage(this,'banner')"/></label></div><input id="accountAvatarInput" aria-label="URL del avatar opcional" class="mt-3" placeholder="URL del avatar (opcional)" aria-label="URL del avatar" /><input id="accountBannerInput" class="mt-3" placeholder="URL del banner (opcional)" aria-label="URL del banner" /><button type="button" class="btn-primary mt-4" onclick="saveAccountProfile()">Guardar perfil</button></div>
             <div class="card p-6" id="accountInfoCard">
               <div class="flex items-center justify-between gap-3 mb-4"><div><div class="text-sm font-semibold">👤 Información de la cuenta</div><div class="text-xs mt-1" style="color:#5a5a6e">Gestiona tu perfil y revisa el estado de tu cuenta.</div></div><span id="accountRoleBadge" class="chip">CUENTA</span></div>
               <div class="grid gap-3 sm:grid-cols-2 text-sm"><div class="p-3 rounded-xl" style="background:#101016;border:1px solid #252533"><div class="text-[11px]" style="color:#6b6b80">USUARIO</div><div id="accountUsername" class="font-mono mt-1">—</div></div><div class="p-3 rounded-xl" style="background:#101016;border:1px solid #252533"><div class="text-[11px]" style="color:#6b6b80">CREADA</div><div id="accountCreated" class="mt-1 text-xs">—</div></div><div class="p-3 rounded-xl" style="background:#101016;border:1px solid #252533"><div class="text-[11px]" style="color:#6b6b80">ÚLTIMO ACCESO</div><div id="accountLastLogin" class="mt-1 text-xs">—</div></div><div class="p-3 rounded-xl" style="background:#101016;border:1px solid #252533"><div class="text-[11px]" style="color:#6b6b80">ESTADO</div><div id="accountStatus" class="mt-1">—</div></div></div>
@@ -1925,23 +2004,23 @@ local Players = game:GetService(&quot;Players&quot;)
 
             <div class="card p-6">
               <div class="text-sm font-semibold mb-1">✏️ Editar perfil</div><div class="text-xs mb-4" style="color:#5a5a6e">Cambia tu nombre de usuario o avatar.</div>
-              <div class="grid gap-3"><div><label class="field">Nombre de usuario</label><input id="accountUsernameInput" placeholder="tu_usuario"/></div><div><label class="field">URL del avatar <span style="color:#5a5a6e">(opcional)</span></label><input id="accountAvatarInput" placeholder="https://..."/></div><button class="btn-primary w-fit" onclick="saveAccountProfile()">Guardar cambios</button></div>
+              <div class="grid gap-3"><div><label class="field">Nombre de usuario</label><input id="accountUsernameInputSecondary" aria-label="Nombre de usuario secundario" placeholder="tu_usuario"/></div><div><label class="field">URL del avatar <span style="color:#5a5a6e">(opcional)</span></label><input id="accountAvatarInputSecondary" aria-label="URL del avatar secundario" placeholder="https://..."/></div><button type="button" class="btn-primary w-fit" onclick="saveAccountProfile()">Guardar cambios</button></div>
             </div>
 
             <div class="card p-6">
               <div class="text-sm font-semibold mb-1">🔑 Cambiar contraseña</div><div class="text-xs mb-4" style="color:#5a5a6e">Por seguridad, necesitas escribir tu contraseña actual.</div>
-              <div class="grid gap-3"><input id="currentPasswordInput" type="password" placeholder="contraseña actual"/><input id="newPasswordInput" type="password" placeholder="nueva contraseña (mínimo 8 caracteres)"/><input id="confirmPasswordInput" type="password" placeholder="repite la nueva contraseña"/><button class="btn-primary w-fit" onclick="changeMyPassword()">Actualizar contraseña</button></div>
+              <div class="grid gap-3"><input id="currentPasswordInput" type="password" placeholder="contraseña actual" aria-label="Contraseña actual" /><input id="newPasswordInput" type="password" placeholder="nueva contraseña (mínimo 8 caracteres)" aria-label="Nueva contraseña" /><input id="confirmPasswordInput" type="password" placeholder="repite la nueva contraseña" aria-label="Confirmación de la nueva contraseña" /><button type="button" class="btn-primary w-fit" onclick="changeMyPassword()">Actualizar contraseña</button></div>
             </div>
 
             <div class="card p-6">
-              <div class="flex items-center justify-between gap-3 mb-1"><div><div class="text-sm font-semibold">💻 Dispositivos y sesiones</div><div class="text-xs mt-1" style="color:#5a5a6e">Revisa dónde tienes la cuenta iniciada.</div></div><button class="btn-ghost text-xs" onclick="loadAccountSessions()">↻ Actualizar</button></div>
+              <div class="flex items-center justify-between gap-3 mb-1"><div><div class="text-sm font-semibold">💻 Dispositivos y sesiones</div><div class="text-xs mt-1" style="color:#5a5a6e">Revisa dónde tienes la cuenta iniciada.</div></div><button type="button" class="btn-ghost text-xs" onclick="loadAccountSessions()">↻ Actualizar</button></div>
               <div id="sessionsList" class="grid gap-2 mt-4"><div class="text-xs" style="color:#6b6b80">Cargando sesiones…</div></div>
-              <button class="btn-ghost mt-4 text-sm" style="color:#fbbf24" onclick="logoutOtherSessions()">Cerrar las demás sesiones</button>
+              <button type="button" class="btn-ghost mt-4 text-sm" style="color:#fbbf24" onclick="logoutOtherSessions()">Cerrar las demás sesiones</button>
             </div>
 
             <div class="card p-6" style="border-color:#4a2020">
               <div class="text-sm font-semibold mb-1" style="color:#f87171">🗑️ Zona de peligro</div><div class="text-xs mb-4" style="color:#8b8b9e">Eliminar tu cuenta borra tus datos y cierra todas tus sesiones. Esta acción no se puede deshacer.</div>
-              <input id="deleteAccountPassword" type="password" placeholder="tu contraseña" class="mb-2"/><input id="deleteAccountConfirm" placeholder="escribe ELIMINAR para confirmar" class="mb-3"/><button class="btn-ghost text-sm" style="color:#f87171;border-color:#4a2020" onclick="deleteMyAccount()">Eliminar mi cuenta permanentemente</button>
+              <input id="deleteAccountPassword" type="password" placeholder="tu contraseña" class="mb-2" aria-label="Contraseña para eliminar la cuenta" /><input id="deleteAccountConfirm" placeholder="escribe ELIMINAR para confirmar" class="mb-3" aria-label="Confirmación de eliminación" /><button type="button" class="btn-ghost text-sm" style="color:#f87171;border-color:#4a2020" onclick="deleteMyAccount()">Eliminar mi cuenta permanentemente</button>
             </div>
 
 
@@ -1959,19 +2038,19 @@ local Players = game:GetService(&quot;Players&quot;)
               <div class="text-xs mb-4" style="color:#5a5a6e">Opciones del panel</div>
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Animaciones</span>
-                <input type="checkbox" id="prefAnim" checked onchange="toggleAnim(this.checked)" style="width:auto;accent-color:#e8e8ed"/>
+                <input type="checkbox" id="prefAnim" aria-label="Activar animaciones" checked onchange="toggleAnim(this.checked)" style="width:auto;accent-color:#e8e8ed"/>
               </label>
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Copiar loadstring al crear</span>
-                <input type="checkbox" id="prefCopy" checked style="width:auto;accent-color:#e8e8ed"/>
+                <input type="checkbox" id="prefCopy" aria-label="Copiar automáticamente" checked style="width:auto;accent-color:#e8e8ed"/>
               </label>
               <div class="mt-4">
                 <div class="text-xs mb-2" style="color:#6b6b80">Theme</div>
                 <div class="flex flex-wrap gap-2">
-                  <button class="btn-ghost text-xs" onclick="setTheme('')">White</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-neon')">Neon</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-cyber')">Cyberpunk</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-blood')">Blood</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('')">White</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-neon')">Neon</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-cyber')">Cyberpunk</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-blood')">Blood</button>
                 </div>
               </div>
             </div>
@@ -1985,8 +2064,8 @@ local Players = game:GetService(&quot;Players&quot;)
 
               <label class="field">Fondo (URL imagen)</label>
               <div class="flex gap-2 mb-3">
-                <input id="vipBgUrl" placeholder="https://...jpg / png / gif" class="flex-1 text-xs"/>
-                <button type="button" class="btn-primary text-xs #38BDF8space-nowrap" onclick="applyVipBg()">Aplicar</button>
+                <input id="vipBgUrl" placeholder="https://...jpg / png / gif" class="flex-1 text-xs" aria-label="URL del fondo VIP" />
+                <button type="button" class="btn-primary text-xs whitespace-nowrap" onclick="applyVipBg()">Aplicar</button>
               </div>
               <div class="flex flex-wrap gap-2 mb-4">
                 <button type="button" class="btn-ghost text-xs" onclick="setVipBgPreset('aurora')">Aurora</button>
@@ -1997,31 +2076,31 @@ local Players = game:GetService(&quot;Players&quot;)
 
               <label class="field">Color de acento</label>
               <div class="flex flex-wrap gap-2 mb-4 items-center">
-                <input type="color" id="vipAccent" value="#e8e8ed" style="width:44px;height:36px;padding:2px;border-radius:8px;background:#0c0c12;border:1px solid #252533"/>
+                <input type="color" id="vipAccent" value="#e8e8ed" style="width:44px;height:36px;padding:2px;border-radius:8px;background:#0c0c12;border:1px solid #252533" aria-label="Color de acento VIP" />
                 <button type="button" class="btn-ghost text-xs" onclick="applyVipAccent()">Usar color</button>
                 <button type="button" class="btn-ghost text-xs" onclick="resetVipAccent()">Reset</button>
               </div>
 
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Partículas de fondo</span>
-                <input type="checkbox" id="vipParticles" onchange="toggleVipParticles(this.checked)" style="width:auto;accent-color:#fbbf24"/>
+                <input type="checkbox" id="vipParticles" aria-label="Mostrar partículas" onchange="toggleVipParticles(this.checked)" style="width:auto;accent-color:#fbbf24"/>
               </label>
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Sidebar compacta</span>
-                <input type="checkbox" id="vipCompact" onchange="toggleVipCompact(this.checked)" style="width:auto;accent-color:#fbbf24"/>
+                <input type="checkbox" id="vipCompact" aria-label="Modo compacto" onchange="toggleVipCompact(this.checked)" style="width:auto;accent-color:#fbbf24"/>
               </label>
               <label class="flex items-center justify-between py-2 cursor-pointer">
                 <span class="text-sm" style="color:#a0a0b0">Blur fuerte (glass)</span>
-                <input type="checkbox" id="vipGlass" onchange="toggleVipGlass(this.checked)" style="width:auto;accent-color:#fbbf24"/>
+                <input type="checkbox" id="vipGlass" aria-label="Efecto glass" onchange="toggleVipGlass(this.checked)" style="width:auto;accent-color:#fbbf24"/>
               </label>
 
               <div class="mt-4">
                 <div class="text-xs mb-2" style="color:#6b6b80">Temas VIP</div>
                 <div class="flex flex-wrap gap-2">
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-gold')">Gold</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-ocean')">Ocean</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-mint')">Mint</button>
-                  <button class="btn-ghost text-xs" onclick="setTheme('theme-sunset')">Sunset</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-gold')">Gold</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-ocean')">Ocean</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-mint')">Mint</button>
+                  <button type="button" class="btn-ghost text-xs" onclick="setTheme('theme-sunset')">Sunset</button>
                 </div>
               </div>
               <p id="vipLockHint" class="text-[11px] mt-3 hidden" style="color:#f87171">Activa VIP (canjea llave) para usar estas opciones.</p>
@@ -2555,7 +2634,7 @@ async function saveAccountProfile(){ try { const username=document.getElementByI
 function applyUserUi(u){ showApp(u); }
 async function changeMyPassword(){ const currentPassword=document.getElementById('currentPasswordInput').value,newPassword=document.getElementById('newPasswordInput').value,confirmPassword=document.getElementById('confirmPasswordInput').value; if(newPassword!==confirmPassword){toast('Las contraseñas nuevas no coinciden','err');return} try{const r=await fetch('/api/account/password',{method:'POST',headers:headers(),body:JSON.stringify({currentPassword,newPassword})}),d=await r.json();if(!r.ok)throw new Error(d.error||'Error');['currentPasswordInput','newPasswordInput','confirmPasswordInput'].forEach(id=>document.getElementById(id).value='');toast(d.message,'ok');loadAccountSessions()}catch(e){toast(e.message,'err')} }
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-async function loadAccountSessions(){ const box=document.getElementById('sessionsList'); if(!box)return; try{const r=await fetch('/api/account/sessions',{headers:headers()});const d=await r.json();if(!r.ok)throw new Error(d.error); box.innerHTML=(d.sessions||[]).map(x=>'<div class="p-3 rounded-xl flex items-center justify-between gap-3" style="background:#101016;border:1px solid #252533"><div class="min-w-0"><div class="text-sm truncate">'+esc(x.device||'Dispositivo desconocido')+(x.current?' <span class="chip" style="font-size:9px">ACTUAL</span>':'')+'</div><div class="text-[10px] mt-1" style="color:#6b6b80">Última actividad: '+new Date(x.lastSeenAt).toLocaleString()+'</div></div>'+(x.current?'':'<button class="btn-ghost text-xs" onclick="closeAccountSession(\''+x.id+'\')">Cerrar</button>')+'</div>').join('')||'<div class="text-xs" style="color:#6b6b80">No hay sesiones activas.</div>'; }catch(e){box.innerHTML='<div class="text-xs" style="color:#f87171">No se pudieron cargar las sesiones.</div>'} }
+async function loadAccountSessions(){ const box=document.getElementById('sessionsList'); if(!box)return; try{const r=await fetch('/api/account/sessions',{headers:headers()});const d=await r.json();if(!r.ok)throw new Error(d.error); box.innerHTML=(d.sessions||[]).map(x=>'<div class="p-3 rounded-xl flex items-center justify-between gap-3" style="background:#101016;border:1px solid #252533"><div class="min-w-0"><div class="text-sm truncate">'+esc(x.device||'Dispositivo desconocido')+(x.current?' <span class="chip" style="font-size:9px">ACTUAL</span>':'')+'</div><div class="text-[10px] mt-1" style="color:#6b6b80">Última actividad: '+new Date(x.lastSeenAt).toLocaleString()+'</div></div>'+(x.current?'':'<button type="button" class="btn-ghost text-xs" onclick="closeAccountSession(\''+x.id+'\')">Cerrar</button>')+'</div>').join('')||'<div class="text-xs" style="color:#6b6b80">No hay sesiones activas.</div>'; }catch(e){box.innerHTML='<div class="text-xs" style="color:#f87171">No se pudieron cargar las sesiones.</div>'} }
 async function closeAccountSession(id){if(!confirm('¿Cerrar esta sesión?'))return;try{const r=await fetch('/api/account/sessions/'+encodeURIComponent(id),{method:'DELETE',headers:headers()}),d=await r.json();if(!r.ok)throw new Error(d.error);toast(d.message,'ok');loadAccountSessions()}catch(e){toast(e.message,'err')}}
 async function logoutOtherSessions(){if(!confirm('¿Cerrar todas las demás sesiones?'))return;try{const r=await fetch('/api/account/sessions/logout-others',{method:'POST',headers:headers()}),d=await r.json();if(!r.ok)throw new Error(d.error);toast(d.message,'ok');loadAccountSessions()}catch(e){toast(e.message,'err')}}
 async function deleteMyAccount(){const password=document.getElementById('deleteAccountPassword').value,confirmation=document.getElementById('deleteAccountConfirm').value;if(!confirm('ÚLTIMA CONFIRMACIÓN: ¿Eliminar permanentemente tu cuenta?'))return;try{const r=await fetch('/api/account',{method:'DELETE',headers:headers(),body:JSON.stringify({password,confirmation})}),d=await r.json();if(!r.ok)throw new Error(d.error);toast('Cuenta eliminada','ok');setTimeout(logout,700)}catch(e){toast(e.message,'err')}}
@@ -2909,7 +2988,7 @@ function renderScripts(list){
   const el = document.getElementById('scriptsList');
   const host = location.origin;
   if (!list.length) {
-    el.innerHTML = '<div class="card empty-state"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><div>'+t('scripts.empty')+'</div><button onclick="go(\'create\')" class="btn-primary mt-4 text-sm">'+t('scripts.first')+'</button></div>';
+    el.innerHTML = '<div class="card empty-state"><svg aria-hidden="true" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><div>'+t('scripts.empty')+'</div><button type="button" onclick="go(\'create\')" class="btn-primary mt-4 text-sm">'+t('scripts.first')+'</button></div>';
     return;
   }
   el.innerHTML = list.map(s => {
@@ -2928,23 +3007,23 @@ function renderScripts(list){
           '</div>'+
         '</div>'+
         '<div class="script-actions shrink-0">'+
-          '<button class="icon-btn" title="Página pública" onclick="window.open(scriptPublicUrl(\"'+s.id+'\"),\"_blank\")">🌐</button>'+
-          '<button class="icon-btn" title="Editar" onclick="editScript(\''+s.id+'\')">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>'+
+          '<button type="button" class="icon-btn" title="Página pública" onclick="window.open(scriptPublicUrl(\"'+s.id+'\"),\"_blank\")">🌐</button>'+
+          '<button type="button" class="icon-btn" title="Editar" onclick="editScript(\''+s.id+'\')">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>'+
           '</button>'+
-          '<button class="icon-btn" title="Copiar loadstring" onclick="copyLs(\''+ls.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+
+          '<button type="button" class="icon-btn" title="Copiar loadstring" onclick="copyLs(\''+ls.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+
           '</button>'+
-          '<button class="icon-btn" title="Copiar ID" onclick="copyLs(\''+s.id+'\')">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>'+
+          '<button type="button" class="icon-btn" title="Copiar ID" onclick="copyLs(\''+s.id+'\')">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>'+
           '</button>'+
-          '<button class="icon-btn" title="Versiones" onclick="showVersions(\''+s.id+'\')">⏱</button>'+
-          '<button class="icon-btn danger" title="Eliminar" onclick="delScript(\''+s.id+'\')">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'+
+          '<button type="button" class="icon-btn" title="Versiones" onclick="showVersions(\''+s.id+'\')">⏱</button>'+
+          '<button type="button" class="icon-btn danger" title="Eliminar" onclick="delScript(\''+s.id+'\')">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'+
           '</button>'+
         '</div>'+
       '</div>'+
-      '<pre class="text-[11px] overflow-x-auto #38BDF8space-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(ls)+'</pre>'+
+      '<pre class="text-[11px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(ls)+'</pre>'+
     '</div>';
   }).join('');
 }
@@ -3114,15 +3193,15 @@ function renderHub(list){
           '</div>'+
         '</div>'+
         '<div class="script-actions">'+
-          '<button class="icon-btn" title="Copiar loadstring" onclick="copyHubLs(\''+id+'\',\''+ (h.loadstring||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") +'\')">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+
+          '<button type="button" class="icon-btn" title="Copiar loadstring" onclick="copyHubLs(\''+id+'\',\''+ (h.loadstring||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") +'\')">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+
           '</button>'+
-          '<button class="icon-btn danger hub-del" data-owner="'+esc(h.ownerId||'')+'" title="Quitar del hub" onclick="delHub(\''+id+'\')" style="display:none">'+
-            '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'+
+          '<button type="button" class="icon-btn danger hub-del" data-owner="'+esc(h.ownerId||'')+'" title="Quitar del hub" onclick="delHub(\''+id+'\')" style="display:none">'+
+            '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'+
           '</button>'+
         '</div>'+
       '</div>'+
-      '<pre class="text-[11px] overflow-x-auto #38BDF8space-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(h.loadstring)+'</pre>'+
+      '<pre class="text-[11px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(h.loadstring)+'</pre>'+
     '</div>';
   }).join('');
   // show delete for own items
@@ -3171,6 +3250,7 @@ async function loadAdminCore(){
     document.getElementById('aScripts').textContent = st.scripts ?? '—';
     document.getElementById('aHub').textContent = st.hub ?? '—';
     document.getElementById('aPrem').textContent = st.premium ?? '—';
+    if (window.qxUpdateAdminOps) window.qxUpdateAdminOps(st);
   } catch {}
   try {
     const users = await fetch('/api/admin/users', { headers: headers() }).then(r=>r.json());
@@ -3184,7 +3264,7 @@ async function loadAdminCore(){
     const hub = await fetch('/api/hub').then(r=>r.json());
     document.getElementById('adminHub').innerHTML = (hub||[]).map(h => {
       const id = h._id || h.id;
-      return '<tr><td>'+esc(h.name)+'</td><td>@'+esc(h.ownerUsername)+'</td><td>'+(h.views||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelHub(\''+id+'\')">Eliminar</button></td></tr>';
+      return '<tr><td>'+esc(h.name)+'</td><td>@'+esc(h.ownerUsername)+'</td><td>'+(h.views||0)+'</td><td><button type="button" class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelHub(\''+id+'\')">Eliminar</button></td></tr>';
     }).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
   } catch {}
 }
@@ -3261,7 +3341,7 @@ async function loadAdminScripts(){
   try {
     const list = await fetch('/api/admin/scripts', { headers: headers() }).then(r=>r.json());
     document.getElementById('adminScripts').innerHTML = (list||[]).map(s =>
-      '<tr><td>'+esc(s.name)+'</td><td style="color:#5a5a6e;font-size:11px">'+esc((s.ownerId||'').slice(0,8))+'…</td><td>'+(s.executions||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelScript(\''+s.id+'\')">Eliminar</button></td></tr>'
+      '<tr><td>'+esc(s.name)+'</td><td style="color:#5a5a6e;font-size:11px">'+esc((s.ownerId||'').slice(0,8))+'…</td><td>'+(s.executions||0)+'</td><td><button type="button" class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelScript(\''+s.id+'\')">Eliminar</button></td></tr>'
     ).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
   } catch {}
 }
@@ -3394,8 +3474,8 @@ async function loadProviders(){
           (p.adLink ? '<div class="text-[10px] mt-0.5 break-all" style="color:#5a5a6e">Ad: '+esc(p.adLink)+'</div>' : '')+
           '</div>'+
           '<div class="flex gap-1 flex-shrink-0">'+
-          '<button class="icon-btn" title="Copiar claim" onclick="navigator.clipboard.writeText(\''+claim+'\');toast(\'Claim copiado\')">⧉</button>'+
-          '<button class="icon-btn danger" title="Eliminar" onclick="delProvider(\''+p._id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>'+
+          '<button type="button" class="icon-btn" title="Copiar claim" onclick="navigator.clipboard.writeText(\''+claim+'\');toast(\'Claim copiado\')">⧉</button>'+
+          '<button type="button" class="icon-btn danger" title="Eliminar" onclick="delProvider(\''+p._id+'\')"><svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>'+
           '</div></div></div>';
     }).join('');
     
@@ -3471,15 +3551,15 @@ async function loadKeysTable(){
       const hw = (k.hwids||[]).length + '/' + (k.hwidLimit||1);
       const off = k.enabled === false;
       return '<tr style="'+(off?'opacity:.5':'')+'">'+
-        '<td class="font-mono text-xs">'+esc(k.key)+' <button class="btn-ghost text-[10px] ml-1" onclick="copyLs(\''+k.key+'\')">copy</button></td>'+
+        '<td class="font-mono text-xs">'+esc(k.key)+' <button type="button" class="btn-ghost text-[10px] ml-1" onclick="copyLs(\''+k.key+'\')">copy</button></td>'+
         '<td>'+esc(k.providerName)+'</td>'+
         '<td>'+hw+'</td>'+
         '<td class="text-xs" style="color:#8b8b9e">'+esc(exp)+'</td>'+
         '<td>'+(k.uses||0)+'</td>'+
         '<td class="script-actions">'+
-          '<button class="icon-btn" title="Reset HWID" onclick="resetHwid(\''+k._id+'\')">↺</button>'+
-          '<button class="icon-btn" title="On/Off" onclick="toggleKey(\''+k._id+'\')">'+(off?'ON':'OFF')+'</button>'+
-          '<button class="icon-btn danger" onclick="delKey(\''+k._id+'\')">×</button>'+
+          '<button type="button" class="icon-btn" title="Reset HWID" onclick="resetHwid(\''+k._id+'\')">↺</button>'+
+          '<button type="button" class="icon-btn" title="On/Off" onclick="toggleKey(\''+k._id+'\')">'+(off?'ON':'OFF')+'</button>'+
+          '<button type="button" class="icon-btn danger" onclick="delKey(\''+k._id+'\')">×</button>'+
         '</td></tr>';
     }).join('');
   } catch(e) { console.error(e); }
@@ -3569,7 +3649,7 @@ async function loadWebhooks(){
   try {
     const list = await fetch('/api/webhooks', { headers: headers() }).then(r=>r.json());
     document.getElementById('whList').innerHTML = (list||[]).map(w =>
-      '<div class="card p-4 flex justify-between gap-2"><div class="text-xs break-all">'+esc(w.url)+'<div style="color:#5a5a6e">'+(w.events||[]).join(', ')+'</div></div><button class="icon-btn danger" onclick="delWebhook(\''+w._id+'\')">×</button></div>'
+      '<div class="card p-4 flex justify-between gap-2"><div class="text-xs break-all">'+esc(w.url)+'<div style="color:#5a5a6e">'+(w.events||[]).join(', ')+'</div></div><button type="button" class="icon-btn danger" onclick="delWebhook(\''+w._id+'\')">×</button></div>'
     ).join('') || '<div class="text-sm" style="color:#5a5a6e">Sin webhooks</div>';
   } catch {}
 }
@@ -3609,7 +3689,7 @@ async function loadAssets(){
   try {
     const list = await fetch('/api/assets', { headers: headers() }).then(r=>r.json());
     document.getElementById('assetList').innerHTML = (list||[]).map(a =>
-      '<div class="card p-4"><div class="flex justify-between"><div class="font-medium" style="color:#fafafa">'+esc(a.name)+'</div><button class="icon-btn danger" onclick="delAsset(\''+a._id+'\')">×</button></div><div class="text-xs mt-1" style="color:#5a5a6e">'+esc(a.type)+'</div><pre class="text-[11px] mt-2 overflow-auto" style="color:#8b8b9e;max-height:80px">'+esc((a.content||'').slice(0,300))+'</pre><button class="btn-ghost text-xs mt-2" onclick="copyLs('+JSON.stringify(a.content||'')+')">Copiar</button></div>'
+      '<div class="card p-4"><div class="flex justify-between"><div class="font-medium" style="color:#fafafa">'+esc(a.name)+'</div><button type="button" class="icon-btn danger" onclick="delAsset(\''+a._id+'\')">×</button></div><div class="text-xs mt-1" style="color:#5a5a6e">'+esc(a.type)+'</div><pre class="text-[11px] mt-2 overflow-auto" style="color:#8b8b9e;max-height:80px">'+esc((a.content||'').slice(0,300))+'</pre><button type="button" class="btn-ghost text-xs mt-2" onclick="copyLs('+JSON.stringify(a.content||'')+')">Copiar</button></div>'
     ).join('') || '<div style="color:#5a5a6e">Sin assets</div>';
   } catch {}
 }
@@ -3642,7 +3722,7 @@ function renderTemplates(){
   const el = document.getElementById('tplList');
   if (!el) return;
   el.innerHTML = TEMPLATES.map((t,i) =>
-    '<div class="card p-5"><div class="font-semibold" style="color:#fafafa">'+esc(t.name)+'</div><div class="text-xs mb-2" style="color:#5a5a6e">'+esc(t.desc)+'</div><pre class="text-[11px] p-2 rounded" style="background:#0c0c12;color:#8b8b9e">'+esc(t.code)+'</pre><div class="flex gap-2 mt-2"><button class="btn-ghost text-xs" onclick="copyLs(TEMPLATES['+i+'].code)">Copiar</button><button class="btn-primary text-xs" onclick="useTemplate('+i+')">Usar en Create</button></div></div>'
+    '<div class="card p-5"><div class="font-semibold" style="color:#fafafa">'+esc(t.name)+'</div><div class="text-xs mb-2" style="color:#5a5a6e">'+esc(t.desc)+'</div><pre class="text-[11px] p-2 rounded" style="background:#0c0c12;color:#8b8b9e">'+esc(t.code)+'</pre><div class="flex gap-2 mt-2"><button type="button" class="btn-ghost text-xs" onclick="copyLs(TEMPLATES['+i+'].code)">Copiar</button><button type="button" class="btn-primary text-xs" onclick="useTemplate('+i+')">Usar en Create</button></div></div>'
   ).join('');
 }
 function useTemplate(i){
@@ -3703,7 +3783,7 @@ async function loadAdminBlacklist(){
   try {
     const list = await fetch('/api/admin/blacklist', { headers: headers() }).then(r=>r.json());
     document.getElementById('adminBlacklist').innerHTML = (list||[]).map(b =>
-      '<div class="flex justify-between py-1"><span>'+esc(b.ip)+' — '+esc(b.reason||'')+'</span><button class="btn-ghost text-[10px]" onclick="adminDelBl(\''+b._id+'\')">x</button></div>'
+      '<div class="flex justify-between py-1"><span>'+esc(b.ip)+' — '+esc(b.reason||'')+'</span><button type="button" class="btn-ghost text-[10px]" onclick="adminDelBl(\''+b._id+'\')">x</button></div>'
     ).join('') || 'Vacío';
   } catch {}
 }
@@ -4084,7 +4164,7 @@ function hideLoader(){
 }
 window.addEventListener('load', ()=> setTimeout(hideLoader, 500), { once: true });
 (function bindLogoFallback(){
-  const fb = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16161f"/><text x="32" y="40" text-anchor="middle" font-family="Outfit,Inter,sans-serif" font-size="22" font-weight="700" fill="#f4f4f5">Q</text></svg>');
+  const fb = "data:image/svg+xml;utf8," + encodeURIComponent('<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16161f"/><text x="32" y="40" text-anchor="middle" font-family="Outfit,Inter,sans-serif" font-size="22" font-weight="700" fill="#f4f4f5">Q</text></svg>');
   document.querySelectorAll('img[src*="ibb.co"]').forEach(img => {
     img.addEventListener('error', function onErr(){ this.removeEventListener('error', onErr); this.src = fb; }, { once: true });
   });
@@ -4239,5 +4319,40 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal();
 #adminStats>.card:nth-child(4){border-top:2px solid rgba(64,137,224,.72)!important}
 #adminStats>.card .text-xs{color:#5f7790!important}
 </style>
+
+<script id="qx-production-utils">
+(function(){
+  const root=document.documentElement;
+  const reduced=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.dataset.motion=reduced?'reduced':'full';
+  const baseTitle='QrexApi';
+  const titleMap={overview:'Dashboard',scripts:'Scripts',create:'Create Script',studio:'Studio',hub:'Script Hub',keys:'Keys & Providers',webhooks:'Webhooks',admin:'Admin Center',settings:'Settings',status:'System Status',playground:'API Playground',logs:'Logs',executions:'Analytics',assets:'Assets',templates:'Templates',leaderboard:'Leaderboard',apiinfo:'API Info',changelog:'Changelog'};
+  window.addEventListener('qx:page-change',function(e){const k=e.detail&&e.detail.page;document.title=titleMap[k]?titleMap[k]+' | '+baseTitle:baseTitle;});
+  document.addEventListener('click',function(e){const b=e.target.closest('[onclick*\"go(\"], [onclick*=\"go(\'\")]');},true);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')){
+      const el=document.querySelector('#page-scripts:not(.hidden) #scriptSearch, #page-hub:not(.hidden) #hubSearch, #page-logs:not(.hidden) #logsSearch, #page-admin:not(.hidden) .qx-filter');
+      if(el){e.preventDefault();el.focus();el.select?.();}
+    }
+    if(e.key==='Escape'){document.querySelectorAll('.lang-switch.open').forEach(x=>x.classList.remove('open'));}
+  },{passive:false});
+  const setTxt=(id,v)=>{const n=document.getElementById(id);if(n)n.textContent=v};
+  window.qxUpdateAdminOps=function(st){
+    if(!st)return;
+    setTxt('qxAdminOpsUsers',st.users??'—');setTxt('qxAdminOpsScripts',st.scripts??'—');setTxt('qxAdminOpsHub',st.hub??'—');
+  };
+  const mo=new MutationObserver(()=>{
+    document.querySelectorAll('button:not([type])').forEach(b=>b.type='button');
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+<footer id="qxSiteFooter" class="qx-site-footer" aria-label="QrexApi footer">
+  <span>© 2026 QrexApi</span><span aria-hidden="true">·</span><a href="#" onclick="openLegal('terms');return false">Términos</a><a href="#" onclick="openLegal('privacy');return false">Privacidad</a><span class="qx-dim">Panel privado</span>
+</footer>
+
+<script id="qx-account-a11y">
+function syncAccountSecondary(source,target){try{const dst=document.getElementById(target);if(dst)dst.value=source.value}catch(e){}}
+</script>
 </body>
 </html>
