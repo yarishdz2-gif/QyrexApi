@@ -1680,82 +1680,157 @@ local Players = game:GetService(&quot;Players&quot;)
 
         <!-- ADMIN -->
         <section id="page-admin" class="page hidden">
-          <h1 class="text-2xl font-bold mb-2">Admin Panel</h1>
-          <p class="text-xs mb-6" style="color:#5a5a6e">Solo visible para OWNER / admin</p>
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="adminStats">
-            <div class="card p-4"><div class="text-xs" style="color:#6b6b80">Users</div><div class="text-2xl font-bold" id="aUsers">—</div></div>
-            <div class="card p-4"><div class="text-xs" style="color:#6b6b80">SCRIPTS</div><div class="text-2xl font-bold" id="aScripts">—</div></div>
-            <div class="card p-4"><div class="text-xs" style="color:#6b6b80">Hub</div><div class="text-2xl font-bold" id="aHub">—</div></div>
-            <div class="card p-4"><div class="text-xs" style="color:#6b6b80">Premium</div><div class="text-2xl font-bold" style="color:#fbbf24" id="aPrem">—</div></div>
-          </div>
-
-          <div class="card p-6 mb-6 max-w-xl" style="border-color:#33284f">
-            <div class="flex items-center justify-between gap-3 mb-1"><div class="text-sm font-semibold">Seguridad de cuentas</div><span class="text-[10px] px-2 py-1 rounded" style="background:#191624;color:#b8a7ff;border:1px solid #33284f">ADMIN</span></div>
-            <p class="text-xs mb-4" style="color:#6b6b80">Las contraseñas originales no se muestran. Puedes restablecer una contraseña tras confirmar el código de administrador.</p>
+          <div class="flex flex-wrap items-end justify-between gap-3 mb-2">
+            <div>
+              <h1 class="text-2xl font-bold">Admin Panel</h1>
+              <p class="text-xs mt-1" style="color:#5a5a6e">Gestión global · solo OWNER / admin</p>
+            </div>
             <div class="flex flex-wrap gap-2">
-              <input id="resetUser" placeholder="usuario" style="max-width:150px"/>
-              <input id="resetPass" type="password" placeholder="nueva contraseña" style="max-width:180px"/>
-              <input id="adminActionCode" type="password" placeholder="código admin" style="max-width:130px"/>
-              <button class="btn-primary text-sm" onclick="adminResetPassword()">Restablecer</button>
-            </div>
-            <div class="text-[11px] mt-3" style="color:#5a5a6e">Protección doble: sesión admin + código de acción.</div>
-          </div>
-
-          <div class="card p-6 mb-6 max-w-xl">
-            <div class="text-sm font-semibold mb-3">Dar / quitar Premium</div>
-            <div class="flex flex-wrap gap-2">
-              <input id="premUser" placeholder="username" style="max-width:160px"/>
-              <input id="premDays" type="number" placeholder="días (30)" value="30" style="max-width:110px"/>
-              <button class="btn-primary text-sm" onclick="adminSetPremium(true)">Activar</button>
-              <button class="btn-ghost text-sm" style="color:#f87171;border-color:#3a1a1a" onclick="adminSetPremium(false)">Quitar</button>
+              <button class="btn-ghost text-xs" onclick="loadAdmin()">↻ Refresh</button>
+              <button class="btn-ghost text-xs" onclick="adminExportData()">Exportar JSON</button>
             </div>
           </div>
 
-          <div class="card p-6 mb-6 max-w-xl">
-            <div class="text-sm font-semibold mb-1" style="color:#fbbf24">Llaves VIP (canje)</div>
-            <p class="text-xs mb-3" style="color:#5a5a6e">Genera códigos. Cada uno da VIP al canjearlos en Settings.</p>
-            <div class="flex flex-wrap gap-2 mb-3">
-              <input id="vipGenAmount" type="number" value="10" min="1" max="100" style="max-width:100px" placeholder="cantidad"/>
-              <input id="vipGenDays" type="number" value="10" min="1" style="max-width:100px" placeholder="días"/>
-              <button class="btn-primary text-sm" onclick="genVipKeysAdmin()">Generar llaves</button>
-            </div>
-            <textarea id="vipGenOut" readonly class="h-28 font-mono text-xs hidden" style="color:#fbbf24"></textarea>
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6" id="adminStats">
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Users</div><div class="text-xl font-bold mt-1" id="aUsers">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Scripts</div><div class="text-xl font-bold mt-1" id="aScripts">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Hub</div><div class="text-xl font-bold mt-1" id="aHub">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Premium</div><div class="text-xl font-bold mt-1" style="color:#fbbf24" id="aPrem">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Keys</div><div class="text-xl font-bold mt-1" id="aKeys">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Bans</div><div class="text-xl font-bold mt-1" style="color:#f87171" id="aBanned">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">IP Ban</div><div class="text-xl font-bold mt-1" id="aBl">—</div></div>
+            <div class="card p-3"><div class="text-[10px] uppercase tracking-wide" style="color:#6b6b80">Execs</div><div class="text-xl font-bold mt-1" id="aExecs">—</div></div>
           </div>
 
+          <!-- Quick search -->
+          <div class="card p-4 mb-6">
+            <div class="flex flex-wrap gap-2 items-center">
+              <input id="adminSearch" placeholder="Buscar usuario, script, IP o hub…" class="flex-1 min-w-[220px]" oninput="adminApplySearch()"/>
+              <select id="adminSearchType" onchange="adminApplySearch()" style="max-width:140px">
+                <option value="all">Todo</option>
+                <option value="users">Usuarios</option>
+                <option value="scripts">Scripts</option>
+                <option value="hub">Hub</option>
+                <option value="blacklist">Blacklist</option>
+              </select>
+              <button class="btn-ghost text-xs" onclick="document.getElementById('adminSearch').value='';adminApplySearch()">Limpiar</button>
+            </div>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Account security -->
+            <div class="card p-5" style="border-color:#33284f">
+              <div class="flex items-center justify-between gap-3 mb-1">
+                <div class="text-sm font-semibold">Seguridad de cuentas</div>
+                <span class="text-[10px] px-2 py-1 rounded" style="background:#191624;color:#b8a7ff;border:1px solid #33284f">ADMIN</span>
+              </div>
+              <p class="text-xs mb-3" style="color:#6b6b80">Restablecer contraseña con código de acción.</p>
+              <div class="flex flex-wrap gap-2">
+                <input id="resetUser" placeholder="usuario" style="max-width:140px"/>
+                <input id="resetPass" type="password" placeholder="nueva contraseña" style="max-width:160px"/>
+                <input id="adminActionCode" type="password" placeholder="código admin" style="max-width:120px"/>
+                <button class="btn-primary text-sm" onclick="adminResetPassword()">Restablecer</button>
+              </div>
+              <div class="text-[11px] mt-3" style="color:#5a5a6e">Código por defecto offline: <code style="color:#c4b5fd">qrex-admin</code></div>
+            </div>
+
+            <!-- Premium + VIP keys -->
+            <div class="card p-5">
+              <div class="text-sm font-semibold mb-3">Premium &amp; VIP keys</div>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <input id="premUser" placeholder="username" style="max-width:140px"/>
+                <input id="premDays" type="number" placeholder="días" value="30" style="max-width:90px"/>
+                <button class="btn-primary text-sm" onclick="adminSetPremium(true)">Activar</button>
+                <button class="btn-ghost text-sm" style="color:#f87171;border-color:#3a1a1a" onclick="adminSetPremium(false)">Quitar</button>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-2">
+                <input id="vipGenAmount" type="number" value="5" min="1" max="50" style="max-width:90px" placeholder="cant."/>
+                <input id="vipGenDays" type="number" value="10" min="1" style="max-width:90px" placeholder="días"/>
+                <button class="btn-primary text-sm" onclick="genVipKeysAdmin()">Generar llaves VIP</button>
+              </div>
+              <textarea id="vipGenOut" readonly class="h-20 font-mono text-xs hidden w-full" style="color:#fbbf24"></textarea>
+            </div>
+          </div>
+
+          <!-- Users table -->
           <div class="card overflow-hidden mb-6">
-            <div class="px-5 py-3 border-b text-sm font-semibold" style="border-color:#1e1e2a">Usuarios</div>
+            <div class="px-5 py-3 border-b flex flex-wrap items-center justify-between gap-2" style="border-color:#1e1e2a">
+              <span class="text-sm font-semibold">Usuarios <span id="adminUsersCount" class="text-xs font-normal" style="color:#6b6b80"></span></span>
+              <div class="flex gap-2">
+                <button class="btn-ghost text-xs" onclick="adminFilterUsers('all')">Todos</button>
+                <button class="btn-ghost text-xs" onclick="adminFilterUsers('banned')">Baneados</button>
+                <button class="btn-ghost text-xs" onclick="adminFilterUsers('premium')">Premium</button>
+                <button class="btn-ghost text-xs" onclick="adminFilterUsers('admin')">Admins</button>
+              </div>
+            </div>
             <div class="overflow-x-auto">
               <table>
-                <thead><tr><th>User</th><th>Role</th><th>Premium</th><th>Desde</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Rol</th>
+                    <th>Premium</th>
+                    <th>Estado</th>
+                    <th>Desde</th>
+                    <th style="min-width:280px">Acciones</th>
+                  </tr>
+                </thead>
                 <tbody id="adminUsers"></tbody>
               </table>
             </div>
           </div>
 
+          <!-- Scripts table -->
           <div class="card overflow-hidden mb-6">
-            <div class="px-5 py-3 border-b text-sm font-semibold flex justify-between" style="border-color:#1e1e2a">
-              <span>Todos los scripts</span>
+            <div class="px-5 py-3 border-b text-sm font-semibold flex justify-between items-center" style="border-color:#1e1e2a">
+              <span>Todos los scripts <span id="adminScriptsCount" class="text-xs font-normal" style="color:#6b6b80"></span></span>
               <button class="btn-ghost text-xs" onclick="loadAdminScripts()">Refresh</button>
             </div>
             <div class="overflow-x-auto">
               <table>
-                <thead><tr><th>Name</th><th>Owner</th><th>Runs</th><th></th></tr></thead>
+                <thead><tr><th>Name</th><th>Owner</th><th>Vis.</th><th>Runs</th><th></th></tr></thead>
                 <tbody id="adminScripts"></tbody>
               </table>
             </div>
           </div>
 
-          <div class="card p-6 mb-6 max-w-xl">
-            <div class="text-sm font-semibold mb-3">IP Blacklist</div>
-            <div class="flex gap-2 mb-3">
-              <input id="blIp" placeholder="IP" style="max-width:160px"/>
-              <input id="blReason" placeholder="Razón" style="max-width:160px"/>
-              <button class="btn-primary text-sm" onclick="adminAddBlacklist()">Ban IP</button>
+          <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Blacklist -->
+            <div class="card p-5">
+              <div class="text-sm font-semibold mb-3">IP Blacklist</div>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <input id="blIp" placeholder="IP" style="max-width:150px"/>
+                <input id="blReason" placeholder="Razón" style="max-width:150px"/>
+                <button class="btn-primary text-sm" onclick="adminAddBlacklist()">Ban IP</button>
+              </div>
+              <div id="adminBlacklist" class="text-xs space-y-1 max-h-48 overflow-y-auto" style="color:#8b8b9e"></div>
             </div>
-            <div id="adminBlacklist" class="text-xs space-y-1" style="color:#8b8b9e"></div>
+
+            <!-- Broadcast + tools -->
+            <div class="card p-5">
+              <div class="text-sm font-semibold mb-3">Broadcast &amp; herramientas</div>
+              <div class="flex flex-wrap gap-2 mb-2">
+                <input id="bcTitle" placeholder="Título" style="max-width:160px"/>
+                <input id="bcMsg" placeholder="Mensaje" class="flex-1 min-w-[160px]"/>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <select id="bcType" style="max-width:120px">
+                  <option value="info">Info</option>
+                  <option value="success">Success</option>
+                  <option value="warn">Warn</option>
+                </select>
+                <button class="btn-primary text-sm" onclick="adminBroadcast()">Enviar aviso</button>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <button class="btn-ghost text-xs" onclick="adminClearLogs()">Limpiar logs</button>
+                <button class="btn-ghost text-xs" onclick="adminChangeCode()">Cambiar código admin</button>
+              </div>
+              <div class="text-[11px]" style="color:#5a5a6e">El aviso aparece en notificaciones del panel.</div>
+            </div>
           </div>
 
-          <div class="card overflow-hidden">
+          <!-- Hub -->
+          <div class="card overflow-hidden mb-6">
             <div class="px-5 py-3 border-b text-sm font-semibold" style="border-color:#1e1e2a">Hub público</div>
             <div class="overflow-x-auto">
               <table>
@@ -1764,6 +1839,23 @@ local Players = game:GetService(&quot;Players&quot;)
               </table>
             </div>
           </div>
+
+          <!-- Audit log -->
+          <div class="card overflow-hidden">
+            <div class="px-5 py-3 border-b text-sm font-semibold flex justify-between" style="border-color:#1e1e2a">
+              <span>Audit log</span>
+              <button class="btn-ghost text-xs" onclick="loadAdminAudit()">Refresh</button>
+            </div>
+            <div class="overflow-x-auto max-h-64">
+              <table>
+                <thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead>
+                <tbody id="adminAudit"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
         </section>
 
 
@@ -2029,19 +2121,37 @@ local Players = game:GetService(&quot;Players&quot;)
   function seed(){
     const p1=uid();
     return {
-      user:{id:'u_'+uid(),username:'',displayName:'',role:'user',vip:false,avatar:'',bio:''},
+      user:{id:'u_'+uid(),username:'',displayName:'',role:'user',vip:false,premium:false,avatar:'',bio:'',banned:false,createdAt:now()},
+      users:[],
       token:'',
+      adminCode:'qrex-admin',
       scripts:[],
-      providers:[{id:p1,name:'Main',slug:'main',enabled:true}],
+      providers:[{id:p1,name:'Main',slug:'main',enabled:true,keyValidityHours:24,hwidLimit:1}],
       keys:[],
       logs:[],
       webhooks:[],
       hub:[],
+      blacklist:[],
+      audit:[],
+      vipKeys:[],
       notifs:[{id:uid(),title:'Bienvenido a QrexApi',message:'Tu panel está listo. Usa Ctrl+K para navegar.',type:'success',read:false,createdAt:now()}],
       executions: Array.from({length:7},(_,i)=>({day:daysAgo(6-i).slice(0,10),count:0}))
     };
   }
-  function get(){try{const x=JSON.parse(localStorage.getItem(SK)||'null');if(x&&x.scripts)return x}catch{} const s=seed();set(s);return s}
+  function get(){try{const x=JSON.parse(localStorage.getItem(SK)||'null');if(x&&x.scripts){
+      if(!Array.isArray(x.users)) x.users=[];
+      if(!Array.isArray(x.blacklist)) x.blacklist=[];
+      if(!Array.isArray(x.audit)) x.audit=[];
+      if(!Array.isArray(x.vipKeys)) x.vipKeys=[];
+      if(!x.adminCode) x.adminCode='qrex-admin';
+      // ensure current user is in users list
+      if(x.user&&x.user.username){
+        const found=x.users.find(u=>u.username===x.user.username);
+        if(!found){ const u=Object.assign({password:''},x.user); if(!u.role) u.role='admin'; x.users.push(u); }
+        else if(x.user.role) found.role=x.user.role;
+      }
+      return x;
+    }}catch{} const s=seed();set(s);return s}
   function set(s){localStorage.setItem(SK,JSON.stringify(s))}
   function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}})}
   function bodyOf(init){try{return JSON.parse(init&&init.body||'{}')}catch{return {}}}
@@ -2072,16 +2182,37 @@ local Players = game:GetService(&quot;Players&quot;)
       if(method==='POST'){
         const user=String(b.username||'').trim();
         if(!user||!b.password) return json({error:'Pon usuario y contraseña'},400);
-        s.user.id = s.user.id || ('u_'+uid());
-        s.user.username = user;
-        s.user.displayName = s.user.displayName || user;
-        s.user.role = s.user.role || 'user';
+        if(!Array.isArray(s.users)) s.users=[];
+        let acc = s.users.find(u=>u.username.toLowerCase()===user.toLowerCase());
+        if(path.includes('register')){
+          if(acc) return json({error:'Usuario ya existe'},400);
+          const isFirst = s.users.length===0;
+          acc = {id:'u_'+uid(),username:user,displayName:user,role:isFirst?'admin':'user',vip:isFirst,premium:isFirst,avatar:'',bio:'',banned:false,createdAt:now(),password:String(b.password)};
+          s.users.push(acc);
+        } else {
+          if(!acc){
+            // auto-create on first login for offline convenience
+            const isFirst = s.users.length===0;
+            acc = {id:'u_'+uid(),username:user,displayName:user,role:isFirst?'admin':'user',vip:isFirst,premium:isFirst,avatar:'',bio:'',banned:false,createdAt:now(),password:String(b.password)};
+            s.users.push(acc);
+          } else if(acc.password && acc.password !== String(b.password)){
+            return json({error:'Credenciales inválidas'},401);
+          }
+          if(acc.banned) return json({error:'Cuenta suspendida'},403);
+        }
+        s.user = Object.assign({}, acc); delete s.user.password;
         s.token = 'tok-'+uid();
         set(s);
         return json({token:s.token,user:s.user});
       }
     }
-    if(path==='/api/me') return json(s.user);
+    if(path==='/api/me'){
+      if(s.user&&s.user.username&&Array.isArray(s.users)){
+        const u=s.users.find(x=>x.username===s.user.username);
+        if(u){ const out=Object.assign({},u); delete out.password; return json(out); }
+      }
+      return json(s.user||{});
+    }
     if(path==='/api/notifications') return json({notifications:s.notifs});
     if(path==='/api/notifications/read-all'&&method==='POST'){s.notifs.forEach(n=>n.read=true);set(s);return json({ok:true})}
     if(path==='/api/account/profile'&&method==='PATCH'){Object.assign(s.user,b);set(s);return json(s.user)}
@@ -2089,7 +2220,7 @@ local Players = game:GetService(&quot;Players&quot;)
     if(path.startsWith('/api/account')) return json({ok:true,message:'Guardado'});
     if(path==='/api/scripts'||path==='/api/v1/scripts'){
       if(method==='POST'){
-        const item={id:uid(),name:b.name||'Nuevo',game:b.game||'Universal',version:b.version||'1.0.0',visibility:b.visibility||'private',obfuscation:b.obfuscation||'none',executions:0,createdAt:now(),updatedAt:now(),source:b.source||b.code||'-- script'};
+        const item={id:uid(),name:b.name||'Nuevo',game:b.game||'Universal',version:b.version||'1.0.0',visibility:b.visibility||'private',obfuscation:b.obfuscation||'none',executions:0,createdAt:now(),updatedAt:now(),source:b.source||b.code||'-- script',ownerId:s.user&&s.user.id,ownerUsername:s.user&&s.user.username};
         s.scripts.unshift(item); set(s); return json(item);
       }
       return json({scripts:s.scripts});
@@ -2113,14 +2244,188 @@ local Players = game:GetService(&quot;Players&quot;)
     }
     if(path==='/api/providers') return json({providers:s.providers});
     if(path==='/api/logs') return json({logs:s.logs});
-    if(path==='/api/hub') return json({hub:s.hub,items:s.hub});
+    if(path==='/api/hub'){
+      const hub=(s.hub||[]).map(h=>({...h, ownerUsername:h.ownerUsername|| (s.user&&s.user.username)||'—', views:h.views||h.executions||0, _id:h.id||h._id}));
+      return json(hub);
+    }
     if(path==='/api/webhooks'){
       if(method==='POST'){const w={id:uid(),name:b.name||'Webhook',url:b.url||'',events:b.events||[],enabled:true};s.webhooks.unshift(w);set(s);return json(w)}
       return json({webhooks:s.webhooks});
     }
     if(path==='/api/stats'||path==='/api/overview') return json({scripts:s.scripts.length,executions:s.scripts.reduce((a,x)=>a+x.executions,0),keys:s.keys.length,users:1});
     if(path==='/api/analytics'||path.includes('analytics')) return json({daily:s.executions,hourly:s.executions,scripts:s.scripts.map(x=>({name:x.name,executions:x.executions}))});
-    if(path==='/api/admin'||path.startsWith('/api/admin')) return json({users:[],ok:true});
+    if(path.startsWith('/api/admin')){
+      if(!Array.isArray(s.users)) s.users=[];
+      if(!Array.isArray(s.blacklist)) s.blacklist=[];
+      if(!Array.isArray(s.audit)) s.audit=[];
+      if(!Array.isArray(s.vipKeys)) s.vipKeys=[];
+      const ensureAdmin=()=>{ if(!s.user||s.user.role!=='admin') return false; return true; };
+      const audit=(action,detail)=>{ s.audit.unshift({id:uid(),action,detail,by:s.user&&s.user.username,at:now()}); if(s.audit.length>200) s.audit.length=200; };
+
+      if(path==='/api/admin/stats'){
+        return json({
+          users:s.users.length,
+          scripts:s.scripts.length,
+          hub:s.hub.length,
+          premium:s.users.filter(u=>u.premium||u.vip).length,
+          keys:s.keys.length,
+          banned:s.users.filter(u=>u.banned).length,
+          blacklist:s.blacklist.length,
+          executions:s.scripts.reduce((a,x)=>a+(x.executions||0),0)
+        });
+      }
+      if(path==='/api/admin/users'){
+        if(method==='GET') return json(s.users.map(u=>({id:u.id,username:u.username,displayName:u.displayName,role:u.role,premium:!!(u.premium||u.vip),banned:!!u.banned,createdAt:u.createdAt,bio:u.bio||''})));
+      }
+      if(path==='/api/admin/users/delete'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const uname=String(b.username||'').trim().toLowerCase();
+        if(!uname) return json({error:'Usuario requerido'},400);
+        if(s.user&&s.user.username&&s.user.username.toLowerCase()===uname) return json({error:'No puedes eliminarte a ti mismo'},400);
+        const before=s.users.length;
+        s.users=s.users.filter(u=>u.username.toLowerCase()!==uname);
+        s.scripts=s.scripts.filter(x=>String(x.ownerUsername||'').toLowerCase()!==uname);
+        audit('user.delete', uname);
+        set(s);
+        return json({ok:true,removed:before-s.users.length});
+      }
+      if(path==='/api/admin/users/ban'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const uname=String(b.username||'').trim().toLowerCase();
+        const ban=b.banned!==false && b.banned!==0;
+        const u=s.users.find(x=>x.username.toLowerCase()===uname);
+        if(!u) return json({error:'Usuario no encontrado'},404);
+        if(u.role==='admin'&&ban) return json({error:'No puedes banear un admin'},400);
+        u.banned=!!ban;
+        audit(ban?'user.ban':'user.unban', uname);
+        set(s);
+        return json({ok:true,user:{username:u.username,banned:u.banned}});
+      }
+      if(path==='/api/admin/users/role'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const uname=String(b.username||'').trim().toLowerCase();
+        const role=String(b.role||'user');
+        if(!['user','admin','mod'].includes(role)) return json({error:'Rol inválido'},400);
+        const u=s.users.find(x=>x.username.toLowerCase()===uname);
+        if(!u) return json({error:'Usuario no encontrado'},404);
+        if(s.user&&s.user.username&&s.user.username.toLowerCase()===uname&&role!=='admin') return json({error:'No puedes quitarte el rol admin'},400);
+        u.role=role;
+        audit('user.role', uname+' -> '+role);
+        set(s);
+        return json({ok:true,user:{username:u.username,role:u.role}});
+      }
+      if(path==='/api/admin/reset-password'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        if(String(b.adminCode||'')!==String(s.adminCode||'qrex-admin')) return json({error:'Código admin inválido'},403);
+        const uname=String(b.username||'').trim().toLowerCase();
+        const u=s.users.find(x=>x.username.toLowerCase()===uname);
+        if(!u) return json({error:'Usuario no encontrado'},404);
+        if(String(b.newPassword||'').length<8) return json({error:'Mínimo 8 caracteres'},400);
+        u.password=String(b.newPassword);
+        audit('user.reset_password', uname);
+        set(s);
+        return json({ok:true,username:u.username});
+      }
+      if(path==='/api/admin/premium'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const uname=String(b.username||'').trim().toLowerCase();
+        const u=s.users.find(x=>x.username.toLowerCase()===uname);
+        if(!u) return json({error:'Usuario no encontrado'},404);
+        const on=!!b.premium;
+        u.premium=on; u.vip=on;
+        if(on){ const d=new Date(); d.setDate(d.getDate()+Number(b.days||30)); u.premiumUntil=d.toISOString(); }
+        else u.premiumUntil=null;
+        audit(on?'user.premium_on':'user.premium_off', uname);
+        set(s);
+        return json({ok:true,username:u.username,premium:u.premium,premiumUntil:u.premiumUntil});
+      }
+      if(path==='/api/admin/scripts'){
+        if(method==='GET') return json(s.scripts.map(x=>({id:x.id,name:x.name,ownerId:x.ownerId||'',ownerUsername:x.ownerUsername||'',executions:x.executions||0,visibility:x.visibility,version:x.version,createdAt:x.createdAt})));
+      }
+      if(path.match(/^\/api\/admin\/scripts\/[^/]+$/)&&method==='DELETE'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const id=path.split('/').pop();
+        s.scripts=s.scripts.filter(x=>x.id!==id);
+        s.hub=s.hub.filter(h=>(h.scriptId||h.id)!==id);
+        audit('script.delete', id);
+        set(s);
+        return json({ok:true});
+      }
+      if(path.match(/^\/api\/admin\/hub\/[^/]+$/)&&method==='DELETE'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const id=path.split('/').pop();
+        s.hub=s.hub.filter(h=>(h.id||h._id)!==id);
+        audit('hub.delete', id);
+        set(s);
+        return json({ok:true});
+      }
+      if(path==='/api/admin/blacklist'){
+        if(method==='GET') return json(s.blacklist);
+        if(method==='POST'){
+          if(!ensureAdmin()) return json({error:'Solo admin'},403);
+          const ip=String(b.ip||'').trim();
+          if(!ip) return json({error:'IP requerida'},400);
+          const item={_id:uid(),ip,reason:b.reason||'',createdAt:now()};
+          s.blacklist.unshift(item);
+          audit('blacklist.add', ip);
+          set(s);
+          return json(item);
+        }
+      }
+      if(path.match(/^\/api\/admin\/blacklist\/[^/]+$/)&&method==='DELETE'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const id=path.split('/').pop();
+        s.blacklist=s.blacklist.filter(x=>x._id!==id);
+        set(s);
+        return json({ok:true});
+      }
+      if(path==='/api/admin/vip-keys'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const amount=Math.min(50,Math.max(1,Number(b.amount||1)));
+        const days=Number(b.days||10);
+        const keys=[];
+        for(let i=0;i<amount;i++){
+          const k={id:uid(),code:'VIP-'+uid().toUpperCase().slice(0,10),days,note:b.note||'',used:false,createdAt:now()};
+          s.vipKeys.unshift(k); keys.push(k);
+        }
+        audit('vip.keys', amount+' keys');
+        set(s);
+        return json({keys,created:keys.length});
+      }
+      if(path==='/api/admin/broadcast'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        const title=String(b.title||'Aviso').slice(0,80);
+        const message=String(b.message||'').slice(0,300);
+        s.notifs.unshift({id:uid(),title,message,type:b.type||'info',read:false,createdAt:now()});
+        audit('broadcast', title);
+        set(s);
+        return json({ok:true});
+      }
+      if(path==='/api/admin/audit'){
+        return json({audit:s.audit||[]});
+      }
+      if(path==='/api/admin/set-code'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        if(String(b.adminCode||'')!==String(s.adminCode||'qrex-admin')) return json({error:'Código actual inválido'},403);
+        if(String(b.newCode||'').length<4) return json({error:'Nuevo código muy corto'},400);
+        s.adminCode=String(b.newCode);
+        audit('admin.code_change','*');
+        set(s);
+        return json({ok:true});
+      }
+      if(path==='/api/admin/clear-logs'&&method==='POST'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        s.logs=[];
+        audit('logs.clear','');
+        set(s);
+        return json({ok:true});
+      }
+      if(path==='/api/admin/export'&&method==='GET'){
+        if(!ensureAdmin()) return json({error:'Solo admin'},403);
+        return json({users:s.users.map(u=>({username:u.username,role:u.role,premium:u.premium,banned:u.banned,createdAt:u.createdAt})),scripts:s.scripts.map(x=>({id:x.id,name:x.name,executions:x.executions})),keys:s.keys.length,exportedAt:now()});
+      }
+      return json({ok:true,admin:true});
+    }
     if(path==='/api/status') return json({ok:true,latency:12,version:'3.1'});
     if(path==='/api/leaderboard') return json({rows:s.scripts.map((x,i)=>({rank:i+1,name:x.name,executions:x.executions}))});
     if(path==='/api/assets') return json({assets:[]});
@@ -3155,37 +3460,165 @@ async function fillHubSelect(){
 
 async function loadAdmin(){
   if (!currentUser || currentUser.role !== 'admin') { toast('Solo admin', 'err'); return; }
+  window.__adminUsersCache = [];
+  window.__adminScriptsCache = [];
+  window.__adminHubCache = [];
+  window.__adminUserFilter = 'all';
   try {
     const st = await fetch('/api/admin/stats', { headers: headers() }).then(r=>r.json());
-    document.getElementById('aUsers').textContent = st.users ?? '—';
-    document.getElementById('aScripts').textContent = st.scripts ?? '—';
-    document.getElementById('aHub').textContent = st.hub ?? '—';
-    document.getElementById('aPrem').textContent = st.premium ?? '—';
+    const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent = (v??'—'); };
+    set('aUsers', st.users); set('aScripts', st.scripts); set('aHub', st.hub); set('aPrem', st.premium);
+    set('aKeys', st.keys); set('aBanned', st.banned); set('aBl', st.blacklist); set('aExecs', st.executions);
   } catch {}
   try {
     const users = await fetch('/api/admin/users', { headers: headers() }).then(r=>r.json());
-    document.getElementById('adminUsers').innerHTML = (users||[]).map(u =>
-      '<tr><td>@'+esc(u.username)+'</td><td>'+esc(u.role)+'</td><td style="color:'+(u.premium?'#fbbf24':'#5a5a6e')+'">'+(u.premium?'Yes':'No')+'</td><td style="color:#5a5a6e">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString():'-')+'</td></tr>'
-    ).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Sin usuarios</td></tr>';
+    window.__adminUsersCache = Array.isArray(users) ? users : [];
+    renderAdminUsers();
   } catch {}
-  loadAdminScripts();
-  loadAdminBlacklist();
+  await loadAdminScripts();
+  await loadAdminBlacklist();
   try {
-    const hub = await fetch('/api/hub').then(r=>r.json());
-    document.getElementById('adminHub').innerHTML = (hub||[]).map(h => {
-      const id = h._id || h.id;
-      return '<tr><td>'+esc(h.name)+'</td><td>@'+esc(h.ownerUsername)+'</td><td>'+(h.views||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelHub(\''+id+'\')">Eliminar</button></td></tr>';
-    }).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
+    const hubRaw = await fetch('/api/hub').then(r=>r.json());
+    const hub = Array.isArray(hubRaw) ? hubRaw : (hubRaw.hub || hubRaw.items || []);
+    window.__adminHubCache = hub;
+    renderAdminHub();
   } catch {}
+  await loadAdminAudit();
+}
+
+function adminFilterUsers(f){
+  window.__adminUserFilter = f || 'all';
+  renderAdminUsers();
+}
+
+function adminApplySearch(){
+  renderAdminUsers();
+  renderAdminScripts();
+  renderAdminHub();
+  // blacklist search is live via filter in render if needed
+  const q = (document.getElementById('adminSearch')?.value || '').toLowerCase().trim();
+  const type = document.getElementById('adminSearchType')?.value || 'all';
+  if ((type==='all'||type==='blacklist') && q) {
+    // re-filter blacklist rows by text
+    const box = document.getElementById('adminBlacklist');
+    if (box) {
+      Array.from(box.children).forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+  }
+}
+
+function renderAdminUsers(){
+  const tb = document.getElementById('adminUsers');
+  if (!tb) return;
+  const q = (document.getElementById('adminSearch')?.value || '').toLowerCase().trim();
+  const type = document.getElementById('adminSearchType')?.value || 'all';
+  const f = window.__adminUserFilter || 'all';
+  let list = window.__adminUsersCache || [];
+  if (f === 'banned') list = list.filter(u => u.banned);
+  if (f === 'premium') list = list.filter(u => u.premium);
+  if (f === 'admin') list = list.filter(u => u.role === 'admin');
+  if (q && (type==='all'||type==='users')) {
+    list = list.filter(u => (u.username||'').toLowerCase().includes(q) || (u.displayName||'').toLowerCase().includes(q) || (u.role||'').toLowerCase().includes(q));
+  }
+  const countEl = document.getElementById('adminUsersCount');
+  if (countEl) countEl.textContent = '('+list.length+')';
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="text-center py-6" style="color:#5a5a6e">Sin usuarios</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(u => {
+    const un = esc(u.username||'');
+    const prem = u.premium ? '<span style="color:#fbbf24">Yes</span>' : '<span style="color:#5a5a6e">No</span>';
+    const st = u.banned
+      ? '<span style="color:#f87171;font-weight:600">BAN</span>'
+      : '<span style="color:#34d399">OK</span>';
+    const roleChip = u.role==='admin'
+      ? '<span class="chip" style="background:#191624;color:#c4b5fd;border-color:#33284f">admin</span>'
+      : esc(u.role||'user');
+    const me = currentUser && currentUser.username === u.username;
+    const actions = [
+      '<button class="btn-ghost text-[10px]" title="Premium" onclick="adminQuickPremium(\''+un+'\','+(u.premium?'false':'true')+')">'+(u.premium?'−VIP':'+VIP')+'</button>',
+      '<button class="btn-ghost text-[10px]" onclick="adminQuickRole(\''+un+'\')">'+(u.role==='admin'?'→user':'→admin')+'</button>',
+      '<button class="btn-ghost text-[10px]" style="color:'+(u.banned?'#34d399':'#fbbf24')+'" onclick="adminQuickBan(\''+un+'\','+(u.banned?'false':'true')+')">'+(u.banned?'Unban':'Ban')+'</button>',
+      me ? '' : '<button class="btn-ghost text-[10px]" style="color:#f87171;border-color:#3a1a1a" onclick="adminDeleteUser(\''+un+'\')">Eliminar</button>'
+    ].filter(Boolean).join(' ');
+    return '<tr data-user="'+un+'">'+
+      '<td>@'+un+(me?' <span class="text-[10px]" style="color:#6b6b80">(tú)</span>':'')+'</td>'+
+      '<td>'+roleChip+'</td>'+
+      '<td>'+prem+'</td>'+
+      '<td>'+st+'</td>'+
+      '<td style="color:#5a5a6e;font-size:11px">'+(u.createdAt?new Date(u.createdAt).toLocaleDateString():'-')+'</td>'+
+      '<td><div class="flex flex-wrap gap-1">'+actions+'</div></td></tr>';
+  }).join('');
+}
+
+function renderAdminScripts(){
+  const tb = document.getElementById('adminScripts');
+  if (!tb) return;
+  const q = (document.getElementById('adminSearch')?.value || '').toLowerCase().trim();
+  const type = document.getElementById('adminSearchType')?.value || 'all';
+  let list = window.__adminScriptsCache || [];
+  if (q && (type==='all'||type==='scripts')) {
+    list = list.filter(s => (s.name||'').toLowerCase().includes(q) || (s.ownerUsername||'').toLowerCase().includes(q) || (s.id||'').toLowerCase().includes(q));
+  }
+  const countEl = document.getElementById('adminScriptsCount');
+  if (countEl) countEl.textContent = '('+list.length+')';
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="5" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(s => {
+    const id = s.id || s._id;
+    const owner = s.ownerUsername ? '@'+esc(s.ownerUsername) : esc((s.ownerId||'').toString().slice(0,8)||'—');
+    return '<tr><td>'+esc(s.name||'—')+'</td><td style="color:#5a5a6e;font-size:11px">'+owner+'</td><td style="color:#6b6b80;font-size:11px">'+esc(s.visibility||'—')+'</td><td>'+(s.executions||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelScript(\''+id+'\')">Eliminar</button></td></tr>';
+  }).join('');
+}
+
+function renderAdminHub(){
+  const tb = document.getElementById('adminHub');
+  if (!tb) return;
+  const q = (document.getElementById('adminSearch')?.value || '').toLowerCase().trim();
+  const type = document.getElementById('adminSearchType')?.value || 'all';
+  let hub = window.__adminHubCache || [];
+  if (q && (type==='all'||type==='hub')) {
+    hub = hub.filter(h => (h.name||'').toLowerCase().includes(q) || (h.ownerUsername||'').toLowerCase().includes(q));
+  }
+  if (!hub.length) {
+    tb.innerHTML = '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
+    return;
+  }
+  tb.innerHTML = hub.map(h => {
+    const id = h._id || h.id;
+    return '<tr><td>'+esc(h.name)+'</td><td>@'+esc(h.ownerUsername||'—')+'</td><td>'+(h.views||h.executions||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelHub(\''+id+'\')">Eliminar</button></td></tr>';
+  }).join('');
 }
 
 async function loadAdminScripts(){
   try {
     const list = await fetch('/api/admin/scripts', { headers: headers() }).then(r=>r.json());
-    document.getElementById('adminScripts').innerHTML = (list||[]).map(s =>
-      '<tr><td>'+esc(s.name)+'</td><td style="color:#5a5a6e;font-size:11px">'+esc((s.ownerId||'').slice(0,8))+'…</td><td>'+(s.executions||0)+'</td><td><button class="btn-ghost text-xs" style="color:#f87171;border-color:#3a1a1a" onclick="adminDelScript(\''+s.id+'\')">Eliminar</button></td></tr>'
-    ).join('') || '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Vacío</td></tr>';
+    window.__adminScriptsCache = Array.isArray(list) ? list : [];
+    renderAdminScripts();
   } catch {}
+}
+
+async function loadAdminAudit(){
+  const tb = document.getElementById('adminAudit');
+  if (!tb) return;
+  try {
+    const d = await fetch('/api/admin/audit', { headers: headers() }).then(r=>r.json());
+    const list = d.audit || d || [];
+    if (!list.length) {
+      tb.innerHTML = '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">Sin eventos</td></tr>';
+      return;
+    }
+    tb.innerHTML = list.slice(0,80).map(a =>
+      '<tr><td style="color:#5a5a6e;font-size:11px">'+(a.at?new Date(a.at).toLocaleString():'-')+'</td><td>@'+esc(a.by||'?')+'</td><td>'+esc(a.action||'')+'</td><td style="color:#8b8b9e">'+esc(a.detail||'')+'</td></tr>'
+    ).join('');
+  } catch {
+    tb.innerHTML = '<tr><td colspan="4" class="text-center py-6" style="color:#5a5a6e">—</td></tr>';
+  }
 }
 
 async function adminResetPassword(){
@@ -3202,6 +3635,7 @@ async function adminResetPassword(){
     document.getElementById('resetPass').value='';
     document.getElementById('adminActionCode').value='';
     toast('Contraseña restablecida para @'+d.username, 'ok');
+    loadAdmin();
   } catch(e) { toast(e.message || 'No se pudo restablecer', 'err'); }
 }
 
@@ -3221,6 +3655,66 @@ async function adminSetPremium(on){
   } catch(e) { toast(e.message, 'err'); }
 }
 
+async function adminQuickPremium(username, on){
+  try {
+    const r = await fetch('/api/admin/premium', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ username, premium: !!on, days: 30 })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+    toast((on?'+':'−')+' Premium @'+username);
+    loadAdmin();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminQuickBan(username, ban){
+  const label = ban ? 'banear' : 'desbanear';
+  if (!confirm('¿'+label+' a @'+username+'?')) return;
+  try {
+    const r = await fetch('/api/admin/users/ban', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ username, banned: !!ban })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+    toast((ban?'Baneado':'Desbaneado')+': @'+username);
+    loadAdmin();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminQuickRole(username){
+  const u = (window.__adminUsersCache||[]).find(x => x.username === username);
+  const next = (u && u.role === 'admin') ? 'user' : 'admin';
+  if (!confirm('Cambiar rol de @'+username+' → '+next+'?')) return;
+  try {
+    const r = await fetch('/api/admin/users/role', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ username, role: next })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+    toast('Rol actualizado: @'+username+' → '+next);
+    loadAdmin();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminDeleteUser(username){
+  if (!username) return;
+  if (!confirm('¿ELIMINAR permanentemente la cuenta @'+username+' y sus scripts?\nEsta acción no se puede deshacer.')) return;
+  if (!confirm('Confirma otra vez: borrar @'+username)) return;
+  try {
+    const r = await fetch('/api/admin/users/delete', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ username })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+    toast('Cuenta eliminada: @'+username);
+    loadAdmin();
+  } catch(e){ toast(e.message,'err'); }
+}
+
 async function adminDelScript(id){
   if (!confirm('¿Eliminar este script del sistema?')) return;
   try {
@@ -3229,6 +3723,7 @@ async function adminDelScript(id){
     if (!r.ok) throw new Error(d.error||'Error');
     toast('Script eliminado');
     loadAdminScripts();
+    loadAdmin();
   } catch(e) { toast(e.message,'err'); }
 }
 
@@ -3241,6 +3736,68 @@ async function adminDelHub(id){
     toast('Quitado del hub');
     loadAdmin();
   } catch(e) { toast(e.message,'err'); }
+}
+
+async function adminBroadcast(){
+  const title = (document.getElementById('bcTitle')?.value || '').trim();
+  const message = (document.getElementById('bcMsg')?.value || '').trim();
+  const type = document.getElementById('bcType')?.value || 'info';
+  if (!title || !message) { toast('Título y mensaje requeridos', 'err'); return; }
+  try {
+    const r = await fetch('/api/admin/broadcast', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ title, message, type })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Error');
+    toast('Aviso enviado');
+    document.getElementById('bcTitle').value='';
+    document.getElementById('bcMsg').value='';
+    loadAdminAudit();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminClearLogs(){
+  if (!confirm('¿Vaciar todos los logs del sistema?')) return;
+  try {
+    const r = await fetch('/api/admin/clear-logs', { method:'POST', headers: headers() });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Error');
+    toast('Logs limpiados');
+    loadAdminAudit();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminChangeCode(){
+  const adminCode = prompt('Código admin actual:');
+  if (adminCode == null) return;
+  const newCode = prompt('Nuevo código admin (mín. 4 chars):');
+  if (!newCode || newCode.length < 4) { toast('Código inválido', 'err'); return; }
+  try {
+    const r = await fetch('/api/admin/set-code', {
+      method:'POST', headers: headers(),
+      body: JSON.stringify({ adminCode, newCode })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Error');
+    toast('Código admin actualizado');
+    loadAdminAudit();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function adminExportData(){
+  try {
+    const r = await fetch('/api/admin/export', { headers: headers() });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Error');
+    const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'qrex-export-'+new Date().toISOString().slice(0,10)+'.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Export descargado');
+  } catch(e){ toast(e.message,'err'); }
 }
 
 
@@ -4694,24 +5251,33 @@ async function runPlayground(){
 async function adminAddBlacklist(){
   const ip = document.getElementById('blIp').value.trim();
   const reason = document.getElementById('blReason').value.trim();
+  if (!ip) { toast('Pon una IP', 'err'); return; }
   try {
     const r = await fetch('/api/admin/blacklist', { method:'POST', headers: headers(), body: JSON.stringify({ ip, reason }) });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error||'Error');
-    toast('IP baneada'); loadAdminBlacklist();
+    document.getElementById('blIp').value='';
+    document.getElementById('blReason').value='';
+    toast('IP baneada'); loadAdminBlacklist(); loadAdmin();
   } catch(e){ toast(e.message,'err'); }
 }
 async function loadAdminBlacklist(){
   try {
     const list = await fetch('/api/admin/blacklist', { headers: headers() }).then(r=>r.json());
-    document.getElementById('adminBlacklist').innerHTML = (list||[]).map(b =>
-      '<div class="flex justify-between py-1"><span>'+esc(b.ip)+' — '+esc(b.reason||'')+'</span><button class="btn-ghost text-[10px]" onclick="adminDelBl(\''+b._id+'\')">x</button></div>'
-    ).join('') || 'Vacío';
+    const box = document.getElementById('adminBlacklist');
+    if (!box) return;
+    box.innerHTML = (list||[]).map(b =>
+      '<div class="flex justify-between items-center py-1.5 border-b" style="border-color:#1a1a24"><span><b style="color:#f4f4f5">'+esc(b.ip)+'</b> <span style="color:#6b6b80">— '+esc(b.reason||'sin razón')+'</span></span><button class="btn-ghost text-[10px]" style="color:#f87171" onclick="adminDelBl(\''+(b._id||b.id)+'\')">Quitar</button></div>'
+    ).join('') || '<div style="color:#5a5a6e">Vacío</div>';
   } catch {}
 }
 async function adminDelBl(id){
-  await fetch('/api/admin/blacklist/'+id, { method:'DELETE', headers: headers() });
-  loadAdminBlacklist();
+  try {
+    await fetch('/api/admin/blacklist/'+id, { method:'DELETE', headers: headers() });
+    toast('IP quitada de blacklist');
+    loadAdminBlacklist();
+    loadAdmin();
+  } catch(e){ toast(e.message||'Error','err'); }
 }
 
 // versions UI helper
