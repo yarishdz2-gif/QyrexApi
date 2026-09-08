@@ -313,6 +313,16 @@ const Asset = mongoose.models.QrexAsset || mongoose.model('QrexAsset', new mongo
   createdAt: { type: Date, default: Date.now }
 }));
 
+const ScriptSite = mongoose.models.QrexScriptSite || mongoose.model('QrexScriptSite', new mongoose.Schema({
+  ownerId: { type: String, required: true, index: true, unique: true },
+  slug: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+  html: { type: String, required: true, maxlength: 900000 },
+  enabled: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  publishedAt: { type: Date, default: Date.now }
+}));
+
 const BlacklistIP = mongoose.models.QrexBlacklistIP || mongoose.model('QrexBlacklistIP', new mongoose.Schema({
   ip: { type: String, unique: true },
   reason: { type: String, default: '' },
@@ -2507,6 +2517,97 @@ app.get('/auth/discord/callback', async (req, res) => {
     console.error('discord oauth', e);
     return fail(e.message || 'Error inesperado');
   }
+});
+
+
+// ========== VIP CUSTOM SCRIPT SITE ==========
+const QYREX_SITE_ROOT = String(process.env.QYREX_SITE_ROOT || 'qyrex.hopto.org').toLowerCase().replace(/^\*\./,'').replace(/\/$/,'');
+function cleanSiteSlug(v){
+  return String(v || '').trim().toLowerCase();
+}
+function validSiteSlug(v){
+  return /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(v) && !v.includes('--');
+}
+function siteUrl(slug){ return 'https://' + slug + '.' + QYREX_SITE_ROOT + '/'; }
+function siteShell(html){
+  const text=String(html||'');
+  if(!text.trim()) return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qyrex Site</title></head><body><h1>Qyrex Site</h1></body></html>';
+  return text;
+}
+
+app.get('/api/sites/me', auth, needMongo, async (req,res)=>{
+  try{
+    const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    const site=await ScriptSite.findOne({ownerId:req.user.sub}).lean();
+    res.json(site?{...site,url:siteUrl(site.slug)}:{site:null});
+  }catch(e){ res.status(500).json({error:e.message||'Error'}); }
+});
+
+app.post('/api/sites', auth, needMongo, async (req,res)=>{
+  try{
+    const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    const slug=cleanSiteSlug(req.body?.slug), html=String(req.body?.html||'');
+    if(!validSiteSlug(slug)) return res.status(400).json({error:'Slug inválido. Usa 2-30 caracteres: letras, números y guiones.'});
+    if(!html.trim()) return res.status(400).json({error:'index.html requerido'});
+    if(html.length>900000) return res.status(400).json({error:'El index.html supera el límite de 900 KB'});
+    const taken=await ScriptSite.findOne({slug});
+    if(taken && String(taken.ownerId)!==String(req.user.sub)) return res.status(409).json({error:'Ese subdominio ya está ocupado'});
+    const existing=await ScriptSite.findOne({ownerId:req.user.sub});
+    if(existing) return res.status(409).json({error:'Ya tienes un sitio publicado. Usa actualizar.'});
+    const doc=await ScriptSite.create({ownerId:req.user.sub,slug,html:siteShell(html),enabled:true});
+    res.json({success:true,site:{...doc.toObject(),url:siteUrl(slug)}});
+  }catch(e){ res.status(500).json({error:e.message||'Error'}); }
+});
+
+app.put('/api/sites', auth, needMongo, async (req,res)=>{
+  try{
+    const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    const site=await ScriptSite.findOne({ownerId:req.user.sub});
+    if(!site) return res.status(404).json({error:'No tienes un sitio publicado'});
+    const html=String(req.body?.html||'');
+    if(!html.trim()) return res.status(400).json({error:'index.html requerido'});
+    if(html.length>900000) return res.status(400).json({error:'El index.html supera el límite de 900 KB'});
+    if(req.body?.slug!==undefined){
+      const slug=cleanSiteSlug(req.body.slug);
+      if(!validSiteSlug(slug)) return res.status(400).json({error:'Slug inválido'});
+      if(slug!==site.slug){
+        const taken=await ScriptSite.findOne({slug});
+        if(taken && String(taken._id)!==String(site._id)) return res.status(409).json({error:'Ese subdominio ya está ocupado'});
+        site.slug=slug;
+      }
+    }
+    site.html=siteShell(html); site.updatedAt=new Date(); site.publishedAt=new Date(); site.enabled=req.body?.enabled===undefined?site.enabled:!!req.body.enabled;
+    await site.save();
+    res.json({success:true,site:{...site.toObject(),url:siteUrl(site.slug)}});
+  }catch(e){ res.status(500).json({error:e.message||'Error'}); }
+});
+
+app.delete('/api/sites', auth, needMongo, async (req,res)=>{
+  try{
+    const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Solo VIP/Premium'});
+    await ScriptSite.deleteOne({ownerId:req.user.sub});
+    res.json({success:true});
+  }catch(e){ res.status(500).json({error:e.message||'Error'}); }
+});
+
+// Host-based delivery: requires *.qyrex.hopto.org to point to this service.
+app.use(async (req,res,next)=>{
+  try{
+    if(req.method!=='GET' || !req.hostname || !req.hostname.endsWith('.'+QYREX_SITE_ROOT)) return next();
+    const sub=req.hostname.slice(0,-('.'+QYREX_SITE_ROOT).length);
+    if(!validSiteSlug(sub) || req.path!=='/') return next();
+    if(mongoose.connection.readyState!==1) return res.status(503).type('html').send('<h1>Qyrex Site temporalmente no disponible</h1>');
+    const site=await ScriptSite.findOne({slug:sub,enabled:true}).lean();
+    if(!site) return res.status(404).type('html').send('<h1>Qyrex Site no encontrado</h1><p>Este subdominio todavía no está publicado.</p>');
+    res.set('Cache-Control','public, max-age=60, stale-while-revalidate=300');
+    res.set('X-Content-Type-Options','nosniff');
+    res.set('Referrer-Policy','strict-origin-when-cross-origin');
+    return res.type('html').send(site.html);
+  }catch(e){ return next(); }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
