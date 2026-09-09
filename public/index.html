@@ -1338,6 +1338,11 @@ section.page[hidden],section.page.hidden{display:none!important}
 <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
 <span data-i18n="nav.admin">Admin Panel</span>
 </button>
+<div class="nav-section">IA</div>
+<button aria-current="false" class="nav-item" data-page="ia" onclick="go('ia')" type="button" title="QyrexAI Chat">
+<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+<span>IA</span>
+</button>
 <div class="nav-section" data-i18n="nav.account">ACCOUNT</div>
 <button aria-current="false" class="nav-item" data-page="settings" onclick="go('settings')" type="button">
 <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -2003,6 +2008,10 @@ local Players = game:GetService("Players")
 </div>
 </section>
 <!-- SETTINGS -->
+<!-- IA CHAT -->
+<section aria-labelledby="heading-page-ia" class="page hidden" id="page-ia" role="region" style="padding:0!important;margin:0!important;max-width:none!important;height:calc(100vh - 56px);">
+<iframe id="iaFrame" src="/ia.html" title="QyrexAI Chat" style="width:100%;height:100%;border:0;border-radius:0;background:#0b0f19;display:block;" allow="clipboard-write"></iframe>
+</section>
 <section aria-labelledby="heading-page-settings" class="page hidden" id="page-settings" role="region">
 <aside aria-label="Recurso de sección" class="section-resource"><span>Cuenta y preferencias · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h2 class="text-2xl font-bold" data-i18n="settings.account" id="heading-page-settings">Tu cuenta</h2></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();" type="button">↻ Actualizar</button></div>
@@ -2294,7 +2303,7 @@ document.addEventListener('click', (e) => {
   }
 });
 function buildPageNames(){
-  return { overview:t('nav.overview'), scripts:t('nav.lua'), site:'Mi sitio Qyrex', hub:t('nav.hub'), keys:t('page.keys'), webhooks:t('nav.webhooks'), leaderboard:t('nav.leaderboard'), assets:t('nav.assets'), templates:t('nav.templates'), status:t('nav.status'), playground:t('nav.playground'), changelog:t('nav.changelog'), create:t('nav.create'), studio:t('nav.studio'), executions:t('nav.analytics'), logs:t('nav.logs'), apiinfo:t('nav.apiinfo'), settings:t('nav.settings'), admin:t('nav.admin') };
+  return { overview:t('nav.overview'), scripts:t('nav.lua'), site:'Mi sitio Qyrex', hub:t('nav.hub'), keys:t('page.keys'), webhooks:t('nav.webhooks'), leaderboard:t('nav.leaderboard'), assets:t('nav.assets'), templates:t('nav.templates'), status:t('nav.status'), playground:t('nav.playground'), changelog:t('nav.changelog'), create:t('nav.create'), studio:t('nav.studio'), executions:t('nav.analytics'), logs:t('nav.logs'), apiinfo:t('nav.apiinfo'), ia:'IA', settings:t('nav.settings'), admin:t('nav.admin') };
 }
 
 function scriptDownloadUrl(id){
