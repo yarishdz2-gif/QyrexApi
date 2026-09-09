@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QyrexAI Workspace</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0b0f19',
+                            800: '#111827',
+                            700: '#1f2937',
+                            600: '#374151',
+                            500: '#4b5563',
+                        },
+                        brand: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js & Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <!-- JSZip for ZIP extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Custom Styling & Scrollbars -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+        .code-block-container {
+            position: relative;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #1e1e2e;
+            border: 1px solid #313244;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #181825;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: #a6adc8;
+            border-bottom: 1px solid #313244;
+        }
+        .copy-code-btn {
+            background: #313244;
+            color: #cdd6f4;
+            border: none;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .copy-code-btn:hover {
+            background: #45475a;
+            color: #fff;
+        }
+        pre code {
+            display: block;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .markdown-body p { margin-bottom: 0.75rem; }
+        .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown-body h1 { font-size: 1.5rem; }
+        .markdown-body h2 { font-size: 1.25rem; }
+        .markdown-body h3 { font-size: 1.1rem; }
+        .markdown-body blockquote { border-left: 3px solid #6366f1; padding-left: 1rem; color: #9ca3af; margin: 0.75rem 0; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+        .markdown-body th, .markdown-body td { border: 1px solid #374151; padding: 0.5rem; text-align: left; }
+        .markdown-body th { background-color: #1f2937; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-dark-800 border-r border-dark-700 flex flex-col transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:static">
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-dark-700 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-cube text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-wide text-white">QyrexAI</h1>
+                    <span class="text-xs text-indigo-400 font-medium">Workspace v3.1 · ZIP + OpenRouter</span>
+                </div>
+            </div>
+            <button id="close-sidebar" class="md:hidden text-gray-400 hover:text-white p-1 rounded-lg">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- New Chat Button -->
+        <div class="p-3">
+            <button id="new-chat-btn" class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-medium py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/15 transition-all duration-200">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <span>New Conversation</span>
+            </button>
+        </div>
+
+        <!-- Chat History List -->
+        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1" id="chat-history-list">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Sidebar Footer Controls -->
+        <div class="p-3 border-t border-dark-700 space-y-2 bg-dark-900/50">
+            <button id="open-scratchpad-btn" class="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-700/60 rounded-lg transition-colors">
+                <span class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-note-sticky text-indigo-400"></i>
+                    <span>Scratchpad</span>
+                </span>
+                <span class="text-xs bg-dark-700 text-gray-400 px-1.5 py-0.5 rounded">Ctrl+S</span>
+            </button>
+            <button id="export-json-btn" class="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-700/60 rounded-lg transition-colors">
+                <span class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-file-arrow-down text-emerald-400"></i>
+                    <span>Export Chats (JSON)</span>
+                </span>
+            </button>
+            <button id="settings-btn" class="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-700/60 rounded-lg transition-colors">
+                <span class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-gear text-purple-400"></i>
+                    <span>Settings & Config</span>
+                </span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full bg-dark-900 relative overflow-hidden">
+        <!-- Top Navigation Bar -->
+        <header class="h-14 border-b border-dark-700/80 bg-dark-800/80 backdrop-blur flex items-center justify-between px-4 z-10">
+            <div class="flex items-center space-x-3">
+                <button id="toggle-sidebar" class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-dark-700 transition-colors">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <!-- Model Switcher (Clean Tiers) -->
+                <div class="relative">
+                    <select id="model-select" class="bg-dark-700/90 text-gray-200 text-xs md:text-sm font-medium py-1.5 pl-3 pr-8 rounded-lg border border-dark-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer appearance-none">
+                        <option value="meta-llama/llama-3.3-70b-instruct">🔥 El Mejor (Llama 3.3 70B)</option>
+                        <option value="google/gemini-2.5-flash">⚡ El Fast (Gemini 2.5 Flash)</option>
+                        <option value="deepseek/deepseek-chat">🧠 DeepSeek Chat</option>
+                        <option value="mistralai/mixtral-8x7b-instruct">⚖️ El Medio (Mixtral)</option>
+                        <option value="openai/gpt-4o-mini">💻 GPT-4o Mini</option>
+                        <option value="openrouter/free">🆓 Free Models Router</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center space-x-2">
+                <button id="clear-current-chat" title="Clear Chat Messages" class="text-gray-400 hover:text-red-400 p-2 rounded-lg hover:bg-dark-700 transition-colors text-sm">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button id="top-settings-btn" title="Settings" class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-dark-700 transition-colors text-sm">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Message Area -->
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+            <!-- Welcome / Empty State -->
+            <div id="empty-state" class="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-4">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl shadow-xl shadow-indigo-500/5">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Welcome to QyrexAI Workspace</h2>
+                <p class="text-sm text-gray-400">Select your performance tier above and start creating.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-4">
+                    <button class="quick-prompt text-left p-3 rounded-xl bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs text-gray-300 transition-all hover:border-indigo-500/50">
+                        <span class="font-semibold text-white block mb-1"><i class="fa-solid fa-code text-indigo-400 mr-1.5"></i> Refactor Code</span>
+                        Write a clean asynchronous script with robust error handling.
+                    </button>
+                    <button class="quick-prompt text-left p-3 rounded-xl bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs text-gray-300 transition-all hover:border-indigo-500/50">
+                        <span class="font-semibold text-white block mb-1"><i class="fa-solid fa-terminal text-emerald-400 mr-1.5"></i> System Architecture</span>
+                        Explain microservices pattern and database indexing strategies.
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Footer -->
+        <div class="p-4 md:p-6 bg-dark-900 border-t border-dark-700/80">
+            <div class="max-w-4xl mx-auto">
+                <div id="attachment-preview-container" class="flex flex-wrap gap-2 mb-2 empty:mb-0"></div>
+
+                <form id="chat-form" class="bg-dark-800 border border-dark-700 rounded-2xl shadow-lg focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all overflow-hidden flex flex-col">
+                    <textarea 
+                        id="user-input" 
+                        rows="1" 
+                        placeholder="Message QyrexAI (Shift+Enter for newline)..." 
+                        class="w-full bg-transparent text-gray-100 placeholder-gray-500 p-3.5 focus:outline-none resize-none max-h-40 text-sm"
+                    ></textarea>
+
+                    <div class="flex items-center justify-between px-3 py-2 bg-dark-800/80 border-t border-dark-700/50">
+                        <div class="flex items-center space-x-2">
+                            <input type="file" id="file-upload" class="hidden" multiple accept="image/*,.txt,.md,.js,.jsx,.ts,.tsx,.json,.py,.html,.css,.scss,.sass,.vue,.svelte,.java,.c,.cpp,.h,.hpp,.cs,.go,.rs,.php,.rb,.swift,.kt,.sql,.sh,.bash,.yml,.yaml,.toml,.xml,.csv,.log,.zip,.pdf,.env,.gitignore,.dockerfile">
+                            <button type="button" id="upload-btn" title="Adjuntar imagen, código o ZIP" class="text-gray-400 hover:text-indigo-400 p-2 rounded-lg hover:bg-dark-700 transition-colors text-sm">
+                                <i class="fa-solid fa-paperclip"></i>
+                            </button>
+                            <span id="file-counter" class="text-xs text-gray-500 hidden">0 files attached</span>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <button type="submit" id="send-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span>Send</span>
+                                <i class="fa-solid fa-arrow-up text-xs"></i>
+                            </button>
+                            <button type="button" id="stop-btn" class="hidden bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2">
+                                <span>Stop</span>
+                                <i class="fa-solid fa-stop text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="text-center mt-2">
+                    <span class="text-[11px] text-gray-500">QyrexAI Workspace · Powered by OpenRouter</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-dark-700 flex items-center justify-between">
+                <h3 class="font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-gear text-indigo-400"></i>
+                    <span>Workspace Settings</span>
+                </h3>
+                <button id="close-settings" class="text-gray-400 hover:text-white p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">System Prompt</label>
+                    <textarea id="system-prompt-input" rows="4" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">You are QyrexAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.</textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Temperature (<span id="temp-val">0.7</span>)</label>
+                    <input type="range" id="temperature-input" min="0" max="1" step="0.05" value="0.7" class="w-full accent-indigo-500">
+                </div>
+                <div class="p-3 bg-dark-900 rounded-xl border border-dark-700 text-xs text-gray-400">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 mr-1.5"></i> Tu OpenRouter API Key está activa de forma segura en las variables de entorno del backend (<code class="text-indigo-300">OPENROUTER_API_KEY</code>).
+                </div>
+            </div>
+            <div class="p-4 border-t border-dark-700 bg-dark-900/50 flex justify-end space-x-3">
+                <button id="save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-indigo-600/25">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scratchpad Modal -->
+    <div id="scratchpad-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-2xl h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/50">
+                <h3 class="font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-note-sticky text-indigo-400"></i>
+                    <span>Scratchpad Workspace</span>
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button id="copy-scratchpad" title="Copy Content" class="text-gray-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-dark-700 text-xs">
+                        <i class="fa-solid fa-copy mr-1"></i> Copy
+                    </button>
+                    <button id="download-scratchpad" title="Download Markdown" class="text-gray-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-dark-700 text-xs">
+                        <i class="fa-solid fa-download mr-1"></i> Save
+                    </button>
+                    <button id="close-scratchpad" class="text-gray-400 hover:text-white p-1 rounded-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 p-4">
+                <textarea id="scratchpad-textarea" class="w-full h-full bg-dark-900 border border-dark-700 rounded-xl p-4 text-sm text-gray-200 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Jot down notes, code snippets, or prompt drafts here..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-indigo-600 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Action successful</span>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        let chats = JSON.parse(localStorage.getItem('qyrex_chats')) || [];
+        let currentChatId = localStorage.getItem('qyrex_current_chat') || null;
+        let systemPrompt = localStorage.getItem('qyrex_system_prompt') || 'You are QyrexAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.';
+        let temperature = parseFloat(localStorage.getItem('qyrex_temperature')) || 0.7;
+        let scratchpadContent = localStorage.getItem('qyrex_scratchpad') || '';
+        let pendingFiles = [];
+        let abortController = null;
+
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const chatHistoryList = document.getElementById('chat-history-list');
+        const chatContainer = document.getElementById('chat-container');
+        const emptyState = document.getElementById('empty-state');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const fileUpload = document.getElementById('file-upload');
+        const uploadBtn = document.getElementById('upload-btn');
+        const attachmentPreviewContainer = document.getElementById('attachment-preview-container');
+        const fileCounter = document.getElementById('file-counter');
+        const modelSelect = document.getElementById('model-select');
+        const clearCurrentChatBtn = document.getElementById('clear-current-chat');
+        
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsBtn = document.getElementById('settings-btn');
+        const topSettingsBtn = document.getElementById('top-settings-btn');
+        const closeSettings = document.getElementById('close-settings');
+        const saveSettings = document.getElementById('save-settings');
+        const systemPromptInput = document.getElementById('system-prompt-input');
+        const temperatureInput = document.getElementById('temperature-input');
+        const tempVal = document.getElementById('temp-val');
+
+        const scratchpadModal = document.getElementById('scratchpad-modal');
+        const openScratchpadBtn = document.getElementById('open-scratchpad-btn');
+        const closeScratchpad = document.getElementById('close-scratchpad');
+        const scratchpadTextarea = document.getElementById('scratchpad-textarea');
+        const copyScratchpad = document.getElementById('copy-scratchpad');
+        const downloadScratchpad = document.getElementById('download-scratchpad');
+
+        const exportJsonBtn = document.getElementById('export-json-btn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        function initApp() {
+            systemPromptInput.value = systemPrompt;
+            temperatureInput.value = temperature;
+            tempVal.textContent = temperature;
+            scratchpadTextarea.value = scratchpadContent;
+
+            if (chats.length === 0) {
+                createNewChat(false);
+            } else {
+                if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
+                    currentChatId = chats[0].id;
+                }
+            }
+            renderChatHistory();
+            loadCurrentChat();
+
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.dispatchEvent(new Event('submit'));
+                }
+            });
+        }
+
+        function showToast(msg) {
+            toastMessage.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function createNewChat(switchTab = true) {
+            const newChat = {
+                id: 'chat_' + Date.now(),
+                title: 'New Conversation',
+                model: modelSelect.value,
+                messages: []
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveChats();
+            renderChatHistory();
+            loadCurrentChat();
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        function saveChats() {
+            localStorage.setItem('qyrex_chats', JSON.stringify(chats));
+            localStorage.setItem('qyrex_current_chat', currentChatId);
+        }
+
+        function renderChatHistory() {
+            chatHistoryList.innerHTML = '';
+            chats.forEach(chat => {
+                const isActive = chat.id === currentChatId;
+                const div = document.createElement('div');
+                div.className = `group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors ${isActive ? 'bg-indigo-600/10 text-indigo-400 font-medium border border-indigo-500/20' : 'text-gray-400 hover:text-white hover:bg-dark-700/50'}`;
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2.5 truncate flex-1" onclick="switchChat('${chat.id}')">
+                        <i class="fa-solid fa-message text-xs ${isActive ? 'text-indigo-400' : 'text-gray-500'}"></i>
+                        <span class="truncate">${escapeHtml(chat.title)}</span>
+                    </div>
+                    <button onclick="deleteChat(event, '${chat.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 p-1 transition-opacity">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                chatHistoryList.appendChild(div);
+            });
+        }
+
+        function switchChat(id) {
+            currentChatId = id;
+            saveChats();
+            renderChatHistory();
+            loadCurrentChat();
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        function deleteChat(e, id) {
+            e.stopPropagation();
+            chats = chats.filter(c => c.id !== id);
+            if (chats.length === 0) {
+                createNewChat(false);
+            } else if (currentChatId === id) {
+                currentChatId = chats[0].id;
+            }
+            saveChats();
+            renderChatHistory();
+            loadCurrentChat();
+        }
+
+        function loadCurrentChat() {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+            modelSelect.value = chat.model || modelSelect.value;
+            chatContainer.innerHTML = '';
+            if (chat.messages.length === 0) {
+                chatContainer.appendChild(emptyState);
+            } else {
+                chat.messages.forEach(msg => appendMessageDOM(msg, false));
+                scrollToBottom();
+            }
+        }
+
+        // Extensiones de texto que se leen como texto plano
+        const TEXT_EXTENSIONS = new Set([
+            'txt','md','markdown','js','jsx','ts','tsx','mjs','cjs','json','py','html','htm','css','scss','sass','less',
+            'vue','svelte','java','c','cpp','cc','cxx','h','hpp','cs','go','rs','php','rb','swift','kt','kts','sql',
+            'sh','bash','zsh','yml','yaml','toml','xml','csv','log','env','gitignore','dockerfile','makefile','cmake',
+            'ini','cfg','conf','properties','gradle','pom','lock','mod','sum','r','dart','lua','pl','pm','scala'
+        ]);
+
+        const MAX_ZIP_FILES = 80;          // máximo de archivos a extraer de un ZIP
+        const MAX_FILE_SIZE = 1.5 * 1024 * 1024; // 1.5 MB por archivo de texto
+
+        function getExtension(name) {
+            const parts = name.toLowerCase().split('.');
+            return parts.length > 1 ? parts.pop() : '';
+        }
+
+        function isTextFile(file) {
+            if (file.type && (file.type.startsWith('text/') || file.type === 'application/json' || file.type === 'application/javascript')) {
+                return true;
+            }
+            return TEXT_EXTENSIONS.has(getExtension(file.name));
+        }
+
+        function isZipFile(file) {
+            return file.type === 'application/zip' ||
+                   file.type === 'application/x-zip-compressed' ||
+                   getExtension(file.name) === 'zip';
+        }
+
+        async function processZipFile(file) {
+            showToast('Extrayendo ZIP...');
+            try {
+                const zip = await JSZip.loadAsync(file);
+                const entries = [];
+                zip.forEach((relativePath, zipEntry) => {
+                    if (!zipEntry.dir) entries.push(relativePath);
+                });
+
+                // Filtrar solo archivos de texto / código y limitar cantidad
+                const textEntries = entries
+                    .filter(path => {
+                        const ext = getExtension(path);
+                        // Ignorar carpetas de dependencias y binarios comunes
+                        if (path.includes('node_modules/') || path.includes('.git/') || path.includes('__pycache__/')) return false;
+                        if (path.includes('dist/') || path.includes('build/') || path.includes('.next/')) return false;
+                        return TEXT_EXTENSIONS.has(ext) || ext === '';
+                    })
+                    .slice(0, MAX_ZIP_FILES);
+
+                let extracted = 0;
+                for (const path of textEntries) {
+                    const zipEntry = zip.file(path);
+                    if (!zipEntry) continue;
+
+                    const content = await zipEntry.async('string');
+                    if (content.length > MAX_FILE_SIZE) continue; // saltar archivos demasiado grandes
+
+                    pendingFiles.push({
+                        name: path,                    // mantenemos la ruta relativa
+                        type: 'text/plain',
+                        data: content,
+                        fromZip: file.name
+                    });
+                    extracted++;
+                }
+
+                renderAttachmentPreviews();
+                showToast(`ZIP: ${extracted} archivo(s) extraídos de ${file.name}`);
+            } catch (err) {
+                console.error(err);
+                showToast('Error al leer el ZIP: ' + err.message);
+            }
+        }
+
+        function processNormalFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    pendingFiles.push({
+                        name: file.name,
+                        type: file.type || 'application/octet-stream',
+                        data: e.target.result
+                    });
+                    resolve();
+                };
+                reader.onerror = () => resolve();
+
+                if (file.type.startsWith('image/')) {
+                    reader.readAsDataURL(file);
+                } else if (isTextFile(file) || file.size < MAX_FILE_SIZE) {
+                    reader.readAsText(file);
+                } else {
+                    // Archivos binarios grandes: solo nombre
+                    pendingFiles.push({
+                        name: file.name,
+                        type: file.type || 'application/octet-stream',
+                        data: `[Archivo binario: ${file.name} (${(file.size/1024).toFixed(1)} KB) – no se pudo leer como texto]`
+                    });
+                    resolve();
+                }
+            });
+        }
+
+        uploadBtn.addEventListener('click', () => fileUpload.click());
+        fileUpload.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            for (const file of files) {
+                if (isZipFile(file)) {
+                    await processZipFile(file);
+                } else {
+                    await processNormalFile(file);
+                }
+            }
+            renderAttachmentPreviews();
+            fileUpload.value = '';
+        });
+
+        function renderAttachmentPreviews() {
+            attachmentPreviewContainer.innerHTML = '';
+            if (pendingFiles.length > 0) {
+                fileCounter.textContent = `${pendingFiles.length} archivo(s) adjunto(s)`;
+                fileCounter.classList.remove('hidden');
+
+                pendingFiles.forEach((file, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'relative flex items-center bg-dark-700 border border-dark-600 rounded-xl p-1.5 pr-8 text-xs text-gray-200 max-w-xs';
+
+                    let previewHTML = `<i class="fa-solid fa-file-lines text-indigo-400 mr-2 text-sm"></i>`;
+                    if (file.type && file.type.startsWith('image/')) {
+                        previewHTML = `<img src="${file.data}" class="w-8 h-8 object-cover rounded-lg mr-2">`;
+                    } else if (file.fromZip) {
+                        previewHTML = `<i class="fa-solid fa-file-zipper text-amber-400 mr-2 text-sm"></i>`;
+                    }
+
+                    const displayName = file.fromZip ? `${file.name}` : file.name;
+
+                    div.innerHTML = `
+                        ${previewHTML}
+                        <span class="truncate" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</span>
+                        <button type="button" onclick="removeAttachment(${index})" class="absolute right-1.5 text-gray-400 hover:text-red-400 p-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
+                    attachmentPreviewContainer.appendChild(div);
+                });
+            } else {
+                fileCounter.classList.add('hidden');
+            }
+        }
+
+        function removeAttachment(index) {
+            pendingFiles.splice(index, 1);
+            renderAttachmentPreviews();
+        }
+
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            langPrefix: 'hljs language-',
+            pedantic: false,
+            gfm: true,
+            breaks: true
+        });
+
+        function parseMarkdown(content) {
+            let html = marked.parse(content);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const preElements = tempDiv.querySelectorAll('pre');
+            preElements.forEach(pre => {
+                const codeEl = pre.querySelector('code');
+                let lang = 'code';
+                if (codeEl) {
+                    const classList = Array.from(codeEl.classList);
+                    const langClass = classList.find(c => c.startsWith('language-'));
+                    if (langClass) {
+                        lang = langClass.replace('language-', '');
+                    }
+                }
+                const container = document.createElement('div');
+                container.className = 'code-block-container';
+                
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                header.innerHTML = `
+                    <span class="font-mono uppercase">${escapeHtml(lang)}</span>
+                    <button class="copy-code-btn" onclick="copyCodeSnippet(this)"><i class="fa-solid fa-copy mr-1"></i> Copy code</button>
+                `;
+                container.appendChild(header);
+                container.appendChild(pre.cloneNode(true));
+                pre.replaceWith(container);
+            });
+            return tempDiv.innerHTML;
+        }
+
+        function copyCodeSnippet(btn) {
+            const pre = btn.closest('.code-block-container').querySelector('pre');
+            const code = pre.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied!';
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            });
+        }
+
+        function copyFullResponse(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied';
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            });
+        }
+
+        function appendMessageDOM(msg, animate = true) {
+            if (document.getElementById('empty-state')) {
+                document.getElementById('empty-state').remove();
+            }
+
+            const isUser = msg.role === 'user';
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} w-full mb-6`;
+
+            let attachmentsHtml = '';
+            if (msg.attachments && msg.attachments.length > 0) {
+                attachmentsHtml = `<div class="flex flex-wrap gap-2 mb-3">`;
+                msg.attachments.forEach(att => {
+                    if (att.type && att.type.startsWith('image/')) {
+                        attachmentsHtml += `<img src="${att.data}" class="w-24 h-24 object-cover rounded-xl border border-dark-600 shadow-md">`;
+                    } else if (att.fromZip) {
+                        attachmentsHtml += `<div class="bg-dark-800 border border-amber-700/40 p-2 rounded-xl text-xs text-gray-300 flex items-center space-x-2"><i class="fa-solid fa-file-zipper text-amber-400"></i><span class="truncate max-w-[180px]" title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</span></div>`;
+                    } else {
+                        attachmentsHtml += `<div class="bg-dark-800 border border-dark-700 p-2 rounded-xl text-xs text-gray-300 flex items-center space-x-2"><i class="fa-solid fa-file-lines text-indigo-400"></i><span class="truncate max-w-[150px]">${escapeHtml(att.name)}</span></div>`;
+                    }
+                });
+                attachmentsHtml += `</div>`;
+            }
+
+            const parsedContent = isUser ? escapeHtml(msg.content) : parseMarkdown(msg.content);
+
+            wrapper.innerHTML = `
+                <div class="flex items-start space-x-3 max-w-3xl ${isUser ? 'flex-row-reverse space-x-reverse' : ''}">
+                    <div class="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center shadow-md ${isUser ? 'bg-indigo-600 text-white' : 'bg-dark-700 text-indigo-400 border border-dark-600'}">
+                        <i class="fa-solid ${isUser ? 'fa-user text-xs' : 'fa-cube text-sm'}"></i>
+                    </div>
+                    <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">${isUser ? 'You' : 'QyrexAI'}</div>
+                        <div class="p-4 rounded-2xl shadow-sm text-sm ${isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-dark-800 text-gray-100 border border-dark-700 rounded-tl-none markdown-body w-full'}">
+                            ${attachmentsHtml}
+                            <div class="message-body">${parsedContent}</div>
+                        </div>
+                        ${!isUser ? `
+                            <div class="flex items-center space-x-2 mt-2 px-1">
+                                <button onclick="copyFullResponse(this, \`${escapeJsString(msg.content)}\`)" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1 py-1 px-2 rounded hover:bg-dark-800 transition-colors">
+                                    <i class="fa-solid fa-copy"></i>
+                                    <span>Copy response</span>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            if (animate) scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function escapeJsString(str) {
+            return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text && pendingFiles.length === 0) return;
+
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            if (chat.messages.length === 0 && text) {
+                chat.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
+                renderChatHistory();
+            }
+
+            const userMsg = {
+                role: 'user',
+                content: text,
+                attachments: [...pendingFiles]
+            };
+
+            chat.messages.push(userMsg);
+            appendMessageDOM(userMsg);
+
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            pendingFiles = [];
+            renderAttachmentPreviews();
+            saveChats();
+
+            sendBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+
+            const apiMessages = [
+                { role: 'system', content: systemPrompt }
+            ];
+
+            chat.messages.forEach(m => {
+                if (m.attachments && m.attachments.length > 0) {
+                    const contentArray = [];
+                    if (m.content) {
+                        contentArray.push({ type: 'text', text: m.content });
+                    }
+
+                    // Agrupar archivos que vienen de ZIP para dar mejor contexto
+                    const zipGroups = {};
+                    const normalFiles = [];
+
+                    m.attachments.forEach(att => {
+                        if (att.type && att.type.startsWith('image/')) {
+                            contentArray.push({
+                                type: 'image_url',
+                                image_url: { url: att.data }
+                            });
+                        } else if (att.fromZip) {
+                            if (!zipGroups[att.fromZip]) zipGroups[att.fromZip] = [];
+                            zipGroups[att.fromZip].push(att);
+                        } else {
+                            normalFiles.push(att);
+                        }
+                    });
+
+                    // Archivos normales
+                    normalFiles.forEach(att => {
+                        contentArray.push({
+                            type: 'text',
+                            text: `### Archivo: \`${att.name}\`\n\`\`\`\n${att.data}\n\`\`\``
+                        });
+                    });
+
+                    // Archivos provenientes de ZIP (como un proyecto)
+                    Object.entries(zipGroups).forEach(([zipName, files]) => {
+                        let projectText = `### Proyecto extraído del ZIP: \`${zipName}\`\n`;
+                        projectText += `Contiene ${files.length} archivo(s):\n\n`;
+                        files.forEach(f => {
+                            projectText += `#### \`${f.name}\`\n\`\`\`\n${f.data}\n\`\`\`\n\n`;
+                        });
+                        contentArray.push({ type: 'text', text: projectText });
+                    });
+
+                    apiMessages.push({ role: m.role, content: contentArray });
+                } else {
+                    apiMessages.push({ role: m.role, content: m.content });
+                }
+            });
+
+            const assistantMsgObj = { role: 'assistant', content: '' };
+            chat.messages.push(assistantMsgObj);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-start w-full mb-6';
+            wrapper.innerHTML = `
+                <div class="flex items-start space-x-3 max-w-3xl">
+                    <div class="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center shadow-md bg-dark-700 text-indigo-400 border border-dark-600">
+                        <i class="fa-solid fa-cube text-sm"></i>
+                    </div>
+                    <div class="flex flex-col items-start">
+                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">QyrexAI</div>
+                        <div class="p-4 rounded-2xl shadow-sm text-sm bg-dark-800 text-gray-100 border border-dark-700 rounded-tl-none markdown-body w-full">
+                            <div class="message-body"><span class="inline-block animate-pulse">Thinking...</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            scrollToBottom();
+
+            const messageBodyDiv = wrapper.querySelector('.message-body');
+            abortController = new AbortController();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: chat.model || modelSelect.value,
+                        messages: apiMessages,
+                        temperature: temperature
+                    }),
+                    signal: abortController.signal
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error?.message || data.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const reply = data.choices[0]?.message?.content || '';
+                assistantMsgObj.content = reply;
+                messageBodyDiv.innerHTML = parseMarkdown(reply);
+                saveChats();
+                loadCurrentChat();
+
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    assistantMsgObj.content += '\n\n*[Generation stopped]*';
+                } else {
+                    assistantMsgObj.content = `**Error:** ${err.message}`;
+                }
+                messageBodyDiv.innerHTML = parseMarkdown(assistantMsgObj.content);
+                saveChats();
+            } finally {
+                sendBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                abortController = null;
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.quick-prompt')) {
+                const btn = e.target.closest('.quick-prompt');
+                userInput.value = btn.textContent.trim().split('\n')[1]?.trim() || btn.textContent.trim();
+                userInput.focus();
+            }
+        });
+
+        clearCurrentChatBtn.addEventListener('click', () => {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.messages = [];
+                saveChats();
+                loadCurrentChat();
+                showToast('Chat cleared');
+            }
+        });
+
+        exportJsonBtn.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chats, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `qyrex_workspace_chats_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast('Chats exported successfully');
+        });
+
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        topSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+        temperatureInput.addEventListener('input', (e) => {
+            tempVal.textContent = e.target.value;
+        });
+
+        saveSettings.addEventListener('click', () => {
+            systemPrompt = systemPromptInput.value.trim();
+            temperature = parseFloat(temperatureInput.value);
+
+            localStorage.setItem('qyrex_system_prompt', systemPrompt);
+            localStorage.setItem('qyrex_temperature', temperature);
+
+            settingsModal.classList.add('hidden');
+            showToast('Settings saved successfully');
+        });
+
+        openScratchpadBtn.addEventListener('click', () => scratchpadModal.classList.remove('hidden'));
+        closeScratchpad.addEventListener('click', () => {
+            scratchpadModal.classList.add('hidden');
+            saveScratchpad();
+        });
+
+        scratchpadTextarea.addEventListener('input', () => {
+            scratchpadContent = scratchpadTextarea.value;
+            localStorage.setItem('qyrex_scratchpad', scratchpadContent);
+        });
+
+        function saveScratchpad() {
+            localStorage.setItem('qyrex_scratchpad', scratchpadTextarea.value);
+            showToast('Scratchpad updated');
+        }
+
+        copyScratchpad.addEventListener('click', () => {
+            navigator.clipboard.writeText(scratchpadTextarea.value).then(() => showToast('Scratchpad copied'));
+        });
+
+        downloadScratchpad.addEventListener('click', () => {
+            const blob = new Blob([scratchpadTextarea.value], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scratchpad_${Date.now()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Scratchpad saved');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                scratchpadModal.classList.toggle('hidden');
+            }
+        });
+
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+
+        newChatBtn.addEventListener('click', () => createNewChat());
+        modelSelect.addEventListener('change', (e) => {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.model = e.target.value;
+                saveChats();
+            }
+        });
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
