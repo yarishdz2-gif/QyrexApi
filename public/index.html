@@ -1380,6 +1380,9 @@ section.page[hidden],section.page.hidden{display:none!important}
 <button data-set-lang="pt" type="button">Português <small>PT</small></button>
 </div>
 </div>
+<button aria-label="Paleta de comandos" class="vip-top-btn" id="qxCmdBtn" onclick="qxOpenCmd()" title="Ctrl+K — Comandos" type="button">⌘ <span>Cmd</span></button>
+<button aria-label="Atajos de teclado" class="vip-top-btn" onclick="qxOpenShortcuts()" title="Atajos" type="button">⌨️</button>
+<button aria-label="Estado API" class="vip-top-btn" id="qxHealthBtn" onclick="qxCheckHealth()" title="Estado del servidor" type="button"><span id="qxHealthDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b7280;margin-right:6px;vertical-align:middle"></span><span>API</span></button>
 <button aria-label="Ver licencias VIP" class="vip-top-btn" data-i18n-title="vip.aria" onclick="openVipModal()" type="button">✦ <span>VIP</span></button>
 <div class="notif-wrap" id="notifWrap"><button aria-controls="notifPanel" aria-expanded="false" aria-label="Notificaciones" class="notif-btn" onclick="toggleNotifications()" type="button"><svg fill="none" height="18" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="18"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></svg><span class="notif-dot" id="notifDot"></span></button><div aria-label="Centro de notificaciones" aria-live="polite" class="notif-panel" id="notifPanel" role="region"><div class="flex items-center justify-between mb-2"><div class="font-semibold" data-i18n="notif.title">Notificaciones</div><button class="btn-ghost text-xs" data-i18n="notif.read" onclick="markAllNotificationsRead()" type="button">Marcar leídas</button></div><div aria-busy="false" class="notif-list" id="notifList" role="feed"><div class="notif-empty" data-i18n="notif.loading">Cargando…</div></div></div></div>
 </div>
@@ -1438,8 +1441,16 @@ section.page[hidden],section.page.hidden{display:none!important}
 <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
 <input data-i18n-placeholder="scripts.search" id="scriptSearch" oninput="filterScripts()" placeholder="Buscar script..."/>
 </search>
+<button class="btn-ghost text-sm" onclick="qxExportScriptsJson()" title="Exportar todos los scripts (JSON)" type="button">⬇ Export</button>
+<button class="btn-ghost text-sm" onclick="qxToggleFavoritesOnly()" title="Solo favoritos" type="button" id="qxFavFilterBtn">★ Favs</button>
+<button class="btn-ghost text-sm" onclick="qxSortScripts()" title="Ordenar" type="button" id="qxSortBtn">⇅ Sort</button>
 <button class="btn-primary text-sm py-2.5 px-4" onclick="resetCreateForm();go('create')" type="button">+ <span data-i18n="scripts.create">Create</span></button>
 </div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4" id="qxScriptTools">
+<span class="text-xs px-2 py-1 rounded-lg" style="background:#16161f;border:1px solid #2a2a3a;color:#8b8b9e" id="qxScriptCount">0 scripts</span>
+<button class="btn-ghost text-xs" type="button" onclick="qxCopyAllLoadstrings()">📋 Copiar todos los loadstrings</button>
+<button class="btn-ghost text-xs" type="button" onclick="qxRefreshScripts()">↻ Refresh</button>
 </div>
 <div class="grid gap-3" id="scriptsList"></div>
 </section>
@@ -4341,7 +4352,611 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal();
   window.qxSiteTemplate=`<!doctype html>
 <html lang="es">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mis Scripts · Qyrex</title><style>body{font-family:system-ui;background:#07101a;color:#dff6ff;padding:48px}a{color:#38bdf8}</style></head>
-<body><main><p>Qyrex Sites</p><h1>Mis scripts</h1><p>Bienvenido a mi página de scripts.</p></main></body>
+<body><main><p>Qyrex Sites</p><h1>Mis scripts</h1><p>Bienvenido a mi página de scripts.</p></main>
+<!-- ========== QYREX POWER LAYER v2.1 — ~30 utilidades ========== -->
+<style id="qx-power-layer">
+#qxFab{position:fixed;right:22px;bottom:22px;z-index:9000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+#qxFabMain{width:52px;height:52px;border-radius:16px;border:1px solid rgba(125,211,252,.35);background:linear-gradient(135deg,#1a1a28,#111118);color:#7DD3FC;font-size:22px;cursor:pointer;box-shadow:0 12px 40px rgba(0,0,0,.45);transition:transform .2s,box-shadow .2s}
+#qxFabMain:hover{transform:scale(1.06);box-shadow:0 16px 48px rgba(125,211,252,.15)}
+#qxFabMenu{display:none;flex-direction:column;gap:6px;padding:10px;border-radius:16px;background:rgba(13,13,20,.96);border:1px solid #2a2a3a;backdrop-filter:blur(16px);min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#qxFab.open #qxFabMenu{display:flex}
+#qxFabMenu button{text-align:left;padding:10px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:#d4d4de;font-size:13px;cursor:pointer}
+#qxFabMenu button:hover{background:rgba(125,211,252,.1);border-color:rgba(125,211,252,.2);color:#fff}
+#qxCmdOverlay,#qxShortOverlay,#qxNotesOverlay,#qxTipsOverlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}
+#qxCmdOverlay.show,#qxShortOverlay.show,#qxNotesOverlay.show,#qxTipsOverlay.show{display:flex}
+#qxCmdBox{width:min(640px,100%);background:#12121a;border:1px solid #2a2a3a;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.55);overflow:hidden}
+#qxCmdInput{width:100%;padding:16px 18px;background:transparent;border:0;border-bottom:1px solid #222232;color:#f4f4f5;font-size:16px;outline:none}
+#qxCmdList{max-height:360px;overflow:auto;padding:8px}
+.qx-cmd-item{padding:11px 14px;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;color:#c8c8d4;font-size:13.5px}
+.qx-cmd-item:hover,.qx-cmd-item.active{background:rgba(125,211,252,.12);color:#fff}
+.qx-cmd-item kbd{font-size:11px;color:#6b6b80;background:#1a1a24;padding:2px 7px;border-radius:6px;border:1px solid #2a2a3a}
+#qxShortBox,#qxNotesBox,#qxTipsBox{width:min(560px,100%);background:#12121a;border:1px solid #2a2a3a;border-radius:18px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+#qxShortBox h3,#qxNotesBox h3,#qxTipsBox h3{margin:0 0 12px;font-size:18px}
+#qxShortBox .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e1e2a;font-size:13px;color:#b0b0c0}
+#qxShortBox kbd{background:#1a1a24;border:1px solid #2a2a3a;padding:2px 8px;border-radius:6px;font-size:12px;color:#7DD3FC}
+#qxNotesTa{width:100%;min-height:220px;background:#0c0c12;border:1px solid #2a2a3a;border-radius:12px;color:#e4e4ed;padding:12px;font-family:ui-monospace,monospace;font-size:13px;resize:vertical}
+#qxSessionBadge{position:fixed;left:16px;bottom:16px;z-index:8000;font-size:11px;padding:6px 10px;border-radius:999px;background:rgba(17,17,24,.9);border:1px solid #2a2a3a;color:#8b8b9e;backdrop-filter:blur(8px);display:none}
+body.qx-compact .card{padding:14px!important}
+body.qx-compact .nav-item{padding:8px 12px!important;min-height:38px!important}
+body.qx-focus #appSidebar,.body.qx-focus .sidebar{transform:translateX(-110%)}
+body.qx-focus #appView main.main-content{margin-left:0!important;width:100%!important}
+body.qx-bigtext{font-size:16.5px}
+body.qx-bigtext .stat-val,.body.qx-bigtext .ov-stat .val{font-size:36px}
+.qx-fav-star{cursor:pointer;opacity:.55;transition:opacity .15s,transform .15s;font-size:16px;margin-right:4px}
+.qx-fav-star.on{opacity:1;filter:drop-shadow(0 0 6px rgba(251,191,36,.5))}
+.qx-fav-star:hover{opacity:1;transform:scale(1.15)}
+#qxClipboardBar{position:fixed;left:50%;transform:translateX(-50%) translateY(120%);bottom:24px;z-index:9100;background:#16161f;border:1px solid #2a2a3a;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 16px 48px rgba(0,0,0,.45);transition:transform .25s;max-width:min(520px,92vw)}
+#qxClipboardBar.show{transform:translateX(-50%) translateY(0)}
+#qxClipboardBar code{font-size:11px;color:#7DD3FC;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#qxProgressTop{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,#7DD3FC,#a78bfa);z-index:100000;transition:width .25s,opacity .4s;opacity:0;pointer-events:none}
+#qxProgressTop.on{opacity:1}
+.qx-tip-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#7DD3FC;margin-right:8px;vertical-align:middle}
+#qxQuickStats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#qxQuickStats .chip{font-size:11px;padding:6px 10px;border-radius:999px;background:#14141c;border:1px solid #252535;color:#9a9ab0}
+@media (max-width:700px){#qxFab{right:14px;bottom:14px}#qxSessionBadge{display:none!important}}
+</style>
+
+<div id="qxProgressTop"></div>
+<div id="qxSessionBadge" title="Tiempo de sesión">⏱ <span id="qxSessionTime">00:00</span></div>
+
+<div id="qxFab">
+  <div id="qxFabMenu">
+    <button type="button" onclick="qxOpenCmd();qxCloseFab()">⌘ Paleta de comandos</button>
+    <button type="button" onclick="go('ia');qxCloseFab()">🤖 Abrir IA</button>
+    <button type="button" onclick="go('studio');qxCloseFab()">🧪 Studio</button>
+    <button type="button" onclick="go('create');qxCloseFab()">➕ Nuevo script</button>
+    <button type="button" onclick="qxOpenNotes();qxCloseFab()">📝 Notas rápidas</button>
+    <button type="button" onclick="qxToggleFocus();qxCloseFab()">🎯 Focus mode</button>
+    <button type="button" onclick="qxToggleCompact();qxCloseFab()">📐 Modo compacto</button>
+    <button type="button" onclick="qxToggleBigText();qxCloseFab()">🔤 Texto grande</button>
+    <button type="button" onclick="qxCheckHealth();qxCloseFab()">💚 Health check</button>
+    <button type="button" onclick="qxOpenShortcuts();qxCloseFab()">⌨️ Atajos</button>
+  </div>
+  <button id="qxFabMain" type="button" title="Acciones rápidas" onclick="qxToggleFab()">⚡</button>
+</div>
+
+<div id="qxCmdOverlay" onclick="if(event.target===this)qxCloseCmd()">
+  <div id="qxCmdBox" role="dialog" aria-label="Paleta de comandos">
+    <input id="qxCmdInput" placeholder="Buscar comando, página o acción… (Ctrl+K)" autocomplete="off" spellcheck="false"/>
+    <div id="qxCmdList"></div>
+  </div>
+</div>
+
+<div id="qxShortOverlay" onclick="if(event.target===this)qxCloseShortcuts()">
+  <div id="qxShortBox">
+    <div class="flex items-center justify-between mb-2">
+      <h3>Atajos de teclado</h3>
+      <button class="btn-ghost text-xs" type="button" onclick="qxCloseShortcuts()">Cerrar</button>
+    </div>
+    <div class="row"><span>Paleta de comandos</span><kbd>Ctrl + K</kbd></div>
+    <div class="row"><span>Nueva nota rápida</span><kbd>Ctrl + Shift + N</kbd></div>
+    <div class="row"><span>Focus mode</span><kbd>Ctrl + \\</kbd></div>
+    <div class="row"><span>Ir a Overview</span><kbd>G luego O</kbd></div>
+    <div class="row"><span>Ir a Scripts</span><kbd>G luego S</kbd></div>
+    <div class="row"><span>Ir a IA</span><kbd>G luego I</kbd></div>
+    <div class="row"><span>Ir a Studio</span><kbd>G luego T</kbd></div>
+    <div class="row"><span>Ir a Keys</span><kbd>G luego K</kbd></div>
+    <div class="row"><span>Cerrar overlays</span><kbd>Esc</kbd></div>
+    <div class="row"><span>Copiar último loadstring</span><kbd>Ctrl + Shift + C</kbd></div>
+  </div>
+</div>
+
+<div id="qxNotesOverlay" onclick="if(event.target===this)qxCloseNotes()">
+  <div id="qxNotesBox">
+    <div class="flex items-center justify-between mb-2">
+      <h3>📝 Notas rápidas (locales)</h3>
+      <button class="btn-ghost text-xs" type="button" onclick="qxCloseNotes()">Cerrar</button>
+    </div>
+    <p class="text-xs mb-3" style="color:#6b6b80">Se guardan solo en este navegador (localStorage). Útiles para HWIDs, ideas, prompts, etc.</p>
+    <textarea id="qxNotesTa" placeholder="Escribe aquí…"></textarea>
+    <div class="flex gap-2 mt-3">
+      <button class="btn-primary text-sm" type="button" onclick="qxSaveNotes()">Guardar</button>
+      <button class="btn-ghost text-sm" type="button" onclick="qxClearNotes()">Borrar</button>
+      <button class="btn-ghost text-sm" type="button" onclick="qxDownloadNotes()">Descargar .md</button>
+    </div>
+  </div>
+</div>
+
+<div id="qxTipsOverlay" onclick="if(event.target===this)qxCloseTips()">
+  <div id="qxTipsBox">
+    <div class="flex items-center justify-between mb-2">
+      <h3>✨ Novedades útiles</h3>
+      <button class="btn-ghost text-xs" type="button" onclick="qxCloseTips()">Cerrar</button>
+    </div>
+    <div id="qxTipsList" style="font-size:13px;color:#b8b8c8;line-height:1.55;max-height:50vh;overflow:auto"></div>
+    <button class="btn-primary mt-4 w-full" type="button" onclick="qxCloseTips();localStorage.setItem('qx_tips_seen_v21','1')">Entendido</button>
+  </div>
+</div>
+
+<div id="qxClipboardBar"><code id="qxClipText"></code><button class="btn-ghost text-xs" type="button" onclick="qxRecopyLast()">Copiar de nuevo</button><button class="btn-ghost text-xs" type="button" onclick="qxHideClipBar()">✕</button></div>
+
+<script id="qx-power-runtime">
+(function(){
+  const LS = {
+    favs: 'qx_fav_scripts',
+    notes: 'qx_quick_notes',
+    compact: 'qx_compact',
+    bigtext: 'qx_bigtext',
+    focus: 'qx_focus',
+    sort: 'qx_script_sort',
+    lastLoad: 'qx_last_loadstring',
+    sessionStart: 'qx_session_start',
+    autoRefresh: 'qx_auto_refresh',
+    tips: 'qx_tips_seen_v21',
+    sound: 'qx_sound_on'
+  };
+
+  function getFavs(){ try{ return JSON.parse(localStorage.getItem(LS.favs)||'[]'); }catch(e){ return []; } }
+  function setFavs(a){ localStorage.setItem(LS.favs, JSON.stringify(a)); }
+  function isFav(id){ return getFavs().includes(String(id)); }
+  function toggleFav(id){
+    id=String(id); let a=getFavs();
+    if(a.includes(id)) a=a.filter(x=>x!==id); else a.push(id);
+    setFavs(a); try{ if(typeof loadScripts==='function') loadScripts(); }catch(e){}
+    toast(a.includes(id)?'Añadido a favoritos':'Quitado de favoritos','ok');
+  }
+  window.qxToggleFav = toggleFav;
+
+  // --- Session timer ---
+  if(!sessionStorage.getItem(LS.sessionStart)) sessionStorage.setItem(LS.sessionStart, String(Date.now()));
+  const sessBadge=document.getElementById('qxSessionBadge');
+  function tickSession(){
+    const start=Number(sessionStorage.getItem(LS.sessionStart)||Date.now());
+    const s=Math.floor((Date.now()-start)/1000);
+    const m=String(Math.floor(s/60)).padStart(2,'0');
+    const sec=String(s%60).padStart(2,'0');
+    const el=document.getElementById('qxSessionTime');
+    if(el) el.textContent=m+':'+sec;
+    if(sessBadge && document.getElementById('appView') && document.getElementById('appView').style.display!=='none')
+      sessBadge.style.display='block';
+  }
+  setInterval(tickSession,1000); tickSession();
+
+  // --- Progress bar for fetches ---
+  const prog=document.getElementById('qxProgressTop');
+  let pending=0;
+  const _fetch=window.fetch;
+  window.fetch=function(){
+    pending++; if(prog){ prog.classList.add('on'); prog.style.width=Math.min(90,12+pending*18)+'%'; }
+    return _fetch.apply(this,arguments).finally(function(){
+      pending=Math.max(0,pending-1);
+      if(prog){
+        if(pending===0){ prog.style.width='100%'; setTimeout(function(){ prog.style.width='0'; prog.classList.remove('on'); },280); }
+        else prog.style.width=Math.min(90,12+pending*18)+'%';
+      }
+    });
+  };
+
+  // --- FAB ---
+  window.qxToggleFab=function(){ document.getElementById('qxFab').classList.toggle('open'); };
+  window.qxCloseFab=function(){ document.getElementById('qxFab').classList.remove('open'); };
+  document.addEventListener('click',function(e){ if(!e.target.closest('#qxFab')) qxCloseFab(); });
+
+  // --- Command palette ---
+  const COMMANDS=[
+    {id:'overview', label:'Ir a Overview', kbd:'G O', run:()=>go('overview')},
+    {id:'scripts', label:'Ir a Scripts', kbd:'G S', run:()=>go('scripts')},
+    {id:'create', label:'Crear script nuevo', kbd:'', run:()=>{resetCreateForm&&resetCreateForm();go('create');}},
+    {id:'studio', label:'Abrir Studio', kbd:'G T', run:()=>go('studio')},
+    {id:'ia', label:'Abrir IA Chat', kbd:'G I', run:()=>go('ia')},
+    {id:'keys', label:'Key System', kbd:'G K', run:()=>go('keys')},
+    {id:'hub', label:'Script Hub', kbd:'', run:()=>go('hub')},
+    {id:'logs', label:'Logs', kbd:'', run:()=>go('logs')},
+    {id:'executions', label:'Analytics', kbd:'', run:()=>go('executions')},
+    {id:'status', label:'System Status', kbd:'', run:()=>go('status')},
+    {id:'webhooks', label:'Webhooks', kbd:'', run:()=>go('webhooks')},
+    {id:'assets', label:'Assets', kbd:'', run:()=>go('assets')},
+    {id:'templates', label:'Templates', kbd:'', run:()=>go('templates')},
+    {id:'playground', label:'API Playground', kbd:'', run:()=>go('playground')},
+    {id:'settings', label:'Settings', kbd:'', run:()=>go('settings')},
+    {id:'notes', label:'Notas rápidas', kbd:'Ctrl+Shift+N', run:()=>qxOpenNotes()},
+    {id:'focus', label:'Toggle Focus mode', kbd:'Ctrl+\\\\', run:()=>qxToggleFocus()},
+    {id:'compact', label:'Toggle compacto', kbd:'', run:()=>qxToggleCompact()},
+    {id:'bigtext', label:'Toggle texto grande', kbd:'', run:()=>qxToggleBigText()},
+    {id:'health', label:'Health check API', kbd:'', run:()=>qxCheckHealth()},
+    {id:'export', label:'Exportar scripts JSON', kbd:'', run:()=>qxExportScriptsJson()},
+    {id:'copyloads', label:'Copiar todos los loadstrings', kbd:'', run:()=>qxCopyAllLoadstrings()},
+    {id:'refresh', label:'Refrescar scripts', kbd:'', run:()=>qxRefreshScripts()},
+    {id:'vip', label:'Abrir VIP', kbd:'', run:()=>{try{openVipModal()}catch(e){}}},
+    {id:'theme-neon', label:'Tema Neon', kbd:'', run:()=>qxSetTheme('theme-neon')},
+    {id:'theme-cyber', label:'Tema Cyber', kbd:'', run:()=>qxSetTheme('theme-cyber')},
+    {id:'theme-blood', label:'Tema Blood', kbd:'', run:()=>qxSetTheme('theme-blood')},
+    {id:'theme-default', label:'Tema Default', kbd:'', run:()=>qxSetTheme('')},
+    {id:'sound', label:'Toggle sonido notificaciones', kbd:'', run:()=>qxToggleSound()},
+    {id:'tips', label:'Ver tips de la update', kbd:'', run:()=>qxOpenTips()},
+  ];
+  let cmdIdx=0, cmdFiltered=COMMANDS.slice();
+  function renderCmd(){
+    const list=document.getElementById('qxCmdList');
+    if(!list) return;
+    list.innerHTML=cmdFiltered.map((c,i)=>'<div class="qx-cmd-item'+(i===cmdIdx?' active':'')+'" data-i="'+i+'"><span>'+c.label+'</span>'+(c.kbd?'<kbd>'+c.kbd+'</kbd>':'')+'</div>').join('')||'<div class="qx-cmd-item">Sin resultados</div>';
+    list.querySelectorAll('.qx-cmd-item[data-i]').forEach(el=>{
+      el.onmouseenter=()=>{cmdIdx=Number(el.dataset.i);renderCmd();};
+      el.onclick=()=>runCmd(Number(el.dataset.i));
+    });
+  }
+  function runCmd(i){
+    const c=cmdFiltered[i]; if(!c) return;
+    qxCloseCmd();
+    try{ c.run(); }catch(e){ console.error(e); toast('Error: '+e.message,'err'); }
+  }
+  window.qxOpenCmd=function(){
+    document.getElementById('qxCmdOverlay').classList.add('show');
+    const inp=document.getElementById('qxCmdInput');
+    inp.value=''; cmdFiltered=COMMANDS.slice(); cmdIdx=0; renderCmd();
+    setTimeout(()=>inp.focus(),30);
+  };
+  window.qxCloseCmd=function(){ document.getElementById('qxCmdOverlay').classList.remove('show'); };
+  document.getElementById('qxCmdInput').addEventListener('input',function(){
+    const q=this.value.trim().toLowerCase();
+    cmdFiltered=COMMANDS.filter(c=>c.label.toLowerCase().includes(q)||c.id.includes(q));
+    cmdIdx=0; renderCmd();
+  });
+  document.getElementById('qxCmdInput').addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'){ e.preventDefault(); cmdIdx=Math.min(cmdFiltered.length-1,cmdIdx+1); renderCmd(); }
+    if(e.key==='ArrowUp'){ e.preventDefault(); cmdIdx=Math.max(0,cmdIdx-1); renderCmd(); }
+    if(e.key==='Enter'){ e.preventDefault(); runCmd(cmdIdx); }
+    if(e.key==='Escape'){ qxCloseCmd(); }
+  });
+
+  // --- Shortcuts modal ---
+  window.qxOpenShortcuts=function(){ document.getElementById('qxShortOverlay').classList.add('show'); };
+  window.qxCloseShortcuts=function(){ document.getElementById('qxShortOverlay').classList.remove('show'); };
+
+  // --- Notes ---
+  window.qxOpenNotes=function(){
+    document.getElementById('qxNotesOverlay').classList.add('show');
+    document.getElementById('qxNotesTa').value=localStorage.getItem(LS.notes)||'';
+  };
+  window.qxCloseNotes=function(){ document.getElementById('qxNotesOverlay').classList.remove('show'); };
+  window.qxSaveNotes=function(){
+    localStorage.setItem(LS.notes, document.getElementById('qxNotesTa').value||'');
+    toast('Notas guardadas','ok');
+  };
+  window.qxClearNotes=function(){
+    if(!confirm('¿Borrar todas las notas locales?')) return;
+    document.getElementById('qxNotesTa').value='';
+    localStorage.removeItem(LS.notes);
+    toast('Notas borradas','ok');
+  };
+  window.qxDownloadNotes=function(){
+    const blob=new Blob([document.getElementById('qxNotesTa').value||''],{type:'text/markdown'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='qyrex-notes.md'; a.click();
+  };
+
+  // --- Focus / compact / big text ---
+  window.qxToggleFocus=function(){
+    document.body.classList.toggle('qx-focus');
+    localStorage.setItem(LS.focus, document.body.classList.contains('qx-focus')?'1':'0');
+    toast(document.body.classList.contains('qx-focus')?'Focus mode ON':'Focus mode OFF','ok');
+  };
+  window.qxToggleCompact=function(){
+    document.body.classList.toggle('qx-compact');
+    localStorage.setItem(LS.compact, document.body.classList.contains('qx-compact')?'1':'0');
+  };
+  window.qxToggleBigText=function(){
+    document.body.classList.toggle('qx-bigtext');
+    localStorage.setItem(LS.bigtext, document.body.classList.contains('qx-bigtext')?'1':'0');
+  };
+  if(localStorage.getItem(LS.compact)==='1') document.body.classList.add('qx-compact');
+  if(localStorage.getItem(LS.bigtext)==='1') document.body.classList.add('qx-bigtext');
+  if(localStorage.getItem(LS.focus)==='1') document.body.classList.add('qx-focus');
+
+  // --- Themes quick ---
+  window.qxSetTheme=function(cls){
+    ['theme-neon','theme-cyber','theme-blood','theme-gold','theme-ocean','theme-mint','theme-sunset'].forEach(t=>document.body.classList.remove(t));
+    if(cls) document.body.classList.add(cls);
+    try{ localStorage.setItem('qrex_theme', cls||''); }catch(e){}
+    toast('Tema aplicado','ok');
+  };
+
+  // --- Health ---
+  window.qxCheckHealth=async function(){
+    const dot=document.getElementById('qxHealthDot');
+    try{
+      const r=await fetch('/api/health').catch(()=>fetch('/api/ai/status',{headers: typeof headers==='function'?headers():{}}));
+      if(r && r.ok){
+        if(dot){ dot.style.background='#34d399'; }
+        toast('API online ✓','ok');
+        qxBeep(880,0.05);
+      } else {
+        if(dot){ dot.style.background='#f87171'; }
+        toast('API con problemas','err');
+      }
+    }catch(e){
+      if(dot){ dot.style.background='#f87171'; }
+      toast('No se pudo contactar la API','err');
+    }
+  };
+  // soft health poll
+  setTimeout(function(){ try{ qxCheckHealth(); }catch(e){} }, 2500);
+  setInterval(function(){ try{ qxCheckHealth(); }catch(e){} }, 120000);
+
+  // --- Sound ---
+  window.qxToggleSound=function(){
+    const on=localStorage.getItem(LS.sound)!=='1';
+    localStorage.setItem(LS.sound, on?'1':'0');
+    toast(on?'Sonido ON':'Sonido OFF','ok');
+    if(on) qxBeep(660,0.06);
+  };
+  window.qxBeep=function(freq,dur){
+    if(localStorage.getItem(LS.sound)!=='1') return;
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(); const g=ctx.createGain();
+      o.frequency.value=freq||700; o.connect(g); g.connect(ctx.destination);
+      g.gain.value=0.04; o.start(); setTimeout(()=>{o.stop();ctx.close();}, (dur||0.07)*1000);
+    }catch(e){}
+  };
+
+  // --- Clipboard bar ---
+  window.qxRememberLoadstring=function(str){
+    if(!str) return;
+    localStorage.setItem(LS.lastLoad, str);
+    const bar=document.getElementById('qxClipboardBar');
+    const t=document.getElementById('qxClipText');
+    if(t) t.textContent=str;
+    if(bar){ bar.classList.add('show'); clearTimeout(window.__qxClipT); window.__qxClipT=setTimeout(()=>bar.classList.remove('show'),5000); }
+  };
+  window.qxRecopyLast=async function(){
+    const s=localStorage.getItem(LS.lastLoad)||'';
+    if(!s) return toast('Nada para copiar','err');
+    try{ await navigator.clipboard.writeText(s); toast('Copiado','ok'); qxBeep(900,0.04);}catch(e){ toast('No se pudo copiar','err'); }
+  };
+  window.qxHideClipBar=function(){ document.getElementById('qxClipboardBar').classList.remove('show'); };
+
+  // Hook common copy patterns
+  document.addEventListener('click', function(e){
+    const btn=e.target.closest('button,[data-copy],.copy-btn');
+    if(!btn) return;
+    const txt=btn.getAttribute('data-copy')||btn.dataset.loadstring||'';
+    if(txt && /loadstring|HttpGet|https?:\/\//i.test(txt)) qxRememberLoadstring(txt);
+  }, true);
+
+  // Override toast slightly to beep on ok/err when sound on — wrap if exists later
+  const _toastWait=setInterval(function(){
+    if(typeof toast==='function' && !toast.__qx){
+      const orig=toast;
+      window.toast=function(msg,type){
+        orig(msg,type);
+        if(type==='ok') qxBeep(820,0.04);
+        if(type==='err') qxBeep(220,0.08);
+      };
+      window.toast.__qx=1;
+      clearInterval(_toastWait);
+    }
+  },400);
+
+  // --- Scripts helpers ---
+  window.qxRefreshScripts=function(){ if(typeof loadScripts==='function'){ loadScripts(); toast('Scripts actualizados','ok'); } };
+  window.qxExportScriptsJson=async function(){
+    try{
+      if(typeof headers!=='function') return toast('Inicia sesión primero','err');
+      const r=await fetch('/api/scripts',{headers:headers()});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const data=await r.json();
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='qyrex-scripts-'+Date.now()+'.json'; a.click();
+      toast('Export listo','ok');
+    }catch(e){ toast('Export falló: '+e.message,'err'); }
+  };
+  window.qxCopyAllLoadstrings=async function(){
+    try{
+      if(typeof headers!=='function') return toast('Inicia sesión primero','err');
+      const r=await fetch('/api/scripts',{headers:headers()});
+      const data=await r.json();
+      const list=Array.isArray(data)?data:(data.scripts||data.items||[]);
+      const lines=list.map(s=>{
+        const id=s.id||s._id||s.scriptId;
+        if(!id) return null;
+        try{ return typeof scriptLoadstring==='function'?scriptLoadstring(id):('loadstring(game:HttpGet("'+location.origin+'/api/v1/luascripts/public/'+id+'/download"))()'); }
+        catch(e){ return null; }
+      }).filter(Boolean);
+      if(!lines.length) return toast('No hay scripts','err');
+      const text=lines.join('\n\n');
+      await navigator.clipboard.writeText(text);
+      qxRememberLoadstring(lines[0]);
+      toast(lines.length+' loadstrings copiados','ok');
+    }catch(e){ toast('Error: '+e.message,'err'); }
+  };
+
+  let favOnly=false, sortMode=localStorage.getItem(LS.sort)||'name';
+  window.qxToggleFavoritesOnly=function(){
+    favOnly=!favOnly;
+    const b=document.getElementById('qxFavFilterBtn');
+    if(b) b.style.borderColor=favOnly?'#fbbf24':'';
+    if(typeof filterScripts==='function') filterScripts();
+    else if(typeof loadScripts==='function') loadScripts();
+    toast(favOnly?'Solo favoritos':'Todos los scripts','ok');
+  };
+  window.qxSortScripts=function(){
+    sortMode=sortMode==='name'?'runs':sortMode==='runs'?'recent':'name';
+    localStorage.setItem(LS.sort, sortMode);
+    const b=document.getElementById('qxSortBtn');
+    if(b) b.textContent='⇅ '+sortMode;
+    if(typeof loadScripts==='function') loadScripts();
+    toast('Orden: '+sortMode,'ok');
+  };
+
+  // Patch filterScripts / loadScripts rendering via MutationObserver on scriptsList
+  function decorateScriptCards(){
+    const list=document.getElementById('scriptsList');
+    if(!list) return;
+    const cards=list.querySelectorAll('.card, [data-script-id], .script-card');
+    let visible=0;
+    cards.forEach(card=>{
+      // try find id
+      let id=card.getAttribute('data-script-id')||card.dataset.id||'';
+      if(!id){
+        const m=(card.innerHTML||'').match(/\/([a-f0-9]{8,}|[A-Za-z0-9_-]{10,})\/download|scriptLoadstring\('([^']+)'\)|data-id="([^"]+)"/);
+        if(m) id=m[1]||m[2]||m[3]||'';
+      }
+      if(!id){
+        // look for onclick copy patterns
+        const btn=card.querySelector('[onclick*="copy"],[onclick*="Loadstring"],[onclick*="loadstring"]');
+        if(btn){
+          const oc=btn.getAttribute('onclick')||'';
+          const m2=oc.match(/'([A-Za-z0-9_-]{8,})'/);
+          if(m2) id=m2[1];
+        }
+      }
+      if(id && !card.querySelector('.qx-fav-star')){
+        const star=document.createElement('span');
+        star.className='qx-fav-star'+(isFav(id)?' on':'');
+        star.title='Favorito';
+        star.textContent=isFav(id)?'★':'☆';
+        star.onclick=function(ev){ ev.stopPropagation(); toggleFav(id); star.textContent=isFav(id)?'★':'☆'; star.classList.toggle('on',isFav(id)); };
+        const head=card.querySelector('.font-semibold, h3, .text-sm.font-semibold, .script-title')||card.firstElementChild;
+        if(head) head.prepend(star); else card.prepend(star);
+      }
+      if(favOnly && id && !isFav(id)){ card.style.display='none'; }
+      else { if(card.style.display==='none' && favOnly===false){ /* leave filterScripts control */ } visible++; }
+    });
+    const cnt=document.getElementById('qxScriptCount');
+    if(cnt) cnt.textContent=(list.children.length)+' scripts';
+  }
+  const scriptsList=document.getElementById('scriptsList');
+  if(scriptsList){
+    new MutationObserver(function(){ setTimeout(decorateScriptCards,30); }).observe(scriptsList,{childList:true,subtree:true});
+  }
+
+  // Enhance filterScripts if present
+  const _filtWait=setInterval(function(){
+    if(typeof filterScripts==='function' && !filterScripts.__qx){
+      const orig=filterScripts;
+      window.filterScripts=function(){
+        orig();
+        if(favOnly){
+          document.querySelectorAll('#scriptsList > *').forEach(card=>{
+            if(card.style.display==='none') return;
+            let id=card.getAttribute('data-script-id')||'';
+            if(!id){
+              const star=card.querySelector('.qx-fav-star');
+              // if not fav, hide
+            }
+            const star=card.querySelector('.qx-fav-star');
+            if(star && !star.classList.contains('on')) card.style.display='none';
+          });
+        }
+        decorateScriptCards();
+      };
+      filterScripts.__qx=1;
+      clearInterval(_filtWait);
+    }
+  },500);
+
+  // --- Keyboard shortcuts ---
+  let gPending=false;
+  document.addEventListener('keydown', function(e){
+    const tag=(e.target&&e.target.tagName||'').toLowerCase();
+    const typing=tag==='input'||tag==='textarea'||e.target.isContentEditable;
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){
+      e.preventDefault(); qxOpenCmd(); return;
+    }
+    if((e.ctrlKey||e.metaKey) && e.shiftKey && e.key.toLowerCase()==='n'){
+      e.preventDefault(); qxOpenNotes(); return;
+    }
+    if((e.ctrlKey||e.metaKey) && e.key==='\\'){
+      e.preventDefault(); qxToggleFocus(); return;
+    }
+    if((e.ctrlKey||e.metaKey) && e.shiftKey && e.key.toLowerCase()==='c'){
+      e.preventDefault(); qxRecopyLast(); return;
+    }
+    if(e.key==='Escape'){
+      qxCloseCmd(); qxCloseShortcuts(); qxCloseNotes(); qxCloseTips(); qxCloseFab();
+    }
+    if(typing) return;
+    if(e.key.toLowerCase()==='g' && !e.ctrlKey && !e.metaKey){
+      gPending=true; setTimeout(()=>gPending=false,700); return;
+    }
+    if(gPending){
+      gPending=false;
+      const k=e.key.toLowerCase();
+      if(k==='o') go('overview');
+      if(k==='s') go('scripts');
+      if(k==='i') go('ia');
+      if(k==='t') go('studio');
+      if(k==='k') go('keys');
+      if(k==='c') { try{resetCreateForm();}catch(e){} go('create'); }
+      if(k==='h') go('hub');
+      if(k==='l') go('logs');
+    }
+  });
+
+  // --- Tips / changelog of features ---
+  const TIPS=[
+    'Paleta de comandos global con <b>Ctrl+K</b>',
+    'Botón <b>API</b> en la barra superior con health check en vivo',
+    'FAB ⚡ de acciones rápidas (IA, Studio, Focus, Notas…)',
+    'Notas rápidas locales (<b>Ctrl+Shift+N</b>) exportables a Markdown',
+    'Favoritos de scripts (estrella ★) + filtro “Solo favs”',
+    'Export JSON de todos tus scripts',
+    'Copiar todos los loadstrings de un golpe',
+    'Barra de progreso superior en cada request',
+    'Temporizador de sesión en la esquina',
+    'Focus mode para concentrarte (Ctrl+\\\\)',
+    'Modo compacto y texto grande',
+    'Atajos estilo Vim: <b>G</b> luego <b>S/I/T/K/O</b>',
+    'Barra de último loadstring copiado (re-copiar fácil)',
+    'Sonido opcional en toasts (desde la paleta)',
+    'Cambio rápido de temas desde comandos',
+    'Auto health-check cada 2 minutos',
+    'Ordenar scripts por nombre / runs / recent',
+    'Tips de bienvenida de esta update',
+    'Integración IA Chat en el menú lateral',
+    'Key de OpenRouter 100% en Environment (segura)',
+    'Comando “Crear script nuevo” desde la paleta',
+    'Descarga de notas en .md',
+    'Cerrar cualquier overlay con Esc',
+    'Indicador visual de API online/offline',
+    'Quick actions sin salir de la página actual',
+    'Decoración automática de cards de scripts con favoritos',
+    'Recordatorio del último loadstring en localStorage',
+    'Navegación por teclado más rápida en el dashboard',
+    'Export + refresh + copy-all en la toolbar de Scripts',
+    'Capa de utilidades no rompe tus flujos actuales'
+  ];
+  window.qxOpenTips=function(){
+    document.getElementById('qxTipsList').innerHTML=TIPS.map(t=>'<div style="margin:6px 0"><span class="qx-tip-dot"></span>'+t+'</div>').join('');
+    document.getElementById('qxTipsOverlay').classList.add('show');
+  };
+  window.qxCloseTips=function(){ document.getElementById('qxTipsOverlay').classList.remove('show'); };
+
+  // Show tips once
+  setTimeout(function(){
+    if(localStorage.getItem(LS.tips)!=='1'){
+      const app=document.getElementById('appView');
+      if(app && app.style.display!=='none') qxOpenTips();
+      else {
+        const obs=new MutationObserver(function(){
+          if(app && app.style.display!=='none'){ qxOpenTips(); obs.disconnect(); }
+        });
+        if(app) obs.observe(app,{attributes:true,attributeFilter:['style','class']});
+      }
+    }
+  },1800);
+
+  // Quick stats chips on overview if present
+  function injectOverviewExtras(){
+    const page=document.getElementById('page-overview');
+    if(!page || page.querySelector('#qxQuickStats')) return;
+    const box=document.createElement('div');
+    box.id='qxQuickStats';
+    box.innerHTML='<span class="chip">⌘ Ctrl+K comandos</span><span class="chip">🤖 IA en el menú</span><span class="chip">⚡ FAB acciones</span><span class="chip">★ Favoritos scripts</span><span class="chip">📝 Notas locales</span>';
+    const anchor=page.querySelector('.card, .ov-stat')?.parentElement || page;
+    anchor.appendChild(box);
+  }
+  setTimeout(injectOverviewExtras,1000);
+  document.addEventListener('click',function(e){
+    if(e.target.closest('[data-page="overview"]')) setTimeout(injectOverviewExtras,200);
+  });
+
+  console.log('%c[Qyrex Power Layer] 30 utilidades activas','color:#7DD3FC;font-weight:bold');
+})();
+</script>
+<!-- ========== /QYREX POWER LAYER ========== -->
+
+</body>
 </html>`;
   async function siteFetch(url,opts){const r=await fetch(url,Object.assign({},opts||{},{headers:Object.assign({},headers())}));const d=await r.json().catch(()=>({}));if(!r.ok) throw new Error(d.error||'Error');return d;}
   el('siteFile')?.addEventListener('change',function(){const f=this.files?.[0];if(!f)return;if(f.size>900000){this.value='';toast('index.html demasiado grande (máx. 900 KB)','err');return}const r=new FileReader();r.onload=()=>{el('siteHtml').value=String(r.result||'');qxSiteFormatCheck()};r.readAsText(f)});
