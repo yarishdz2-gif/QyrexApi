@@ -2431,9 +2431,98 @@ app.post('/api/ai/generate', auth, aiLimiter, async (req, res) => {
   }
 });
 
+
 app.get('/api/ai/status', auth, (req, res) => {
   res.json({ configured: !!OPENROUTER_API_KEY, model: OPENROUTER_MODEL });
 });
+
+// --- QyrexAI Chat (OpenRouter proxy) — key from Environment ---
+function isValidChatMessages(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) return false;
+  return messages.every((msg) => {
+    if (typeof msg !== 'object' || msg === null) return false;
+    if (typeof msg.role !== 'string') return false;
+    return typeof msg.content === 'string' || Array.isArray(msg.content);
+  });
+}
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    if (!OPENROUTER_API_KEY) {
+      return res.status(500).json({
+        error: 'OPENROUTER_API_KEY no está configurada. Añádela en Environment Variables.'
+      });
+    }
+    let {
+      model = 'meta-llama/llama-3.3-70b-instruct',
+      messages,
+      temperature = 0.7,
+      max_tokens,
+      top_p,
+      stream = false,
+    } = req.body || {};
+
+    if (typeof model !== 'string' || !model.trim()) {
+      model = 'meta-llama/llama-3.3-70b-instruct';
+    }
+    model = model.trim();
+
+    if (!isValidChatMessages(messages)) {
+      return res.status(400).json({
+        error: 'El campo "messages" debe ser un array de objetos con "role" y "content".'
+      });
+    }
+
+    const payload = {
+      model,
+      messages,
+      temperature: typeof temperature === 'number' ? Math.min(Math.max(temperature, 0), 2) : 0.7,
+      stream: Boolean(stream),
+    };
+    if (typeof max_tokens === 'number') payload.max_tokens = max_tokens;
+    if (typeof top_p === 'number') payload.top_p = top_p;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + OPENROUTER_API_KEY,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'https://qyrexapi.onrender.com',
+        'X-Title': process.env.OPENROUTER_SITE_NAME || 'QyrexAI Workspace',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    let data;
+    if (contentType.includes('application/json')) {
+      data = await response.json().catch(() => null);
+      if (!data) {
+        return res.status(502).json({ error: 'Respuesta inválida de OpenRouter (JSON).' });
+      }
+    } else {
+      const raw = await response.text();
+      return res.status(response.status || 502).json({
+        error: 'Respuesta no JSON de OpenRouter.',
+        raw: String(raw).slice(0, 300),
+      });
+    }
+
+    if (!response.ok) {
+      const msg =
+        (data && data.error && (data.error.message || data.error)) ||
+        (data && data.message) ||
+        ('Error de OpenRouter (HTTP ' + response.status + ')');
+      return res.status(response.status).json({ error: String(msg), openrouter: data });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error('Error /api/chat:', err);
+    res.status(500).json({ error: err.message || 'Error interno del servidor' });
+  }
+});
+
 
 
 app.get('/api/env-logger', (req, res) => {
