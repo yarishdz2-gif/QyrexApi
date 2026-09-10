@@ -1611,15 +1611,7 @@ section.page[hidden],section.page.hidden{display:none!important}
 <div>
 <label class="field">Protección del código</label>
 <label class="text-xs" style="color:#8b8b9e">Ofuscación</label>
-<select class="w-full mt-1" id="sObfMode">
-<option selected value="none">Sin ofuscar (recomendado al pegar ya ofuscado)</option>
-<option value="qyrex">Ofuscar automático vía QyrexOBF remoto</option>
-</select>
-<div class="text-xs mt-2" style="color:#a78bfa;line-height:1.45">
-  <b>Asegúrate de usar <a href="https://qyrexobff.onrender.com" target="_blank" rel="noopener" style="color:#c4b5fd;text-decoration:underline">QyrexOBF</a></b>
-  (<a href="https://qyrexobff.onrender.com" target="_blank" rel="noopener" style="color:#c4b5fd;text-decoration:underline">qyrexobff.onrender.com</a>):
-  ofusca tu script ahí, copia el resultado y pégalo aquí. Así queda protegido con el motor MAX.
-</div></div>
+</div>
 <div class="text-xs" style="color:#5a5a6e">Gratis: máx 15 scripts · VIP: ilimitados</div>
 <div class="tab-bar">
 <button class="active" id="tabScript" type="button">
@@ -3091,8 +3083,6 @@ async function editScript(id){
     document.getElementById('sName').value = s.name || '';
     document.getElementById('sDesc').value = s.description || '';
     document.getElementById('sSource').value = s.source || '';
-    const om = document.getElementById('sObfMode');
-    if (om) om.value = s.obfMode || (s.doObfuscate === false ? 'none' : 'qyrex');
     document.getElementById('createTitle').textContent = t('create.edit');
     document.getElementById('createSubtitle').textContent = 'Modificando · ' + (s.name || id);
     document.getElementById('createBtnLabel').textContent = t('create.save');
@@ -3115,7 +3105,6 @@ function resetCreateForm(){
   document.getElementById('createSubtitle').textContent = t('create.sub');
   document.getElementById('createBtnLabel').textContent = t('create.btn');
   document.getElementById('createOutWrap').classList.add('hidden');
-  const om2 = document.getElementById('sObfMode'); if (om2) om2.value = 'none';
   updateLines();
 }
 
@@ -3165,13 +3154,13 @@ async function createScript(){
 
   async function runObfJob(src) {
     showObf(true);
-    setObfUI({ progress: 2, stage: 'queued', lastLog: 'Creando job de ofuscación…' });
+    setObfUI({ progress: 2, stage: 'queued', lastLog: 'Preparando…' });
     const jr = await fetch('/api/obf-jobs', {
       method: 'POST', headers: headers(),
       body: JSON.stringify({ source: src, max: true, antiTamper: true })
     });
     const jd = await jr.json().catch(() => ({}));
-    if (!jr.ok || !jd.jobId) throw new Error(jd.error || 'No se pudo iniciar ofuscación');
+    if (!jr.ok || !jd.jobId) throw new Error(jd.error || 'No se pudo iniciar la protección');
     const jobId = jd.jobId;
     const t0 = Date.now();
     while (true) {
@@ -3190,23 +3179,19 @@ async function createScript(){
       }
       if (Date.now() - t0 > 25 * 60 * 1000) {
         showObf(false);
-        throw new Error('Timeout de ofuscación');
+        throw new Error('Timeout de protección');
       }
     }
   }
 
   try {
     let r, d;
-    // Ofuscar primero (pantalla de carga) salvo mode none
-    const obfMode = (document.getElementById('sObfMode') || {}).value || 'none';
-    let obfuscated = null;
-    if (obfMode !== 'none' && obfMode !== 'plain' && obfMode !== 'false') {
-      obfuscated = await runObfJob(source);
-    }
+    // Siempre proteger automáticamente (remoto, sin opciones en UI)
+    const obfuscated = await runObfJob(source);
     const body = {
       name, description, source,
-      obfuscated: obfuscated || undefined,
-      obfMode,
+      obfuscated,
+      obfMode: 'qrex',
       keyMode: (document.getElementById('sKeyMode') || {}).value || 'keyless',
       providerId: (document.getElementById('sProvider') || {}).value || ''
     };
@@ -5044,11 +5029,11 @@ body.qx-bigtext .stat-val,.body.qx-bigtext .ov-stat .val{font-size:36px}
 </style>
 <div id="obfOverlay" aria-live="polite">
   <div class="obf-card">
-    <h3><span class="obf-spin"></span>Ofuscando con QyrexOBF remoto</h3>
+    <h3><span class="obf-spin"></span>Protegiendo script…</h3>
     <p class="obf-sub" id="obfStage">Preparando…</p>
     <div class="obf-bar"><i id="obfBar"></i></div>
     <div class="obf-meta"><span id="obfPct">0%</span><span id="obfEta">—</span></div>
-    <div class="obf-log" id="obfLog">Conectando a qyrexobff.onrender.com…</div>
+    <div class="obf-log" id="obfLog">Preparando protección…</div>
   </div>
 </div>
 
