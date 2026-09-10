@@ -912,11 +912,12 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
 
     let obfMode = (req.body?.obfMode || '').toString();
     if (!obfMode) {
-      const wantObf = req.body?.doObfuscate !== false && req.body?.doObfuscate !== 'false';
+      // Por defecto SIN ofuscar — el user pega output de qyrexobff.onrender.com
+      const wantObf = req.body?.doObfuscate === true || req.body?.doObfuscate === 'true';
       obfMode = wantObf ? 'qrex' : 'none';
     }
     if (obfMode === 'qyrex') obfMode = 'qrex';
-    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'qrex';
+    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'none';
     const resolved = await resolveObfuscated(source, obfMode, req.body && req.body.obfuscated);
     const doc = await Script.create({
       ownerId: req.user.sub,
@@ -988,13 +989,13 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
     }
     if (source) {
       s.source = source;
-      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex', req.body && req.body.obfuscated);
+      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'none', req.body && req.body.obfuscated);
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
       s.obfMode = resolved.obfMode;
     } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
-      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex', req.body && req.body.obfuscated);
+      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'none', req.body && req.body.obfuscated);
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
