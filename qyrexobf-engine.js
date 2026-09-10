@@ -14038,11 +14038,13 @@ function p() {
 
 function findLua() {
   const tries = [
+    process.env.QYREX_LUA || '',
+    path.join(require('os').tmpdir(), 'qyrex-lua-bin', 'lua5.1'),
+    path.join(getRoot(), 'bin', 'lua5.1'),
     '/usr/bin/lua5.1',
     '/usr/local/bin/lua5.1',
     '/usr/bin/lua',
-    '/usr/local/bin/lua',
-    path.join(getRoot(), 'bin', 'lua5.1')
+    '/usr/local/bin/lua'
   ];
   for (let i = 0; i < tries.length; i++) {
     const c = tries[i];
@@ -14080,11 +14082,13 @@ function findLua54() {
 
 function findLuac() {
   const tries = [
+    process.env.QYREX_LUAC || '',
+    path.join(require('os').tmpdir(), 'qyrex-lua-bin', 'luac5.1'),
+    path.join(getRoot(), 'bin', 'luac5.1'),
     '/usr/bin/luac5.1',
     '/usr/local/bin/luac5.1',
     '/usr/bin/luac',
-    '/usr/local/bin/luac',
-    path.join(getRoot(), 'bin', 'luac5.1')
+    '/usr/local/bin/luac'
   ];
   for (let i = 0; i < tries.length; i++) {
     const c = tries[i];
