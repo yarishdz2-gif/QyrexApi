@@ -26,15 +26,50 @@ function withHeader(code) {
 }
 
 let maxEngine = null;
+function installStaticLua(root) {
+  // El lua del pack necesita libreadline (no existe en Render). Sustituimos por binarios solo-libc.
+  try {
+    const bins = require('./lua-bins');
+    const binDir = path.join(root, 'bin');
+    fs.mkdirSync(binDir, { recursive: true });
+    const luaPath = path.join(binDir, 'lua5.1');
+    const luacPath = path.join(binDir, 'luac5.1');
+    fs.writeFileSync(luaPath, Buffer.from(bins.lua5_1, 'base64'));
+    fs.writeFileSync(luacPath, Buffer.from(bins.luac5_1, 'base64'));
+    fs.chmodSync(luaPath, 0o755);
+    fs.chmodSync(luacPath, 0o755);
+    // también en /usr/local style paths no — solo pack
+    return luaPath;
+  } catch (e) {
+    console.warn('[QyrexOBF] installStaticLua:', e && e.message);
+    return null;
+  }
+}
+
+function probeLua(bin) {
+  try {
+    const { execFileSync } = require('child_process');
+    execFileSync(bin, ['-v'], { stdio: 'pipe', timeout: 8000 });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 try {
   maxEngine = require('./qyrexobf-engine');
-  // Pre-extrae engines (incluye bin/lua5.1 del pack)
   try {
     const root = maxEngine.getRoot();
-    const luaBin = path.join(root, 'bin', 'lua5.1');
-    try { fs.chmodSync(luaBin, 0o755); } catch (_) {}
-    try { fs.chmodSync(path.join(root, 'bin', 'luac5.1'), 0o755); } catch (_) {}
-    console.log('[QyrexOBF] MAX listo · engines=' + root + ' · lua=' + (maxEngine.findLua && maxEngine.findLua()));
+    // Siempre sobrescribe con lua estático (sin libreadline) — Render Native Node
+    console.log('[QyrexOBF] instalando lua5.1 estático (sin readline)…');
+    installStaticLua(root);
+    let luaBin = path.join(root, 'bin', 'lua5.1');
+    // Forzar que findLua vea el bin del pack primero: ya está en la lista
+    const found = maxEngine.findLua && maxEngine.findLua();
+    console.log('[QyrexOBF] MAX listo · engines=' + root + ' · lua=' + found);
+    if (!found || !probeLua(found)) {
+      console.error('[QyrexOBF] lua sigue sin ejecutar');
+    }
   } catch (e) {
     console.warn('[QyrexOBF] extract:', e && e.message);
   }
@@ -71,12 +106,14 @@ function ensureMaxReady() {
     throw new Error('qyrexobf-worker.js faltante');
   }
   const root = maxEngine.getRoot();
+  installStaticLua(root);
+  let luaBin = path.join(root, 'bin', 'lua5.1');
   const lua = maxEngine.findLua && maxEngine.findLua();
-  if (!lua) {
-    // fuerza chmod y reintento
-    try { fs.chmodSync(path.join(root, 'bin', 'lua5.1'), 0o755); } catch (_) {}
-    const again = maxEngine.findLua && maxEngine.findLua();
-    if (!again) throw new Error('lua5.1 del pack no ejecutable. Revisa bin/lua5.1 en engines.');
+  if (!lua || !probeLua(lua)) {
+    // último intento: usar bin del pack tras install
+    const forced = path.join(root, 'bin', 'lua5.1');
+    if (probeLua(forced)) return true;
+    throw new Error('lua5.1 no ejecutable en este host (¿arch no x64?). Contacta soporte Qyrex.');
   }
   return true;
 }
