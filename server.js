@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const obfJobs = require('./obf-jobs');
+const { obfuscate: qyrexObfuscate } = require('./obfuscate');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -560,7 +560,10 @@ function needMongo(req, res, next) {
 }
 
 async function obfuscateWithQyrexObf(code) {
-  throw new Error('Usa /api/obf-jobs (QyrexOBF MAX). El ofuscador soft fue eliminado.');
+  const result = qyrexObfuscate(String(code || ''));
+  const out = result && result.code ? result.code : String(result || '');
+  if (!out.trim()) throw new Error('Ofuscador produjo una respuesta vacía');
+  return out;
 }
 
 function xorBytes(buf, key) {
@@ -576,19 +579,23 @@ function wrapWithEnvLogger(source) {
   return ENV_GATE_LUA + "\n" + String(source || "");
 }
 
-async function resolveObfuscated(source, mode, preObfuscated) {
+async function resolveObfuscated(source, mode) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
   const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
   if (m === "none" || m === "false" || m === "plain") {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
-  // Solo acepta output ya ofuscado por /api/obf-jobs (QyrexOBF MAX)
-  if (preObfuscated && String(preObfuscated).trim()) {
-    const code = obfJobs.withHeader(String(preObfuscated));
-    return { code, doObfuscate: true, obfMode: "qyrexobf-max" };
+  try {
+    // QyrexObf 1.0.2 — decimal double-nest + soft protections (Luau/Roblox safe)
+    const result = qyrexObfuscate(src);
+    const code = result && result.code ? result.code : String(result || "");
+    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
+    return { code, doObfuscate: true, obfMode: "qrex", stats: result && result.stats ? result.stats : undefined };
+  } catch (e) {
+    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación falló: " + (e.message || "error"));
   }
-  throw new Error("Ofuscación requerida: el cliente debe completar /api/obf-jobs antes de guardar");
 }
 
 function localObfuscate(code) {
@@ -639,44 +646,6 @@ function localObfuscate(code) {
   return lines.join('\n');
 }
 
-
-
-app.post('/api/obf-jobs', auth, needMongo, async (req, res) => {
-  try {
-    const source = String((req.body && req.body.source) || '');
-    if (!source.trim()) return res.status(400).json({ error: 'source requerido' });
-    if (source.length > 2000000) return res.status(400).json({ error: 'Script demasiado grande' });
-    const antiTamper = !(req.body && req.body.antiTamper === false);
-    const max = !(req.body && req.body.max === false);
-    const jobId = await obfJobs.startJob(source, { antiTamper, max });
-    return res.status(202).json({ success: true, jobId, status: 'queued' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message || 'fail' });
-  }
-});
-
-app.get('/api/obf-jobs/:id', auth, needMongo, (req, res) => {
-  const id = String(req.params.id || '').trim();
-  const m = obfJobs.getJob(id);
-  if (!m) return res.status(404).json({ success: false, status: 'missing', error: 'Job no encontrado' });
-  const elapsedMs = m.createdAt ? (Date.now() - m.createdAt) : (m.elapsedMs || null);
-  if (m.status === 'done') {
-    return res.json({
-      success: true, status: 'done', progress: 100, stage: 'done',
-      code: m.code || '', steps: m.steps || null,
-      originalSize: m.originalSize, obfuscatedSize: m.obfuscatedSize || (m.code && m.code.length),
-      logs: m.logs || [], elapsedMs
-    });
-  }
-  if (m.status === 'error') {
-    return res.json({ success: false, status: 'error', progress: 100, stage: 'error', error: m.error || 'fail', logs: m.logs || [], elapsedMs });
-  }
-  return res.json({
-    success: true, async: true, jobId: id, status: m.status || 'running',
-    progress: Math.max(1, Math.floor(Number(m.progress) || 1)),
-    stage: m.stage || 'running', logs: m.logs || [], lastLog: m.lastLog || null, elapsedMs
-  });
-});
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -912,13 +881,12 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
 
     let obfMode = (req.body?.obfMode || '').toString();
     if (!obfMode) {
-      // Por defecto SIN ofuscar — el user pega output de qyrexobff.onrender.com
-      const wantObf = req.body?.doObfuscate === true || req.body?.doObfuscate === 'true';
+      const wantObf = req.body?.doObfuscate !== false && req.body?.doObfuscate !== 'false';
       obfMode = wantObf ? 'qrex' : 'none';
     }
     if (obfMode === 'qyrex') obfMode = 'qrex';
-    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'none';
-    const resolved = await resolveObfuscated(source, obfMode, req.body && req.body.obfuscated);
+    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'qrex';
+    const resolved = await resolveObfuscated(source, obfMode);
     const doc = await Script.create({
       ownerId: req.user.sub,
       name,
@@ -989,13 +957,13 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
     }
     if (source) {
       s.source = source;
-      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'none', req.body && req.body.obfuscated);
+      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
       s.obfMode = resolved.obfMode;
     } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
-      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'none', req.body && req.body.obfuscated);
+      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
