@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { obfuscate: qyrexObfuscate } = require('./obfuscate');
 const obfJobs = require('./obf-jobs');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -561,10 +560,7 @@ function needMongo(req, res, next) {
 }
 
 async function obfuscateWithQyrexObf(code) {
-  const result = qyrexObfuscate(String(code || ''));
-  const out = result && result.code ? result.code : String(result || '');
-  if (!out.trim()) throw new Error('Ofuscador produjo una respuesta vacía');
-  return out;
+  throw new Error('Usa /api/obf-jobs (QyrexOBF MAX). El ofuscador soft fue eliminado.');
 }
 
 function xorBytes(buf, key) {
@@ -583,24 +579,16 @@ function wrapWithEnvLogger(source) {
 async function resolveObfuscated(source, mode, preObfuscated) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
-  if (preObfuscated && String(preObfuscated).trim()) {
-    const code = obfJobs.withHeader(String(preObfuscated));
-    return { code, doObfuscate: true, obfMode: "qyrex-pre" };
-  }
   const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
   if (m === "none" || m === "false" || m === "plain") {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
-  try {
-    const result = qyrexObfuscate(src);
-    let code = result && result.code ? result.code : String(result || "");
-    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
-    code = obfJobs.withHeader(code);
-    return { code, doObfuscate: true, obfMode: "qrex", stats: result && result.stats ? result.stats : undefined };
-  } catch (e) {
-    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
-    throw new Error("Ofuscación falló: " + (e.message || "error"));
+  // Solo acepta output ya ofuscado por /api/obf-jobs (QyrexOBF MAX)
+  if (preObfuscated && String(preObfuscated).trim()) {
+    const code = obfJobs.withHeader(String(preObfuscated));
+    return { code, doObfuscate: true, obfMode: "qyrexobf-max" };
   }
+  throw new Error("Ofuscación requerida: el cliente debe completar /api/obf-jobs antes de guardar");
 }
 
 function localObfuscate(code) {

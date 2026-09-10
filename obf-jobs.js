@@ -1,6 +1,7 @@
 'use strict';
 /**
- * Async QyrexOBF jobs for create-script loading UI
+ * Solo QyrexOBF MAX (qyrexobf-engine + worker). Sin ofuscador soft viejo.
+ * Funciona en Node puro: el pack trae bin/lua5.1 embebido.
  */
 const path = require('path');
 const fs = require('fs');
@@ -8,20 +9,38 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 
 const JOB_ROOT = path.join(__dirname, 'obf-jobs');
+// Engines del pack en carpeta del proyecto (Node sin Docker)
+if (!process.env.QYREX_ENGINES) process.env.QYREX_ENGINES = path.join(__dirname, 'engines');
 try { fs.mkdirSync(JOB_ROOT, { recursive: true }); } catch (_) {}
 
 const jobs = new Map();
 const children = new Map();
 
+const HEADER = '-- This file was protected using Qyrex Obfuscator v10.3 [https://qyrex.hopto.org]\n';
+
+function withHeader(code) {
+  const c = String(code || '');
+  if (!c) return c;
+  if (c.startsWith('-- This file was protected')) return c;
+  return HEADER + c;
+}
+
 let maxEngine = null;
 try {
   maxEngine = require('./qyrexobf-engine');
-  console.log('[QyrexOBF] motor MAX cargado');
+  // Pre-extrae engines (incluye bin/lua5.1 del pack)
+  try {
+    const root = maxEngine.getRoot();
+    const luaBin = path.join(root, 'bin', 'lua5.1');
+    try { fs.chmodSync(luaBin, 0o755); } catch (_) {}
+    try { fs.chmodSync(path.join(root, 'bin', 'luac5.1'), 0o755); } catch (_) {}
+    console.log('[QyrexOBF] MAX listo · engines=' + root + ' · lua=' + (maxEngine.findLua && maxEngine.findLua()));
+  } catch (e) {
+    console.warn('[QyrexOBF] extract:', e && e.message);
+  }
 } catch (e) {
-  console.warn('[QyrexOBF] motor MAX no disponible:', e && e.message);
+  console.error('[QyrexOBF] No se pudo cargar qyrexobf-engine:', e && e.message);
 }
-
-const { obfuscate: softObfuscate } = require('./obfuscate');
 
 function metaPath(id) { return path.join(JOB_ROOT, id, 'meta.json'); }
 function readMeta(id) {
@@ -31,7 +50,7 @@ function writeMeta(id, patch) {
   const dir = path.join(JOB_ROOT, id);
   fs.mkdirSync(dir, { recursive: true });
   const cur = readMeta(id) || { id, logs: [], createdAt: Date.now() };
-  const logs = Array.isArray(cur.logs) ? cur.logs.slice(-60) : [];
+  const logs = Array.isArray(cur.logs) ? cur.logs.slice(-80) : [];
   if (patch.logLine) {
     logs.push('[' + new Date().toISOString().slice(11, 19) + '] ' + patch.logLine);
     delete patch.logLine;
@@ -46,53 +65,37 @@ function writeMeta(id, patch) {
   return next;
 }
 
-const HEADER = '-- This file was protected using Qyrex Obfuscator v10.3 [https://qyrex.hopto.org]\n';
-
-function withHeader(code) {
-  const c = String(code || '');
-  if (!c) return c;
-  if (c.startsWith('-- This file was protected')) return c;
-  return HEADER + c;
-}
-
-async function runSoft(id, source) {
-  writeMeta(id, { status: 'running', progress: 8, stage: 'boot', logLine: 'Qyrex engine…' });
-  await new Promise((r) => setTimeout(r, 180));
-  writeMeta(id, { progress: 22, stage: 'protect', logLine: 'Protecciones…' });
-  await new Promise((r) => setTimeout(r, 120));
-  writeMeta(id, { progress: 48, stage: 'encode', logLine: 'Ofuscando payload…' });
-  const result = softObfuscate(String(source || ''));
-  let code = result && result.code ? result.code : String(result || '');
-  if (!code.trim()) throw new Error('Ofuscador vacío');
-  writeMeta(id, { progress: 88, stage: 'finalize', logLine: 'Finalizando…' });
-  await new Promise((r) => setTimeout(r, 80));
-  code = withHeader(code);
-  writeMeta(id, {
-    status: 'done',
-    progress: 100,
-    stage: 'done',
-    code,
-    originalSize: String(source).length,
-    obfuscatedSize: code.length,
-    steps: ['QyrexSoft'],
-    logLine: 'DONE · ' + code.length + ' B'
-  });
-  return code;
+function ensureMaxReady() {
+  if (!maxEngine) throw new Error('QyrexOBF MAX no cargado (qyrexobf-engine.js)');
+  if (!fs.existsSync(path.join(__dirname, 'qyrexobf-worker.js'))) {
+    throw new Error('qyrexobf-worker.js faltante');
+  }
+  const root = maxEngine.getRoot();
+  const lua = maxEngine.findLua && maxEngine.findLua();
+  if (!lua) {
+    // fuerza chmod y reintento
+    try { fs.chmodSync(path.join(root, 'bin', 'lua5.1'), 0o755); } catch (_) {}
+    const again = maxEngine.findLua && maxEngine.findLua();
+    if (!again) throw new Error('lua5.1 del pack no ejecutable. Revisa bin/lua5.1 en engines.');
+  }
+  return true;
 }
 
 function startMaxWorker(id, source, opts) {
+  ensureMaxReady();
   const dir = path.join(JOB_ROOT, id);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'in.lua'), source, 'utf8');
   writeMeta(id, {
     id,
     status: 'running',
-    progress: 5,
+    progress: 4,
     stage: 'spawn',
     createdAt: Date.now(),
-    opts: opts || { antiTamper: true },
-    logLine: 'Worker MAX arrancando…'
+    opts: Object.assign({ antiTamper: true }, opts || {}),
+    logLine: 'QyrexOBF MAX · worker arrancando'
   });
+
   const workerJs = path.join(__dirname, 'qyrexobf-worker.js');
   const child = spawn(process.execPath, [workerJs, dir], {
     cwd: __dirname,
@@ -100,21 +103,27 @@ function startMaxWorker(id, source, opts) {
     stdio: ['ignore', 'pipe', 'pipe']
   });
   children.set(id, child);
+
   const beat = setInterval(() => {
     const m = readMeta(id);
     if (!m || m.status === 'done' || m.status === 'error') {
       clearInterval(beat);
       return;
     }
-    let p = Number(m.progress) || 5;
-    if (p < 97) p = Math.min(97, p + (p < 88 ? 1 : 0.3));
+    let p = Number(m.progress) || 4;
+    if (p < 97) p = Math.min(97, p + (p < 88 ? 1 : 0.25));
     writeMeta(id, {
       progress: Math.round(p * 10) / 10,
       elapsedMs: Date.now() - (m.createdAt || Date.now())
     });
   }, 2000);
+
+  child.stdout.on('data', (b) => {
+    const line = String(b).trim();
+    if (line) console.log('[obf ' + id.slice(0, 6) + ']', line);
+  });
   child.stderr.on('data', (b) => {
-    const line = String(b).trim().slice(0, 200);
+    const line = String(b).trim().slice(0, 240);
     if (line) writeMeta(id, { logLine: line });
   });
   child.on('exit', (code) => {
@@ -131,6 +140,7 @@ function startMaxWorker(id, source, opts) {
           progress: 100,
           stage: 'done',
           code: out,
+          originalSize: String(source).length,
           obfuscatedSize: out.length,
           logLine: 'DONE MAX · ' + out.length + ' B'
         });
@@ -139,7 +149,7 @@ function startMaxWorker(id, source, opts) {
           status: 'error',
           progress: 100,
           stage: 'error',
-          error: 'Sin out.lua',
+          error: 'Worker OK pero sin out.lua',
           logLine: 'ERROR sin output'
         });
       }
@@ -157,42 +167,21 @@ function startMaxWorker(id, source, opts) {
 
 async function startJob(source, opts) {
   const id = crypto.randomBytes(8).toString('hex');
-  const wantMax = !(opts && opts.max === false);
-  const workerOk = fs.existsSync(path.join(__dirname, 'qyrexobf-worker.js'));
-  let useMax = false;
-  if (wantMax && maxEngine && workerOk) {
-    try {
-      if (typeof maxEngine.findLua === 'function' && !maxEngine.findLua()) {
-        throw new Error('lua5.1 no disponible');
-      }
-      useMax = true;
-    } catch (e) {
-      console.warn('[QyrexOBF] MAX no usable, soft:', e.message);
-    }
-  }
-  if (useMax) {
-    startMaxWorker(id, source, opts);
+  try {
+    ensureMaxReady();
+  } catch (e) {
+    writeMeta(id, {
+      id,
+      status: 'error',
+      progress: 100,
+      stage: 'error',
+      createdAt: Date.now(),
+      error: e.message,
+      logLine: 'ERROR: ' + e.message
+    });
     return id;
   }
-  writeMeta(id, {
-    id,
-    status: 'queued',
-    progress: 2,
-    stage: 'queued',
-    createdAt: Date.now(),
-    logLine: 'Job en cola'
-  });
-  setImmediate(() => {
-    runSoft(id, source).catch((e) => {
-      writeMeta(id, {
-        status: 'error',
-        progress: 100,
-        stage: 'error',
-        error: String(e.message || e).slice(0, 500),
-        logLine: 'ERROR: ' + (e.message || e)
-      });
-    });
-  });
+  startMaxWorker(id, String(source || ''), opts || { antiTamper: true });
   return id;
 }
 
@@ -200,4 +189,4 @@ function getJob(id) {
   return readMeta(id) || jobs.get(id) || null;
 }
 
-module.exports = { startJob, getJob, withHeader };
+module.exports = { startJob, getJob, withHeader, ensureMaxReady };
