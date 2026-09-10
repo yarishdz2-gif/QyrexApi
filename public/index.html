@@ -3115,6 +3115,7 @@ function resetCreateForm(){
   updateLines();
 }
 
+
 async function createScript(){
   const name = document.getElementById('sName').value.trim();
   const description = document.getElementById('sDesc').value.trim();
@@ -3127,18 +3128,90 @@ async function createScript(){
   btn.disabled = true;
   const prev = document.getElementById('createBtnLabel').textContent;
   document.getElementById('createBtnLabel').textContent = editId ? 'Saving...' : 'Creating...';
+
+  const stageMap = {
+    queued: 'En cola', spawn: 'Arrancando', boot: 'Iniciando', protect: 'Protecciones',
+    encode: 'Codificando', antitamper: 'AntiTamper', prometheus: 'Prometheus',
+    hercules: 'Hercules', ironbrew2: 'IronBrew2', finalize: 'Finalizando',
+    done: 'Listo', error: 'Error', running: 'Procesando'
+  };
+  function showObf(show) {
+    const el = document.getElementById('obfOverlay');
+    if (!el) return;
+    if (show) el.classList.add('show'); else el.classList.remove('show');
+  }
+  function setObfUI(pd) {
+    const p = Math.max(1, Math.min(100, Math.floor(Number(pd.progress) || 1)));
+    const bar = document.getElementById('obfBar');
+    const pct = document.getElementById('obfPct');
+    const st = document.getElementById('obfStage');
+    const eta = document.getElementById('obfEta');
+    const log = document.getElementById('obfLog');
+    if (bar) bar.style.width = p + '%';
+    if (pct) pct.textContent = p + '%';
+    const stage = stageMap[pd.stage] || pd.stage || '…';
+    const sec = pd.elapsedMs != null ? Math.round(pd.elapsedMs / 1000) + 's' : '—';
+    if (st) st.textContent = stage;
+    if (eta) eta.textContent = sec;
+    if (log) {
+      if (pd.logs && pd.logs.length) log.textContent = pd.logs.join('\n');
+      else if (pd.lastLog) log.textContent = pd.lastLog;
+    }
+  }
+
+  async function runObfJob(src) {
+    showObf(true);
+    setObfUI({ progress: 2, stage: 'queued', lastLog: 'Creando job de ofuscación…' });
+    const jr = await fetch('/api/obf-jobs', {
+      method: 'POST', headers: headers(),
+      body: JSON.stringify({ source: src, max: true, antiTamper: true })
+    });
+    const jd = await jr.json().catch(() => ({}));
+    if (!jr.ok || !jd.jobId) throw new Error(jd.error || 'No se pudo iniciar ofuscación');
+    const jobId = jd.jobId;
+    const t0 = Date.now();
+    while (true) {
+      await new Promise(r => setTimeout(r, 900));
+      const pr = await fetch('/api/obf-jobs/' + encodeURIComponent(jobId), { headers: headers() });
+      const pd = await pr.json().catch(() => null);
+      if (!pd) continue;
+      setObfUI(Object.assign({ elapsedMs: Date.now() - t0 }, pd));
+      if (pd.status === 'done' && pd.code) {
+        showObf(false);
+        return pd.code;
+      }
+      if (pd.status === 'error' || pd.success === false && pd.error && pd.status !== 'running') {
+        showObf(false);
+        throw new Error(pd.error || 'Ofuscación falló');
+      }
+      if (Date.now() - t0 > 25 * 60 * 1000) {
+        showObf(false);
+        throw new Error('Timeout de ofuscación');
+      }
+    }
+  }
+
   try {
     let r, d;
+    // Ofuscar primero (pantalla de carga) salvo mode none
+    const obfMode = (document.getElementById('sObfMode') || {}).value || 'qyrex';
+    let obfuscated = null;
+    if (obfMode !== 'none' && obfMode !== 'plain' && obfMode !== 'false') {
+      obfuscated = await runObfJob(source);
+    }
+    const body = {
+      name, description, source,
+      obfuscated: obfuscated || undefined,
+      obfMode,
+      keyMode: (document.getElementById('sKeyMode') || {}).value || 'keyless',
+      providerId: (document.getElementById('sProvider') || {}).value || ''
+    };
     if (editId) {
-      r = await fetch('/api/scripts/' + editId, {
-        method: 'PUT', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
-      });
+      r = await fetch('/api/scripts/' + editId, { method: 'PUT', headers: headers(), body: JSON.stringify(body) });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error al guardar');
       toast('Script actualizado');
       wrap.classList.remove('hidden');
-      const host = location.origin;
       out.value = scriptLoadstring(editId);
       const prefCopy = document.getElementById('prefCopy');
       if (prefCopy && prefCopy.checked) { try { navigator.clipboard.writeText(out.value); } catch {} }
@@ -3146,35 +3219,30 @@ async function createScript(){
       loadScripts(); loadStats();
       go('scripts');
     } else {
-      r = await fetch('/api/scripts', {
-        method:'POST', headers: headers(),
-        body: JSON.stringify({ name, description, source, obfMode: (document.getElementById('sObfMode')||{}).value || 'qyrex', keyMode: (document.getElementById('sKeyMode')||{}).value || 'keyless', providerId: (document.getElementById('sProvider')||{}).value || '' })
-      });
+      r = await fetch('/api/scripts', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
       d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Error');
-      wrap.classList.remove('hidden');
-      out.value = (d.id ? scriptLoadstring(d.id) : (d.loadstring || JSON.stringify(d)));
-      const prefCopy = document.getElementById('prefCopy');
-      if (prefCopy && prefCopy.checked) {
-        try { navigator.clipboard.writeText(out.value); } catch {}
-      }
       toast('Script creado');
-      document.getElementById('sName').value = '';
-      document.getElementById('sDesc').value = '';
-      document.getElementById('sSource').value = '';
-      updateLines();
+      wrap.classList.remove('hidden');
+      out.value = d.loadstring || scriptLoadstring(d.id);
+      const prefCopy = document.getElementById('prefCopy');
+      if (prefCopy && prefCopy.checked) { try { navigator.clipboard.writeText(out.value); } catch {} }
+      resetCreateForm();
       loadScripts(); loadStats();
+      go('scripts');
     }
-  } catch(e) {
+  } catch (e) {
+    showObf(false);
     wrap.classList.remove('hidden');
-    out.value = 'Error: ' + e.message;
-    toast(e.message, 'err');
+    out.value = (e && e.message) ? e.message : String(e);
+    toast(e.message || 'Error');
   } finally {
+    showObf(false);
     btn.disabled = false;
-    document.getElementById('createBtnLabel').textContent = prev === 'Saving...' || prev === 'Creating...' ? (editId ? 'Save changes' : 'Create') : prev;
-    if (!editId) document.getElementById('createBtnLabel').textContent = 'Create';
+    document.getElementById('createBtnLabel').textContent = prev;
   }
 }
+
 
 async function delScript(id){
   if (!confirm(t('confirm.delScript'))) return;
@@ -4955,6 +5023,30 @@ body.qx-bigtext .stat-val,.body.qx-bigtext .ov-stat .val{font-size:36px}
 })();
 </script>
 <!-- ========== /QYREX POWER LAYER ========== -->
+
+
+<style id="obfLoadCss">
+#obfOverlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(6,6,12,.82);backdrop-filter:blur(8px)}
+#obfOverlay.show{display:flex}
+.obf-card{width:min(420px,92vw);background:#12121a;border:1px solid #2a2a3a;border-radius:16px;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.obf-card h3{margin:0 0 6px;font-size:16px;font-weight:700;color:#eee}
+.obf-card p.obf-sub{margin:0 0 18px;font-size:12px;color:#7a7a90}
+.obf-bar{height:8px;background:#1e1e2a;border-radius:99px;overflow:hidden;margin-bottom:10px}
+.obf-bar>i{display:block;height:100%;width:3%;background:linear-gradient(90deg,#7c5cfc,#a78bfa);border-radius:99px;transition:width .35s ease}
+.obf-meta{display:flex;justify-content:space-between;font-size:11px;color:#8b8ba0;margin-bottom:12px}
+.obf-log{max-height:120px;overflow:auto;font-family:ui-monospace,monospace;font-size:10px;line-height:1.45;color:#9a9ab0;background:#0c0c12;border-radius:8px;padding:10px;border:1px solid #1e1e2a;white-space:pre-wrap}
+.obf-spin{width:18px;height:18px;border:2px solid #3a3a50;border-top-color:#a78bfa;border-radius:50%;animation:obfSpin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes obfSpin{to{transform:rotate(360deg)}}
+</style>
+<div id="obfOverlay" aria-live="polite">
+  <div class="obf-card">
+    <h3><span class="obf-spin"></span>Ofuscando con QyrexOBF</h3>
+    <p class="obf-sub" id="obfStage">Preparando…</p>
+    <div class="obf-bar"><i id="obfBar"></i></div>
+    <div class="obf-meta"><span id="obfPct">0%</span><span id="obfEta">—</span></div>
+    <div class="obf-log" id="obfLog">Iniciando job…</div>
+  </div>
+</div>
 
 </body>
 </html>`;
