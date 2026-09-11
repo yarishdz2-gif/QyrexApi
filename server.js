@@ -623,43 +623,13 @@ async function obfuscateWithVoltils(code, preset) {
 async function resolveObfuscated(source, mode) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
-  const m = String(mode || "qyrex").toLowerCase().replace(/^qrex$/, "qyrex");
-  if (m === "none" || m === "false" || m === "plain") {
-    return { code: src, doObfuscate: false, obfMode: "none" };
-  }
-
-  // Modo Voltils (API externa)
-  if (m === "voltils" || m === "volt" || m === "voltil") {
-    try {
-      const code = await obfuscateWithVoltils(src, 'normal');
-      return { code, doObfuscate: true, obfMode: "voltils" };
-    } catch (e) {
-      console.error("Voltils fail:", e && e.stack ? e.stack : e);
-      throw new Error("Ofuscación Voltils falló: " + (e.message || "error"));
-    }
-  }
-
-  // Modo local (5x XOR+B64)
-  if (m === "local") {
-    try {
-      const code = localObfuscate(src);
-      if (!code.trim()) throw new Error("Ofuscador local produjo respuesta vacía");
-      return { code, doObfuscate: true, obfMode: "local" };
-    } catch (e) {
-      console.error("LocalObf fail:", e && e.stack ? e.stack : e);
-      throw new Error("Ofuscación local falló: " + (e.message || "error"));
-    }
-  }
-
-  // Por defecto: QyrexObf 1.0.2
+  // Siempre ofuscar con Voltils (sin opciones)
   try {
-    const result = qyrexObfuscate(src);
-    const code = result && result.code ? result.code : String(result || "");
-    if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
-    return { code, doObfuscate: true, obfMode: "qrex", stats: result && result.stats ? result.stats : undefined };
+    const code = await obfuscateWithVoltils(src, 'normal');
+    return { code, doObfuscate: true, obfMode: "voltils" };
   } catch (e) {
-    console.error("QyrexObf fail:", e && e.stack ? e.stack : e);
-    throw new Error("Ofuscación falló: " + (e.message || "error"));
+    console.error("Voltils fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación Voltils falló: " + (e.message || "error"));
   }
 }
 
@@ -944,14 +914,8 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
       pid = String(prov._id);
     }
 
-    let obfMode = (req.body?.obfMode || '').toString();
-    if (!obfMode) {
-      const wantObf = req.body?.doObfuscate !== false && req.body?.doObfuscate !== 'false';
-      obfMode = wantObf ? 'qrex' : 'none';
-    }
-    if (obfMode === 'qyrex') obfMode = 'qrex';
-    if (!['none', 'qrex', 'local', 'qyrex', 'voltils', 'volt', 'voltil'].includes(obfMode)) obfMode = 'qrex';
-    const resolved = await resolveObfuscated(source, obfMode);
+    // Siempre ofuscar con Voltils
+    const resolved = await resolveObfuscated(source, 'voltils');
     const doc = await Script.create({
       ownerId: req.user.sub,
       name,
@@ -1013,25 +977,17 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         s.providerId = ''; s.providerName = '';
       }
     }
-    if (req.body?.obfMode && ['none','qrex','qyrex','local','voltils','volt','voltil'].includes(req.body.obfMode)) {
-      s.obfMode = req.body.obfMode;
-      s.doObfuscate = s.obfMode !== 'none';
-    } else if (req.body?.doObfuscate !== undefined) {
-      s.doObfuscate = req.body.doObfuscate !== false && req.body.doObfuscate !== 'false';
-      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' || s.obfMode === 'voltils' ? s.obfMode : 'qrex') : 'none';
-    }
+    // Siempre ofuscar con Voltils al guardar código
     if (source) {
       s.source = source;
-      const resolved = await resolveObfuscated(source, (req.body && req.body.obfMode) || 'qyrex');
+      const resolved = await resolveObfuscated(source, 'voltils');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
-      s.obfMode = resolved.obfMode;
-    } else if ((req.body?.obfMode || req.body?.doObfuscate !== undefined) && s.source) {
-      const resolved = await resolveObfuscated(s.source, (req.body && req.body.obfMode) || s.obfMode || 'qyrex');
+    } else if (s.source && (req.body?.obfMode !== undefined || req.body?.doObfuscate !== undefined)) {
+      const resolved = await resolveObfuscated(s.source, 'voltils');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
-      s.obfMode = resolved.obfMode;
       s.obfMode = resolved.obfMode;
     }
     await s.save();
