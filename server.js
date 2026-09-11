@@ -21,6 +21,10 @@ const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491'
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
 
+// Voltils Obfuscator API
+const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltils_1267954195982581782_b24de9d9410f9e7a0dcb7db05b18cda598f9415f';
+const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltils.nxtdev.xyz/v1/obfuscate';
+
 const PORT = process.env.PORT || 10000;
 
 app.use(helmet({
@@ -579,6 +583,43 @@ function wrapWithEnvLogger(source) {
   return ENV_GATE_LUA + "\n" + String(source || "");
 }
 
+async function obfuscateWithVoltils(code, preset) {
+  const body = {
+    code: String(code || ''),
+    preset: preset || 'normal'
+  };
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 120000);
+  try {
+    const res = await fetch(VOLTILS_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + VOLTILS_API_KEY
+      },
+      body: JSON.stringify(body),
+      signal: ctrl.signal
+    });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
+    if (!res.ok) {
+      const errMsg = (data && (data.error || data.message || data.raw)) || text || ('HTTP ' + res.status);
+      throw new Error(String(errMsg).slice(0, 400));
+    }
+    // Respuestas típicas: { code }, { obfuscated }, { result }, o string directo
+    const out =
+      (data && (data.code || data.obfuscated || data.result || data.output || data.script)) ||
+      (typeof data === 'string' ? data : null) ||
+      (typeof text === 'string' && text.trim() && !text.trim().startsWith('{') ? text : null);
+    if (!out || !String(out).trim()) throw new Error('Voltils devolvió respuesta vacía');
+    return String(out);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function resolveObfuscated(source, mode) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
@@ -586,8 +627,32 @@ async function resolveObfuscated(source, mode) {
   if (m === "none" || m === "false" || m === "plain") {
     return { code: src, doObfuscate: false, obfMode: "none" };
   }
+
+  // Modo Voltils (API externa)
+  if (m === "voltils" || m === "volt" || m === "voltil") {
+    try {
+      const code = await obfuscateWithVoltils(src, 'normal');
+      return { code, doObfuscate: true, obfMode: "voltils" };
+    } catch (e) {
+      console.error("Voltils fail:", e && e.stack ? e.stack : e);
+      throw new Error("Ofuscación Voltils falló: " + (e.message || "error"));
+    }
+  }
+
+  // Modo local (5x XOR+B64)
+  if (m === "local") {
+    try {
+      const code = localObfuscate(src);
+      if (!code.trim()) throw new Error("Ofuscador local produjo respuesta vacía");
+      return { code, doObfuscate: true, obfMode: "local" };
+    } catch (e) {
+      console.error("LocalObf fail:", e && e.stack ? e.stack : e);
+      throw new Error("Ofuscación local falló: " + (e.message || "error"));
+    }
+  }
+
+  // Por defecto: QyrexObf 1.0.2
   try {
-    // QyrexObf 1.0.2 — decimal double-nest + soft protections (Luau/Roblox safe)
     const result = qyrexObfuscate(src);
     const code = result && result.code ? result.code : String(result || "");
     if (!code.trim()) throw new Error("Ofuscador produjo una respuesta vacía");
@@ -885,7 +950,7 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
       obfMode = wantObf ? 'qrex' : 'none';
     }
     if (obfMode === 'qyrex') obfMode = 'qrex';
-    if (!['none', 'qrex', 'local', 'qyrex'].includes(obfMode)) obfMode = 'qrex';
+    if (!['none', 'qrex', 'local', 'qyrex', 'voltils', 'volt', 'voltil'].includes(obfMode)) obfMode = 'qrex';
     const resolved = await resolveObfuscated(source, obfMode);
     const doc = await Script.create({
       ownerId: req.user.sub,
@@ -948,12 +1013,12 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         s.providerId = ''; s.providerName = '';
       }
     }
-    if (req.body?.obfMode && ['none','qrex','qyrex','local'].includes(req.body.obfMode)) {
+    if (req.body?.obfMode && ['none','qrex','qyrex','local','voltils','volt','voltil'].includes(req.body.obfMode)) {
       s.obfMode = req.body.obfMode;
       s.doObfuscate = s.obfMode !== 'none';
     } else if (req.body?.doObfuscate !== undefined) {
       s.doObfuscate = req.body.doObfuscate !== false && req.body.doObfuscate !== 'false';
-      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' ? 'local' : 'qrex') : 'none';
+      s.obfMode = s.doObfuscate ? (s.obfMode === 'local' || s.obfMode === 'voltils' ? s.obfMode : 'qrex') : 'none';
     }
     if (source) {
       s.source = source;
