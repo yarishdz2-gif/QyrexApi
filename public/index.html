@@ -100,8 +100,8 @@
   .editor-wrap{border:1px solid #252533;border-radius:12px;overflow:hidden;background:#0c0c12;display:flex;flex-direction:column}
   .editor-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #1e1e2a;flex-wrap:wrap;gap:8px}
   .editor-body{display:flex;flex:1;min-height:320px;max-height:520px;overflow:hidden;position:relative}
-  .line-nums{color:#4a4a5a;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:12px 10px 12px 12px;user-select:none;text-align:right;line-height:1.55;min-width:48px;width:48px;flex-shrink:0;overflow:hidden;background:#0a0a10;border-right:1px solid #1a1a24;#7DD3FC-space:pre;box-sizing:border-box}
-  #sSource{border:none;border-radius:0;background:#0c0c12;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.55;resize:none;padding:12px 14px;flex:1;min-width:0;overflow:auto;#7DD3FC-space:pre;tab-size:2;color:#e4e4ed}
+  .line-nums{color:#4a4a5a;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:12px 10px 12px 12px;user-select:none;text-align:right;line-height:1.55;min-width:48px;width:48px;flex-shrink:0;overflow:hidden;background:#0a0a10;border-right:1px solid #1a1a24;white-space:pre;box-sizing:border-box}
+  #sSource{border:none;border-radius:0;background:#0c0c12;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.55;resize:none;padding:12px 14px;flex:1;min-width:0;overflow:auto;white-space:pre;tab-size:2;color:#e4e4ed}
   .studio-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
   .studio-toolbar .btn-ghost{padding:5px 10px;font-size:11px}
   .ai-panel{border-top:1px solid #1e1e2a;background:#0a0a10;padding:10px 12px;max-height:140px;overflow:auto}
@@ -297,7 +297,7 @@
   .vc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.vc-badge{display:inline-flex;padding:4px 8px;border-radius:8px;background:#1a1a24;color:#b5b5c6;font-size:9px;font-weight:900;letter-spacing:.12em}.vc-badge.vip{background:rgba(251,191,36,.11);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
   .vc-title{font-size:14px;font-weight:800;margin-top:8px}.vc-state{font-size:9px;font-weight:900;color:#77778c;white-space:nowrap}.vc-state.vip{color:#fbbf24}.vc-list{display:grid;gap:8px;margin-top:14px;color:#8e8ea2;font-size:11px}.vc-list div{display:flex;gap:8px;align-items:flex-start}.vc-list div span{color:#6f6f82;font-weight:900}.pro .vc-list div span{color:#fbbf24}
   .vip-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px 8px;color:#e4e4eb;font-size:12px;font-weight:800}.vip-section-title small{color:#606074;font-size:9px;font-weight:600}.vip-matrix{margin:0 24px 12px;border:1px solid #252532;border-radius:15px;overflow:hidden;background:#0c0c12}.vip-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 74px;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid #1d1d27;font-size:10px;color:#8a8a9d}.vip-row:first-child{border-top:0}.vip-row b{text-align:center;color:#c2c2cf;font-size:10px}.vip-row .gold{color:#fbbf24}.vip-row-head{background:#101018;border-top:0;color:#6f6f81!important;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.vip-row-head b{color:#fbbf24}.vip-row-head b:first-of-type{color:#9a9aaa}.vip-value{margin:0 24px 8px;padding:12px 14px;border:1px solid rgba(251,191,36,.13);border-radius:14px;background:linear-gradient(90deg,rgba(251,191,36,.08),rgba(251,191,36,.02));display:flex;align-items:center;justify-content:space-between;gap:14px}.vip-value>div:first-child{min-width:0}.vip-save{padding:7px 9px;border-radius:9px;background:rgba(251,191,36,.1);color:#fbbf24;font-size:9px;font-weight:900;white-space:nowrap;border:1px solid rgba(251,191,36,.16)}
-  @media (max-width:760px){.vip-plans{grid-template-columns:1fr}.vip-top-btn{top:10px;right:58px;padding:8px 10px}.vip-top-btn span{display:inline}.vip-top-btn{font-size:11px}.vip-compare{grid-template-columns:1fr}.vip-row{grid-template-columns:minmax(0,1fr) 58px 58px;font-size:9px}.vip-row b{font-size:9px}.vip-section-title{align-items:flex-start;flex-direction:column}.vip-value{align-items:flex-start;flex-direction:column}.vip-save{#7DD3FC-space:normal}}
+  @media (max-width:760px){.vip-plans{grid-template-columns:1fr}.vip-top-btn{top:10px;right:58px;padding:8px 10px}.vip-top-btn span{display:inline}.vip-top-btn{font-size:11px}.vip-compare{grid-template-columns:1fr}.vip-row{grid-template-columns:minmax(0,1fr) 58px 58px;font-size:9px}.vip-row b{font-size:9px}.vip-section-title{align-items:flex-start;flex-direction:column}.vip-value{align-items:flex-start;flex-direction:column}.vip-save{white-space:normal}}
 
   /* ===== Dashboard pro (mismo vibe que login) ===== */
   #appView{position:relative;background:#07070c;min-height:100vh}
@@ -1092,8 +1092,264 @@ section.page[hidden],section.page.hidden{display:none!important}
 @media (min-width:901px){
   #appView main.main-content{contain:layout paint style}
 }
-</style></head>
+</style>
+<style id="qyrex-glass-ultra">
+/* ==========================================================================
+   QYREX · GLASS ULTRA — capa final de diseño (glassmorphism premium)
+   Se apoya SIEMPRE en las variables de tema ya existentes
+   (--bg, --card, --accent, --accent2, --border) para que los 8 temas
+   (White/Neon/Cyberpunk/Blood/Gold/Ocean/Mint/Sunset) luzcan coherentes
+   y con cristal esmerilado real (backdrop-filter) en vez de colores planos.
+   Esta capa SOLO toca color, tipografía, brillo y profundidad — nunca
+   toca layout, ids, ni funciones — para no romper nada del panel.
+   ========================================================================== */
+
+html body{
+  --gl-blur: 20px;
+  --gl-radius: 18px;
+  --gl-ease: cubic-bezier(.22,1,.36,1);
+  --gl-line: color-mix(in srgb, var(--accent2) 16%, var(--border) 84%);
+  --gl-line-hover: color-mix(in srgb, var(--accent2) 34%, var(--border) 66%);
+  --gl-surface: color-mix(in srgb, var(--card) 56%, transparent);
+  --gl-surface-strong: color-mix(in srgb, var(--card) 74%, transparent);
+  --gl-sheen: color-mix(in srgb, #fff 10%, transparent);
+}
+
+/* ---------- lienzo base + aurora ambiental ---------- */
+html body{
+  background:
+    radial-gradient(1200px 680px at 84% -12%, color-mix(in srgb, var(--accent2) 15%, transparent), transparent 60%),
+    radial-gradient(900px 620px at -12% 108%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 62%),
+    var(--bg) !important;
+  transition: background .6s var(--gl-ease);
+}
+html body::selection, html body *::selection{ background: color-mix(in srgb, var(--accent2) 45%, transparent); color:#fff; }
+
+.qx-aurora-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.qx-aurora-bg span{position:absolute;border-radius:50%;filter:blur(120px);opacity:.5;will-change:transform}
+.qx-aurora-bg span:nth-child(1){width:560px;height:560px;top:-180px;left:-140px;background:color-mix(in srgb, var(--accent2) 55%, transparent);animation:qgDrift1 26s ease-in-out infinite alternate}
+.qx-aurora-bg span:nth-child(2){width:520px;height:520px;bottom:-220px;right:-160px;background:color-mix(in srgb, var(--accent) 48%, transparent);animation:qgDrift2 30s ease-in-out infinite alternate}
+.qx-aurora-bg span:nth-child(3){width:420px;height:420px;top:38%;left:48%;background:color-mix(in srgb, var(--accent2) 28%, transparent);animation:qgDrift3 34s ease-in-out infinite alternate}
+@keyframes qgDrift1{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(80px,55px,0) scale(1.18)}}
+@keyframes qgDrift2{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-70px,-45px,0) scale(1.12)}}
+@keyframes qgDrift3{from{transform:translate3d(-30px,-25px,0) scale(.9)}to{transform:translate3d(45px,30px,0) scale(1.08)}}
+html body #loginView, html body #appView{position:relative;z-index:1}
+@media (max-width:700px){ html body{--gl-blur:12px} .qx-aurora-bg span{filter:blur(70px);opacity:.4} }
+@media (prefers-reduced-motion:reduce){ .qx-aurora-bg span{animation:none!important} }
+
+/* ---------- scrollbar de cristal ---------- */
+html body ::-webkit-scrollbar{width:9px!important;height:9px!important}
+html body ::-webkit-scrollbar-track{background:transparent!important}
+html body ::-webkit-scrollbar-thumb{background:color-mix(in srgb, var(--accent2) 35%, var(--border) 65%)!important;border-radius:20px!important;border:2px solid transparent!important;background-clip:padding-box!important}
+html body ::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb, var(--accent2) 58%, var(--border) 42%)!important}
+
+/* ---------- sidebar + navegación ---------- */
+html body .sidebar, html body #appView .sidebar{
+  background:var(--gl-surface-strong)!important;
+  backdrop-filter:blur(var(--gl-blur)) saturate(1.4)!important;
+  -webkit-backdrop-filter:blur(var(--gl-blur)) saturate(1.4)!important;
+  border-right:1px solid var(--gl-line)!important;
+  box-shadow: inset -1px 0 0 var(--gl-sheen), 10px 0 40px rgba(0,0,0,.35)!important;
+}
+html body .nav-section{color:color-mix(in srgb, var(--accent2) 45%, #8b8b9e 55%)!important;font-weight:700!important}
+html body .nav-item{border-radius:12px!important}
+html body .nav-item:hover{background:color-mix(in srgb, var(--accent2) 12%, transparent)!important;border-color:color-mix(in srgb, var(--accent2) 24%, transparent)!important;color:#fff!important}
+html body .nav-item.active, html body #appView .sidebar .nav-item.active{
+  background:linear-gradient(120deg, color-mix(in srgb, var(--accent2) 28%, transparent), color-mix(in srgb, var(--accent) 14%, transparent))!important;
+  border-color:color-mix(in srgb, var(--accent2) 32%, transparent)!important;
+  box-shadow:0 6px 20px color-mix(in srgb, var(--accent2) 22%, transparent), inset 0 1px var(--gl-sheen)!important;
+  color:#fff!important;
+}
+html body .nav-item.active::after{background:var(--accent2)!important;box-shadow:0 0 16px color-mix(in srgb, var(--accent2) 75%, transparent)!important}
+html body .user-pill, html body #appView .sidebar .user-pill{background:var(--gl-surface)!important;border:1px solid var(--gl-line)!important;backdrop-filter:blur(14px)}
+html body .avatar{background:linear-gradient(135deg, var(--accent2), var(--accent))!important;color:#0a0a0f!important;font-weight:800!important}
+html body .sidebar-brand, html body .lg-mark b, html body .lg-topbar b{filter:drop-shadow(0 0 14px color-mix(in srgb, var(--accent2) 55%, transparent))}
+
+/* ---------- barra superior / móvil ---------- */
+html body .mobile-topbar,
+html body #appView > .flex,
+html body #appView main > .flex.items-center,
+html body #appView .main-content > div:first-of-type{
+  background:var(--gl-surface)!important;
+  backdrop-filter:blur(var(--gl-blur)) saturate(1.3)!important;
+  -webkit-backdrop-filter:blur(var(--gl-blur)) saturate(1.3)!important;
+  border-color:var(--gl-line)!important;
+}
+html body .mt-open{background:linear-gradient(135deg, color-mix(in srgb, var(--accent2) 34%, transparent), color-mix(in srgb, var(--accent2) 10%, transparent))!important;border-color:color-mix(in srgb, var(--accent2) 42%, transparent)!important}
+html body .notif-btn, html body .lang-btn, html body .vip-top-btn{background:var(--gl-surface)!important;border-color:var(--gl-line)!important;backdrop-filter:blur(10px)}
+html body .notif-btn:hover, html body .lang-btn:hover{color:var(--accent2)!important;border-color:color-mix(in srgb, var(--accent2) 40%, transparent)!important}
+
+/* ---------- tarjetas de cristal ---------- */
+html body .card, html body #appView .card{
+  background:var(--gl-surface)!important;
+  backdrop-filter:blur(var(--gl-blur)) saturate(1.3)!important;
+  -webkit-backdrop-filter:blur(var(--gl-blur)) saturate(1.3)!important;
+  border:1px solid var(--gl-line)!important;
+  border-radius:var(--gl-radius)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 10px 30px rgba(0,0,0,.28)!important;
+  transition:transform .3s var(--gl-ease), box-shadow .3s var(--gl-ease), border-color .3s var(--gl-ease)!important;
+}
+html body .card:hover, html body #appView .card:hover{
+  transform:translateY(-3px)!important;
+  border-color:var(--gl-line-hover)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 20px 50px rgba(0,0,0,.4), 0 0 34px color-mix(in srgb, var(--accent2) 16%, transparent)!important;
+}
+html body .stat-val{
+  background:linear-gradient(120deg, #fff 10%, var(--accent2) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent!important;
+  font-family:'Outfit',Inter,sans-serif!important;
+}
+
+/* ---------- héroes (overview / admin) ---------- */
+html body .ov-hero, html body #appView .ov-hero, html body .qx-admin-hero{
+  background:
+    radial-gradient(620px 260px at 100% 0%, color-mix(in srgb, var(--accent2) 26%, transparent), transparent 70%),
+    linear-gradient(135deg, color-mix(in srgb, var(--card) 88%, transparent), color-mix(in srgb, var(--bg) 90%, transparent))!important;
+  border:1px solid color-mix(in srgb, var(--accent2) 20%, var(--border) 80%)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 30px 80px rgba(0,0,0,.35)!important;
+}
+html body .ov-hero::after, html body .qx-admin-hero::after{background:radial-gradient(circle, color-mix(in srgb, var(--accent2) 35%, transparent), transparent 68%)!important}
+html body .ov-title, html body #appView .ov-title, html body .qx-title, html body .lg-title{font-family:'Outfit',Inter,sans-serif!important;letter-spacing:-.03em!important}
+html body .ov-kicker, html body #appView .ov-kicker, html body .qx-kicker{color:var(--accent2)!important}
+html body .ov-sub, html body #appView .ov-sub{color:color-mix(in srgb, var(--text,#e4e4ed) 75%, transparent)!important}
+html body .ov-stat, html body #appView .ov-stat{background:color-mix(in srgb, var(--accent2) 9%, transparent)!important;border:1px solid color-mix(in srgb, var(--accent2) 18%, transparent)!important;backdrop-filter:blur(10px)}
+html body .ov-cta, html body #appView .ov-cta{background:var(--accent2)!important;color:#08131c!important;border-color:var(--accent2)!important}
+
+/* ---------- botones ---------- */
+html body .btn-primary, html body #appView .btn-primary{
+  background:linear-gradient(135deg, var(--accent2), color-mix(in srgb, var(--accent2) 55%, var(--accent) 45%))!important;
+  color:#08131c!important;border:none!important;font-weight:700!important;
+  box-shadow:0 10px 28px color-mix(in srgb, var(--accent2) 35%, transparent)!important;
+}
+html body .btn-primary:hover, html body #appView .btn-primary:hover{box-shadow:0 14px 36px color-mix(in srgb, var(--accent2) 46%, transparent)!important;filter:brightness(1.04)}
+html body .btn-ghost, html body .icon-btn, html body #appView .btn-ghost, html body #appView .icon-btn{
+  background:var(--gl-surface)!important;backdrop-filter:blur(10px);border:1px solid var(--gl-line)!important;color:inherit!important;
+}
+html body .btn-ghost:hover, html body .icon-btn:hover, html body #appView .btn-ghost:hover, html body #appView .icon-btn:hover{
+  border-color:color-mix(in srgb, var(--accent2) 45%, transparent)!important;color:var(--accent2)!important;
+}
+html body .icon-btn.danger:hover{border-color:#f87171!important;color:#f87171!important}
+
+/* ---------- inputs ---------- */
+html body input, html body textarea, html body select,
+html body #appView input, html body #appView textarea, html body #appView select{
+  background:var(--gl-surface)!important;
+  border:1px solid var(--gl-line)!important;
+  color:inherit!important;
+  backdrop-filter:blur(8px);
+}
+html body input:focus, html body textarea:focus, html body select:focus,
+html body #appView input:focus, html body #appView textarea:focus, html body #appView select:focus{
+  border-color:var(--accent2)!important;
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--accent2) 18%, transparent)!important;
+}
+
+/* ---------- insignias / chips ---------- */
+html body .badge, html body .chip, html body #appView .badge, html body #appView .chip{
+  background:var(--gl-surface-strong)!important;border:1px solid var(--gl-line)!important;backdrop-filter:blur(8px);
+}
+html body .badge-green, html body #appView .badge-green{
+  background:color-mix(in srgb, #34d399 16%, transparent)!important;
+  border-color:color-mix(in srgb, #34d399 38%, transparent)!important;color:#6ee7b7!important;
+}
+
+/* ---------- pestañas (tab-bar) ---------- */
+html body .tab-bar{background:var(--gl-surface)!important;border-color:var(--gl-line)!important;backdrop-filter:blur(10px)}
+html body .tab-bar button.active{background:color-mix(in srgb, var(--accent2) 20%, transparent)!important;color:#fff!important}
+
+/* ---------- editor / studio ---------- */
+html body .editor-wrap, html body #appView .editor-wrap{
+  background:color-mix(in srgb, var(--bg) 88%, black 12%)!important;
+  border:1px solid var(--gl-line)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 20px 50px rgba(0,0,0,.35)!important;
+}
+html body .editor-wrap:focus-within{border-color:var(--accent2)!important}
+html body .editor-header, html body .studio-status, html body #appView .editor-header, html body #appView .studio-status{
+  background:color-mix(in srgb, var(--card) 70%, transparent)!important;border-color:var(--gl-line)!important;backdrop-filter:blur(10px);
+}
+html body .line-nums, html body #appView .line-nums{background:color-mix(in srgb, var(--bg) 92%, black 8%)!important;border-color:var(--gl-line)!important;color:color-mix(in srgb, var(--accent2) 30%, #4a4a5a 70%)!important;white-space:pre}
+html body #sSource, html body #appView #sSource{background:color-mix(in srgb, var(--bg) 88%, black 12%)!important;color:inherit!important;white-space:pre}
+html body .ai-panel{background:color-mix(in srgb, var(--bg) 90%, black 10%)!important;border-color:var(--gl-line)!important}
+html body .ai-chip{background:var(--gl-surface)!important;border-color:var(--gl-line)!important}
+html body .ai-chip:hover{border-color:var(--accent2)!important;color:var(--accent2)!important}
+
+/* ---------- tablas ---------- */
+html body table th, html body #appView table th{background:transparent!important;color:color-mix(in srgb, var(--accent2) 25%, #8b8b9e 75%)!important;border-bottom:1px solid var(--gl-line)!important}
+html body table td, html body #appView table td{border-bottom:1px solid color-mix(in srgb, var(--border) 100%, transparent)!important}
+
+/* ---------- login (lg-*) ---------- */
+html body .lg-shell{
+  background:color-mix(in srgb, var(--card) 78%, transparent)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;-webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+  border:1px solid var(--gl-line)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 40px 120px -30px rgba(0,0,0,.85), 0 0 60px color-mix(in srgb, var(--accent2) 10%, transparent)!important;
+}
+html body .lg-aside{background:linear-gradient(160deg, color-mix(in srgb, var(--accent2) 14%, transparent), transparent 55%)!important;border-right-color:var(--gl-line)!important}
+html body .lg-title em{color:var(--accent2)!important}
+html body .lg-points span{background:var(--gl-surface)!important;color:var(--accent2)!important;border-color:var(--gl-line)!important}
+html body .lg-switch{background:color-mix(in srgb, var(--bg) 85%, black 15%)!important;border-color:var(--gl-line)!important}
+html body .lg-switch button.on{color:var(--accent2)!important}
+html body .lg-field input:focus{border-color:var(--accent2)!important;box-shadow:0 0 0 3px color-mix(in srgb, var(--accent2) 20%, transparent)!important}
+html body .lg-dot{background:#34d399!important;box-shadow:0 0 10px #34d399!important}
+
+/* ---------- modales y overlays de cristal ---------- */
+html body .qx-modal-box, html body .vip-modal, html body #qxCmdBox, html body #qxShortBox, html body #qxNotesBox, html body #qxTipsBox{
+  background:color-mix(in srgb, var(--card) 82%, transparent)!important;
+  backdrop-filter:blur(24px) saturate(1.35)!important;-webkit-backdrop-filter:blur(24px) saturate(1.35)!important;
+  border:1px solid var(--gl-line)!important;
+  box-shadow: inset 0 1px 0 var(--gl-sheen), 0 30px 90px rgba(0,0,0,.55)!important;
+}
+html body .notif-panel, html body #notifPanel{
+  background:color-mix(in srgb, var(--card) 84%, transparent)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;border:1px solid var(--gl-line)!important;
+}
+html body .notif-item{background:var(--gl-surface)!important;border-color:var(--gl-line)!important}
+html body .notif-item.unread{border-color:color-mix(in srgb, var(--accent2) 30%, transparent)!important;background:color-mix(in srgb, var(--accent2) 6%, transparent)!important}
+html body .qx-cmd-item:hover, html body .qx-cmd-item.active{background:color-mix(in srgb, var(--accent2) 14%, transparent)!important;color:#fff!important}
+html body #qxCmdInput{border-color:var(--gl-line)!important}
+
+/* ---------- toasts ---------- */
+html body .toast{
+  background:color-mix(in srgb, var(--card) 85%, transparent)!important;
+  backdrop-filter:blur(16px) saturate(1.2)!important;border:1px solid var(--gl-line)!important;
+}
+html body .toast.ok{border-color:color-mix(in srgb, #34d399 45%, transparent)!important}
+html body .toast.err{border-color:color-mix(in srgb, #f87171 45%, transparent)!important}
+
+/* ---------- FAB y utilidades flotantes ---------- */
+html body #qxFabMain{
+  background:linear-gradient(135deg, var(--accent2), color-mix(in srgb, var(--accent2) 55%, var(--accent) 45%))!important;
+  border-color:color-mix(in srgb, var(--accent2) 45%, transparent)!important;color:#08131c!important;
+  box-shadow:0 12px 36px color-mix(in srgb, var(--accent2) 40%, transparent)!important;
+}
+html body #qxFabMenu{background:color-mix(in srgb, var(--card) 88%, transparent)!important;border-color:var(--gl-line)!important;backdrop-filter:blur(18px)}
+
+/* ---------- panel de administración ---------- */
+html body .qx-tool{background:var(--gl-surface)!important;border-color:var(--gl-line)!important}
+html body .qx-tool:hover{border-color:color-mix(in srgb, var(--accent2) 45%, transparent)!important}
+html body .qx-tool .qxi{background:color-mix(in srgb, var(--accent2) 14%, transparent)!important;color:var(--accent2)!important;border-color:color-mix(in srgb, var(--accent2) 22%, transparent)!important}
+html body .qx-mini{background:var(--gl-surface)!important;border-color:var(--gl-line)!important}
+html body .qx-status{background:color-mix(in srgb, #34d399 14%, transparent)!important;border-color:color-mix(in srgb, #34d399 32%, transparent)!important;color:#6ee7b7!important}
+html body .section-resource{background:color-mix(in srgb, var(--accent2) 7%, transparent)!important;border-color:var(--gl-line)!important}
+html body .section-resource a{color:var(--accent2)!important}
+
+/* ---------- selector de tema activo (opción visual añadida) ---------- */
+html body [data-theme-btn]{position:relative;transition:box-shadow .25s var(--gl-ease), border-color .25s var(--gl-ease), transform .2s var(--gl-ease)!important}
+html body [data-theme-btn].theme-active{
+  border-color:var(--accent2)!important;color:#fff!important;
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent2) 55%, transparent), 0 0 18px color-mix(in srgb, var(--accent2) 35%, transparent)!important;
+  transform:translateY(-1px)!important;
+}
+
+/* ---------- accesibilidad de movimiento ---------- */
+@media (prefers-reduced-motion:reduce){
+  html body .card, html body .nav-item, html body .btn-primary, html body .btn-ghost{transition:none!important}
+}
+</style>
+</head>
 <body>
+<div class="qx-aurora-bg" aria-hidden="true"><span></span><span></span><span></span></div>
+
 <a class="qx-skip-link" href="#main-content">Saltar al contenido principal</a>
 <output aria-atomic="true" aria-live="polite" class="sr-only" for="main-content" id="a11yStatus"></output>
 <!-- LOGIN -->
@@ -1552,7 +1808,7 @@ section.page[hidden],section.page.hidden{display:none!important}
 <div class="card p-5">
 <div class="text-sm font-semibold mb-2">Loader Lua (copia en tu script)</div>
 <p class="text-xs mb-3" style="color:#5a5a6e">Scripts con Key Mode usan GUI automatica. Claim URL: <code id="claimUrlHint" style="color:#f4f4f5">/getkey/PROVIDER_ID</code></p>
-<pre class="text-[10px] overflow-x-auto #7DD3FCspace-pre-wrap break-all p-3 rounded-lg font-mono" id="loaderSnippet" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
+<pre class="text-[10px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg font-mono" id="loaderSnippet" style="background:#0c0c12;color:#a0a0b0;max-height:220px"></pre>
 <button class="btn-ghost text-xs mt-2" onclick="copyLs(document.getElementById('loaderSnippet').textContent)" type="button">Copiar loader</button>
 </div>
 </div>
@@ -2071,10 +2327,10 @@ local Players = game:GetService("Players")
 <div class="mt-4">
 <div class="text-xs mb-2" style="color:#6b6b80">Theme</div>
 <div class="flex flex-wrap gap-2">
-<button class="btn-ghost text-xs" onclick="setTheme('')" type="button">White</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-neon')" type="button">Neon</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-cyber')" type="button">Cyberpunk</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-blood')" type="button">Blood</button>
+<button class="btn-ghost text-xs" data-theme-btn="" onclick="setTheme('')" type="button">White</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-neon" onclick="setTheme('theme-neon')" type="button">Neon</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-cyber" onclick="setTheme('theme-cyber')" type="button">Cyberpunk</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-blood" onclick="setTheme('theme-blood')" type="button">Blood</button>
 </div>
 </div>
 </div>
@@ -2087,7 +2343,7 @@ local Players = game:GetService("Players")
 <label class="field">Fondo (URL imagen)</label>
 <div class="flex gap-2 mb-3">
 <input class="flex-1 text-xs" id="vipBgUrl" placeholder="https://...jpg / png / gif"/>
-<button class="btn-primary text-xs #7DD3FCspace-nowrap" onclick="applyVipBg()" type="button">Aplicar</button>
+<button class="btn-primary text-xs whitespace-nowrap" onclick="applyVipBg()" type="button">Aplicar</button>
 </div>
 <div class="flex flex-wrap gap-2 mb-4">
 <button class="btn-ghost text-xs" onclick="setVipBgPreset('aurora')" type="button">Aurora</button>
@@ -2116,10 +2372,10 @@ local Players = game:GetService("Players")
 <div class="mt-4">
 <div class="text-xs mb-2" style="color:#6b6b80">Temas VIP</div>
 <div class="flex flex-wrap gap-2">
-<button class="btn-ghost text-xs" onclick="setTheme('theme-gold')" type="button">Gold</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-ocean')" type="button">Ocean</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-mint')" type="button">Mint</button>
-<button class="btn-ghost text-xs" onclick="setTheme('theme-sunset')" type="button">Sunset</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-gold" onclick="setTheme('theme-gold')" type="button">Gold</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-ocean" onclick="setTheme('theme-ocean')" type="button">Ocean</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-mint" onclick="setTheme('theme-mint')" type="button">Mint</button>
+<button class="btn-ghost text-xs" data-theme-btn="theme-sunset" onclick="setTheme('theme-sunset')" type="button">Sunset</button>
 </div>
 </div>
 <p class="text-[11px] mt-3 hidden" id="vipLockHint" style="color:#f87171">Activa VIP (canjea llave) para usar estas opciones.</p>
@@ -3057,7 +3313,7 @@ function renderScripts(list){
           '</button>'+
         '</div>'+
       '</div>'+
-      '<pre class="text-[11px] overflow-x-auto #7DD3FCspace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(ls)+'</pre>'+
+      '<pre class="text-[11px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(ls)+'</pre>'+
     '</div>';
   }).join('');
 }
@@ -3235,7 +3491,7 @@ function renderHub(list){
           '</button>'+
         '</div>'+
       '</div>'+
-      '<pre class="text-[11px] overflow-x-auto #7DD3FCspace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(h.loadstring)+'</pre>'+
+      '<pre class="text-[11px] overflow-x-auto whitespace-pre-wrap break-all p-3 rounded-lg" style="background:#0c0c12;color:#5a5a6e">'+esc(h.loadstring)+'</pre>'+
     '</div>';
   }).join('');
   // show delete for own items
@@ -5004,6 +5260,28 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
     }
   });
   window.qxAnnounce=function(message){ if(status){status.textContent=''; requestAnimationFrame(()=>status.textContent=String(message||''));} };
+})();
+</script>
+<script id="qyrex-glass-theme-picker">
+(function(){
+  // Resalta con un brillo de cristal el botón del tema actualmente activo
+  // en Ajustes. No modifica setTheme(); solo observa y añade una clase css.
+  function activeThemeClass(){
+    const known=['theme-neon','theme-cyber','theme-blood','theme-gold','theme-ocean','theme-mint','theme-sunset'];
+    for (const c of known) if (document.body.classList.contains(c)) return c;
+    return '';
+  }
+  function syncThemeButtons(){
+    const current = activeThemeClass();
+    document.querySelectorAll('[data-theme-btn]').forEach(function(btn){
+      btn.classList.toggle('theme-active', btn.getAttribute('data-theme-btn') === current);
+    });
+  }
+  document.addEventListener('click', function(e){
+    if (e.target.closest('[data-theme-btn]')) setTimeout(syncThemeButtons, 30);
+  });
+  syncThemeButtons();
+  new MutationObserver(syncThemeButtons).observe(document.body, {attributes:true, attributeFilter:['class']});
 })();
 </script>
 </body>
