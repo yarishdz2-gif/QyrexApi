@@ -1,0 +1,21 @@
+{
+  "name": "Qyrex Developer Control Center",
+  "short_name": "Qyrex",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#03070b",
+  "theme_color": "#03070b",
+  "description": "Plataforma Qyrex para gestionar scripts, keys, analytics y herramientas de desarrollo.",
+  "icons": [
+    {
+      "src": "https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "developer",
+    "utilities"
+  ]
+}
