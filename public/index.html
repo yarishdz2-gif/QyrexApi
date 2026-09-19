@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/><meta charset="utf-8"/>
 
 <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<title>Qyrex — Plataforma de gestión y protección de scripts</title>
+<title>Qyrex · Developer Control Center</title>
 <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
 <link rel="apple-touch-icon" href="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
 
@@ -1272,6 +1272,122 @@ body.sidebar-collapsed .sidebar .nav-item:hover::after{content:attr(data-page);p
   #loginView .lg-panel{padding:24px 18px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.card:hover,.btn-primary:hover,.btn-ghost:hover,.icon-btn:hover{transform:none!important}}
+</style>
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#03070b">
+  <meta name="mobile-web-app-capable" content="yes">
+
+<style id="qyrex-ultra-v4">
+:root{
+  --qx-bg:#03070b;--qx-bg2:#050c12;--qx-panel:rgba(8,16,23,.82);--qx-panel-solid:#09121a;
+  --qx-line:rgba(125,211,252,.10);--qx-line-strong:rgba(125,211,252,.22);
+  --qx-text:#eaf9ff;--qx-muted:#7692a2;--qx-dim:#466170;
+  --qx-blue:#7dd3fc;--qx-blue2:#38bdf8;--qx-blue3:#0ea5e9;--qx-cyan:#22d3ee;
+  --qx-green:#34d399;--qx-red:#fb7185;--qx-yellow:#fbbf24;
+  --qx-radius:18px;--qx-radius-sm:12px;--qx-ease:cubic-bezier(.22,1,.36,1);
+  --qx-shadow:0 24px 80px rgba(0,0,0,.36);--qx-glow:0 0 0 1px rgba(125,211,252,.12),0 18px 60px rgba(56,189,248,.07)
+}
+html.qx-ultra{background:var(--qx-bg)!important;color-scheme:dark}
+html.qx-ultra body{background:var(--qx-bg)!important;color:var(--qx-text)!important}
+html.qx-ultra body:before{content:"";position:fixed;inset:0;z-index:-20;pointer-events:none;background:
+ radial-gradient(900px 700px at 78% -14%,rgba(56,189,248,.11),transparent 66%),
+ radial-gradient(820px 620px at -12% 108%,rgba(14,165,233,.075),transparent 68%),
+ radial-gradient(700px 500px at 50% 30%,rgba(34,211,238,.025),transparent 72%),
+ linear-gradient(180deg,#03070b 0%,#050b10 50%,#03070b 100%)}
+html.qx-ultra body:after{content:"";position:fixed;inset:0;z-index:-19;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(125,211,252,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(125,211,252,.015) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,#000,transparent 96%)}
+#qxUltraBackdrop{position:fixed;inset:0;pointer-events:none;z-index:-18;overflow:hidden}
+#qxUltraBackdrop:before,#qxUltraBackdrop:after{content:"";position:absolute;border-radius:999px;filter:blur(60px);opacity:.2}
+#qxUltraBackdrop:before{width:460px;height:460px;left:-180px;top:22%;background:#0ea5e9}
+#qxUltraBackdrop:after{width:560px;height:560px;right:-220px;bottom:4%;background:#0369a1}
+#qxTopProgress{position:fixed;left:0;right:0;top:0;height:2px;z-index:100000;pointer-events:none;opacity:0;transition:opacity .2s}
+#qxTopProgress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#7dd3fc,#22d3ee,#38bdf8);box-shadow:0 0 18px rgba(56,189,248,.6);transition:width .45s var(--qx-ease)}
+#qxUltraStatus{position:fixed;right:18px;bottom:18px;z-index:4000;display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--qx-line);border-radius:999px;background:rgba(4,11,16,.72);backdrop-filter:blur(18px) saturate(1.15);box-shadow:0 16px 44px rgba(0,0,0,.28);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8eabba;transition:all .3s var(--qx-ease);pointer-events:none}
+#qxUltraStatus .dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.08),0 0 18px rgba(52,211,153,.35)}
+#qxUltraStatus.offline .dot{background:#fb7185;box-shadow:0 0 0 4px rgba(251,113,133,.08),0 0 18px rgba(251,113,133,.35)}
+#qxUltraStatus.busy .dot{background:#fbbf24;animation:qxBlink .8s infinite}
+@keyframes qxBlink{0%,100%{opacity:.45}50%{opacity:1}}
+#qxCommandOverlay{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center;padding:10vh 18px 24px;background:rgba(1,5,8,.68);backdrop-filter:blur(16px)}
+#qxCommandOverlay.show{display:flex;animation:qxFade .2s ease both}
+@keyframes qxFade{from{opacity:0}to{opacity:1}}
+.qx-command{width:min(720px,100%);border:1px solid rgba(125,211,252,.16);background:linear-gradient(180deg,rgba(10,20,28,.96),rgba(5,12,18,.98));border-radius:22px;box-shadow:0 36px 120px rgba(0,0,0,.62),0 0 0 1px rgba(56,189,248,.04);overflow:hidden;animation:qxPop .25s var(--qx-ease) both}
+@keyframes qxPop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.qx-command-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(125,211,252,.08)}
+.qx-command-head svg{width:18px;color:#6e91a3;flex:0 0 auto}.qx-command-head input{background:transparent!important;border:0!important;box-shadow:none!important;padding:5px 0!important;font-size:15px!important;color:#eaf9ff!important}
+.qx-command-kbd{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:7px;border:1px solid rgba(125,211,252,.1);background:#09131b;color:#5f7b8a;font:600 10px ui-monospace,SFMono-Regular,Consolas,monospace}
+.qx-command-list{max-height:min(58vh,520px);overflow:auto;padding:8px}
+.qx-cmd-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:13px;background:transparent;color:#bdd1db;text-align:left;cursor:pointer;transition:all .18s var(--qx-ease)}
+.qx-cmd-item:hover,.qx-cmd-item.active{background:linear-gradient(90deg,rgba(56,189,248,.11),rgba(56,189,248,.035));border-color:rgba(56,189,248,.12);color:#effbff;transform:translateX(2px)}
+.qx-cmd-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#091720;border:1px solid rgba(125,211,252,.09);color:#7dd3fc;font-size:14px}
+.qx-cmd-copy{min-width:0;flex:1}.qx-cmd-title{font-size:12px;font-weight:700}.qx-cmd-desc{font-size:10px;color:#627b8a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qx-cmd-go{font-size:10px;color:#48606c}
+.qx-command-foot{padding:9px 13px;border-top:1px solid rgba(125,211,252,.07);display:flex;justify-content:space-between;gap:10px;color:#4f6774;font-size:10px}
+#qxPagebar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 20px;padding:0 2px;min-height:42px}
+.qx-page-copy{min-width:0}.qx-page-kicker{display:flex;align-items:center;gap:8px;color:#587482;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.qx-page-kicker .line{height:1px;width:24px;background:linear-gradient(90deg,#38bdf8,transparent)}
+.qx-page-title{margin-top:5px;font-size:clamp(20px,2.1vw,28px);font-weight:800;letter-spacing:-.035em;color:#ecfbff}.qx-page-sub{margin-top:4px;font-size:11px;color:#62808f;max-width:720px}
+.qx-page-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.qx-mini-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(125,211,252,.08);border-radius:10px;background:rgba(8,16,23,.54);color:#76909e;font-size:10px}.qx-mini-pill b{color:#b8d4df}
+#qxScrollTop{position:fixed;right:18px;bottom:64px;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(125,211,252,.12);background:rgba(7,16,22,.76);color:#7b9aaa;box-shadow:0 14px 36px rgba(0,0,0,.35);backdrop-filter:blur(16px);opacity:0;transform:translateY(8px);pointer-events:none;transition:all .2s var(--qx-ease);z-index:3999;cursor:pointer}
+#qxScrollTop.show{opacity:1;transform:none;pointer-events:auto}#qxScrollTop:hover{color:#dff8ff;border-color:rgba(125,211,252,.24);transform:translateY(-2px)}
+#qxAppNudge{position:fixed;left:50%;top:16px;z-index:4000;display:none;transform:translate(-50%,-18px);padding:7px 12px;border-radius:999px;border:1px solid rgba(251,191,36,.18);background:rgba(24,18,8,.86);backdrop-filter:blur(15px);color:#f8d889;font-size:10px;font-weight:700;box-shadow:0 12px 34px rgba(0,0,0,.35)}
+html.qx-ultra #appView{position:relative;isolation:isolate;background:transparent!important}
+html.qx-ultra #appView .app-shell{position:relative}
+html.qx-ultra #appView .sidebar{background:linear-gradient(180deg,rgba(5,12,17,.96),rgba(3,8,12,.98))!important;border-right:1px solid rgba(125,211,252,.07)!important;box-shadow:18px 0 60px rgba(0,0,0,.17)!important}
+html.qx-ultra #appView .sidebar-brand{border-bottom:1px solid rgba(125,211,252,.06)}
+html.qx-ultra #appView .sidebar-brand img,html.qx-ultra #appView .mt-brand img{box-shadow:0 0 0 1px rgba(125,211,252,.16),0 10px 34px rgba(56,189,248,.12);background:#061017}
+html.qx-ultra #appView .sidebar .nav-item{position:relative;overflow:hidden;color:#6f8997!important;border-color:transparent!important;background:transparent!important}
+html.qx-ultra #appView .sidebar .nav-item:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:999px;background:linear-gradient(180deg,#7dd3fc,#0ea5e9);transform:scaleY(0);transition:transform .22s var(--qx-ease)}
+html.qx-ultra #appView .sidebar .nav-item:hover{background:rgba(56,189,248,.055)!important;color:#dff8ff!important;border-color:rgba(125,211,252,.07)!important;transform:translateX(1px)}
+html.qx-ultra #appView .sidebar .nav-item.active{background:linear-gradient(90deg,rgba(56,189,248,.13),rgba(56,189,248,.035))!important;color:#ecfbff!important;border-color:rgba(56,189,248,.14)!important;box-shadow:inset 0 1px rgba(255,255,255,.02),0 8px 26px rgba(0,0,0,.12)}
+html.qx-ultra #appView .sidebar .nav-item.active:before{transform:scaleY(1)}
+html.qx-ultra #appView .sidebar .nav-item.active svg{color:#7dd3fc;filter:drop-shadow(0 0 8px rgba(56,189,248,.22))}
+html.qx-ultra #appView .nav-section{color:#4f6a77!important;letter-spacing:.15em}
+html.qx-ultra #appView .user-pill{background:rgba(8,16,23,.68)!important;border-color:rgba(125,211,252,.07)!important;box-shadow:inset 0 1px rgba(255,255,255,.018)}
+html.qx-ultra #appView .main-content{background:transparent!important}
+html.qx-ultra #appView .topbar{background:rgba(3,9,13,.68)!important;border-color:rgba(125,211,252,.07)!important;backdrop-filter:blur(22px) saturate(1.12)!important}
+html.qx-ultra #appView .mobile-topbar{background:rgba(3,9,13,.78)!important;border-color:rgba(125,211,252,.08)!important;backdrop-filter:blur(24px) saturate(1.12)!important;box-shadow:0 16px 48px rgba(0,0,0,.24)!important}
+html.qx-ultra #appView .page:not(.hidden){animation:qxPageIn .35s var(--qx-ease) both}
+@keyframes qxPageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+html.qx-ultra #appView .card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(10,20,28,.82),rgba(6,13,18,.84))!important;border-color:rgba(125,211,252,.08)!important;border-radius:16px!important;box-shadow:0 10px 36px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.018)!important}
+html.qx-ultra #appView .card:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(125,211,252,.025),transparent 24%,transparent 72%,rgba(56,189,248,.015));opacity:.9}
+html.qx-ultra #appView .card:hover{border-color:rgba(125,211,252,.15)!important;transform:translateY(-1px);box-shadow:0 18px 48px rgba(0,0,0,.25),0 0 0 1px rgba(56,189,248,.025)!important}
+html.qx-ultra #appView input,html.qx-ultra #appView textarea,html.qx-ultra #appView select{background:rgba(3,10,15,.72)!important;border-color:rgba(125,211,252,.09)!important;color:#e9faff!important}
+html.qx-ultra #appView input:hover,html.qx-ultra #appView textarea:hover,html.qx-ultra #appView select:hover{border-color:rgba(125,211,252,.15)!important}
+html.qx-ultra #appView input:focus,html.qx-ultra #appView textarea:focus,html.qx-ultra #appView select:focus{border-color:rgba(56,189,248,.42)!important;box-shadow:0 0 0 3px rgba(56,189,248,.08),0 8px 26px rgba(0,0,0,.18)!important}
+html.qx-ultra #appView .btn-primary{background:linear-gradient(135deg,#dff8ff,#a8e9ff)!important;color:#041017!important;border-color:rgba(223,248,255,.78)!important;box-shadow:0 12px 34px rgba(56,189,248,.14)!important}
+html.qx-ultra #appView .btn-primary:hover{box-shadow:0 16px 40px rgba(56,189,248,.22)!important;filter:saturate(1.05) brightness(1.03)}
+html.qx-ultra #appView .btn-ghost,.qx-mini-action{background:rgba(7,15,21,.54)!important;border-color:rgba(125,211,252,.09)!important;color:#7593a1!important}
+html.qx-ultra #appView .btn-ghost:hover,.qx-mini-action:hover{background:rgba(56,189,248,.055)!important;border-color:rgba(125,211,252,.18)!important;color:#dff8ff!important}
+html.qx-ultra #appView table th{color:#56717e!important;border-bottom-color:rgba(125,211,252,.08)!important}html.qx-ultra #appView table td{border-bottom-color:rgba(125,211,252,.045)!important}
+html.qx-ultra #appView .editor-wrap{background:#040b10!important;border-color:rgba(125,211,252,.10)!important;box-shadow:inset 0 1px rgba(255,255,255,.018),0 16px 50px rgba(0,0,0,.2)}
+html.qx-ultra #appView .editor-header{background:rgba(8,18,25,.78)!important;border-bottom-color:rgba(125,211,252,.07)!important}
+html.qx-ultra #appView .line-nums{background:#03080c!important;border-right-color:rgba(125,211,252,.06)!important;color:#405966!important}
+html.qx-ultra #appView #sSource{background:#040b10!important;color:#d9f5ff!important}
+html.qx-ultra #appView .toast{background:rgba(7,16,22,.94)!important;border-color:rgba(125,211,252,.13)!important;box-shadow:0 18px 60px rgba(0,0,0,.42)!important}
+html.qx-ultra #appView .qx-modal-box,html.qx-ultra #appView .vip-modal{background:linear-gradient(180deg,#09151e,#050c12)!important;border-color:rgba(125,211,252,.14)!important;box-shadow:0 36px 120px rgba(0,0,0,.62)!important}
+#loginView{background:#02070b!important}
+#loginView .lg-shell{filter:drop-shadow(0 30px 110px rgba(0,0,0,.4))}
+#loginView .lg-panel{background:linear-gradient(180deg,rgba(6,14,20,.82),rgba(3,9,14,.93))!important;border-color:rgba(125,211,252,.10)!important;box-shadow:0 34px 110px rgba(0,0,0,.46)!important;backdrop-filter:blur(28px) saturate(1.12)}
+#loginView .lg-mark img,#loginView .lg-mobile-mark img,#loginView .lg-topbar img{box-shadow:0 0 0 1px rgba(125,211,252,.16),0 14px 34px rgba(56,189,248,.14)}
+#loginView .lg-title{letter-spacing:-.045em;text-shadow:0 8px 40px rgba(56,189,248,.08)}
+#loginView .lg-sub{color:#7e99a8!important}
+#loginView .lg-points li{color:#87a2af!important}
+#loginView .lg-points li span:first-child{color:#7dd3fc!important;text-shadow:0 0 12px rgba(56,189,248,.28)}
+#loginView input{background:rgba(3,9,14,.7)!important;border-color:rgba(125,211,252,.10)!important}
+#loginView input:focus{border-color:rgba(56,189,248,.46)!important;box-shadow:0 0 0 3px rgba(56,189,248,.09),0 14px 44px rgba(0,0,0,.18)!important}
+#loginView .btn-primary{background:linear-gradient(135deg,#e8fbff,#a9eaff)!important;color:#041017!important;border-color:#c4f2ff!important;box-shadow:0 16px 42px rgba(56,189,248,.16)!important}
+.qx-ultra-brand{position:absolute;left:18px;bottom:18px;display:flex;align-items:center;gap:8px;opacity:.65;font-size:10px;color:#607986;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.qx-ultra-brand img{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px rgba(125,211,252,.15)}
+#qxUltraWelcome{display:none;position:fixed;left:50%;top:72px;z-index:9998;transform:translate(-50%,-8px);padding:8px 12px;border-radius:999px;border:1px solid rgba(125,211,252,.12);background:rgba(5,13,19,.86);backdrop-filter:blur(16px);color:#b7d8e4;font-size:10px;font-weight:700;letter-spacing:.04em;box-shadow:0 12px 36px rgba(0,0,0,.3)}
+@media(max-width:900px){
+  #qxPagebar{margin-top:6px;margin-bottom:16px}.qx-page-tools{display:none}
+  #qxUltraStatus{right:12px;bottom:12px}.qx-command{border-radius:18px}.qx-command-list{max-height:60vh}
+}
+@media(max-width:640px){
+  #qxUltraStatus{bottom:10px;right:10px;padding:7px 9px;font-size:9px}.qx-ultra-brand{display:none}
+  #qxScrollTop{right:12px;bottom:54px;width:38px;height:38px}.qx-command-foot{display:none}
+  #loginView{padding-left:14px!important;padding-right:14px!important}
+}
+@media(prefers-reduced-motion:reduce){#qxUltraBackdrop:before,#qxUltraBackdrop:after,#qxTopProgress i,#qxUltraStatus .dot{animation:none!important}html.qx-ultra #appView .page:not(.hidden),.qx-command{animation:none!important}}
 </style>
 
 </head>
@@ -5295,6 +5411,9 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
 \x3C/script>
 <!-- ========== /QYREX POWER LAYER ========== -->
 
+
+
+
 </body>
 \x3C/html>`;
   async function siteFetch(url,opts){const r=await fetch(url,Object.assign({},opts||{},{headers:Object.assign({},headers())}));const d=await r.json().catch(()=>({}));if(!r.ok) throw new Error(d.error||'Error');return d;}
@@ -5424,6 +5543,117 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
  const oldGo=window.go;
  if(typeof oldGo==='function'&&!window.__qgGoWrapped){window.__qgGoWrapped=true;window.go=function(){const r=oldGo.apply(this,arguments);sync();return r}}
  window.qxAnnounce=window.qxAnnounce||announce;
+})();
+</script>
+
+<script id="qyrex-ultra-v4-runtime">
+(function(){
+  'use strict';
+  const LOGO="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024";
+  const routeMeta={
+    overview:['Overview','Centro de mando','Tu actividad, scripts y estado general en un vistazo.'],
+    executions:['Analytics','Rendimiento','Métricas y actividad reciente de tus scripts.'],
+    logs:['Logs','Auditoría','Eventos y actividad registrada del sistema.'],
+    status:['Status','Infraestructura','Estado de los servicios y componentes de Qyrex.'],
+    scripts:['Scripts','Biblioteca','Gestiona tus scripts protegidos y sus versiones.'],
+    create:['Create','Nuevo script','Carga una nueva versión y configura su distribución.'],
+    studio:['Studio','Workspace','Edita, valida y prepara tu script desde un editor avanzado.'],
+    hub:['Script Hub','Descubrimiento','Explora y organiza recursos publicados.'],
+    templates:['Templates','Biblioteca','Plantillas y snippets reutilizables.'],
+    keys:['Key System','Acceso','Controla keys, expiración y seguridad.'],
+    webhooks:['Webhooks','Automatización','Conecta eventos de Qyrex con tus servicios.'],
+    assets:['Assets','Recursos','Administra imágenes y recursos del proyecto.'],
+    leaderboard:['Leaderboard','Comunidad','Actividad y métricas públicas.'],
+    changelog:['Changelog','Producto','Cambios y novedades recientes.'],
+    apiinfo:['API Info','Developer','Rutas y capacidades de la API.'],
+    playground:['API Playground','Developer','Prueba endpoints y payloads directamente.'],
+    site:['Qyrex Sites','Publicación','Gestiona tu página de scripts personalizada.'],
+    admin:['Admin Panel','Administración','Herramientas de gestión y observabilidad.'],
+    ia:['QyrexAI','Intelligence','Workspace de asistencia y utilidades de desarrollo.'],
+    settings:['Settings','Cuenta','Preferencias, identidad y seguridad.']
+  };
+  const routePaths={overview:'/',executions:'/analytics',logs:'/logs',status:'/status',scripts:'/scripts',create:'/create',studio:'/studio',hub:'/hub',templates:'/templates',keys:'/keys',webhooks:'/webhooks',assets:'/assets',leaderboard:'/leaderboard',changelog:'/changelog',apiinfo:'/api-info',playground:'/playground',site:'/site',admin:'/admin',ia:'/ia',settings:'/settings'};
+  const commands=Object.keys(routeMeta).map(k=>({page:k,title:routeMeta[k][0],desc:routeMeta[k][2],icon:{overview:'⌂',executions:'◈',logs:'≡',status:'◉',scripts:'◇',create:'＋',studio:'▣',hub:'✦',templates:'▤',keys:'⌁',webhooks:'↯',assets:'▧',leaderboard:'♛',changelog:'◌',apiinfo:'⌘',playground:'▷',site:'◍',admin:'⚙',ia:'✧',settings:'⚙'}[k]||'•'}));
+  function qs(s,r=document){return r.querySelector(s)}
+  function qsa(s,r=document){return [...r.querySelectorAll(s)]}
+  function safe(fn){try{return fn()}catch(_){return undefined}}
+  function add(tag,attrs,parent){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='text')e.textContent=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v)};if(parent)parent.appendChild(e);return e}
+  function setLogos(){qsa('img').forEach(img=>{const src=img.getAttribute('src')||'';if(src.includes('i.ibb.co/wZbspqp2')||img.classList.contains('qx-brand-logo')){img.src=LOGO;img.alt='QyrexApi'}})}
+  function pageKey(){const p=qsa('#appView .page:not(.hidden)')[0];return p?.id?.replace(/^page-/,'')||document.documentElement.dataset.qxPage||'overview'}
+  function updatePagebar(){
+    const k=pageKey(), m=routeMeta[k]||routeMeta.overview, title=qs('#qxPageTitle'),sub=qs('#qxPageSub'),kick=qs('#qxPageKickerText');
+    if(title)title.textContent=m[0];if(sub)sub.textContent=m[2];if(kick)kick.textContent=m[1];
+    document.title='Qyrex · '+m[0]; document.documentElement.dataset.qxPage=k;
+  }
+  let progTimer;
+  function progress(on,done){const bar=qs('#qxTopProgress'),i=bar?.querySelector('i');if(!bar||!i)return;if(on){bar.style.opacity='1';clearTimeout(progTimer);i.style.width='15%';requestAnimationFrame(()=>i.style.width='76%')}else{i.style.width='100%';progTimer=setTimeout(()=>{bar.style.opacity='0';i.style.width='0%'},260)}}
+  function showWelcome(){const user=window.currentUser?.username||window.currentUser?.displayName;if(!user)return;const n=qs('#qxUltraWelcome');if(!n)return;n.textContent='QYREX READY · '+String(user).toUpperCase();n.style.display='block';n.animate([{opacity:0,transform:'translate(-50%,-12px)'},{opacity:1,transform:'translate(-50%,0)'},{opacity:0,transform:'translate(-50%,-5px)'}],{duration:2400,easing:'cubic-bezier(.22,1,.36,1)'}).finished.catch(()=>{}).finally(()=>{n.style.display='none'})}
+  function setupPagebar(){
+    const main=qs('#appView .main-content'); if(!main||qs('#qxPagebar',main))return;
+    const bar=document.createElement('section');bar.id='qxPagebar';bar.innerHTML='<div class="qx-page-copy"><div class="qx-page-kicker"><span class="line"></span><span id="qxPageKickerText">Centro de mando</span></div><div class="qx-page-title" id="qxPageTitle">Overview</div><div class="qx-page-sub" id="qxPageSub">Tu actividad, scripts y estado general en un vistazo.</div></div><div class="qx-page-tools"><span class="qx-mini-pill">⌘ <b>Ctrl K</b><span>Comandos</span></span><span class="qx-mini-pill">⌘ <b>Ctrl B</b><span>Sidebar</span></span></div>';
+    const anchor=main.firstElementChild; if(anchor) main.insertBefore(bar,anchor); else main.prepend(bar); updatePagebar();
+  }
+  function setupCommand(){
+    if(qs('#qxCommandOverlay'))return;
+    const ov=add('div',{id:'qxCommandOverlay','role':'dialog','aria-modal':'true','aria-label':'Paleta de comandos'});ov.innerHTML='<div class="qx-command"><div class="qx-command-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="qxCommandInput" autocomplete="off" placeholder="Buscar una sección o acción…" aria-label="Buscar comandos"><span class="qx-command-kbd">ESC</span></div><div class="qx-command-list" id="qxCommandList"></div><div class="qx-command-foot"><span>↑ ↓ navegar · Enter abrir</span><span>Qyrex Command Center</span></div></div>';
+    document.body.appendChild(ov);
+    const input=qs('#qxCommandInput'),list=qs('#qxCommandList');let active=0,current=commands.slice();
+    function render(){list.innerHTML='';current.forEach((c,idx)=>{const b=add('button',{type:'button',class:'qx-cmd-item'+(idx===active?' active':'')},list);b.innerHTML='<span class="qx-cmd-icon">'+c.icon+'</span><span class="qx-cmd-copy"><span class="qx-cmd-title">'+c.title+'</span><span class="qx-cmd-desc">'+c.desc+'</span></span><span class="qx-cmd-go">'+(routePaths[c.page]||'')+'</span>';b.addEventListener('mouseenter',()=>{active=idx;render()});b.addEventListener('click',()=>run(c))})}
+    function filter(){const q=(input.value||'').trim().toLowerCase();current=commands.filter(c=>!q||(c.title+' '+c.desc+' '+c.page).toLowerCase().includes(q));active=Math.min(active,Math.max(current.length-1,0));render()}
+    function run(c){close();progress(true);safe(()=>window.go?.(c.page));setTimeout(()=>{progress(false);updatePagebar()},240)}
+    function close(){ov.classList.remove('show');document.body.classList.remove('qx-cmd-open')}
+    window.qxOpenCmd=function(){if(!qs('#appView')||qs('#appView').style.display==='none')return;ov.classList.add('show');document.body.classList.add('qx-cmd-open');input.value='';filter();setTimeout(()=>input.focus(),20)};
+    window.qxCloseCmd=close;ov.addEventListener('click',e=>{if(e.target===ov)close()});input.addEventListener('input',filter);input.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(active+1,current.length-1);render();qs('.qx-cmd-item.active',list)?.scrollIntoView({block:'nearest'})}else if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(active-1,0);render();qs('.qx-cmd-item.active',list)?.scrollIntoView({block:'nearest'})}else if(e.key==='Enter'&&current[active]){e.preventDefault();run(current[active])}else if(e.key==='Escape'){e.preventDefault();close()}});render()
+  }
+  function setupHud(){
+    if(!qs('#qxUltraBackdrop'))add('div',{id:'qxUltraBackdrop','aria-hidden':'true'},document.body);
+    if(!qs('#qxTopProgress')){const p=add('div',{id:'qxTopProgress','aria-hidden':'true'},document.body);p.innerHTML='<i></i>'}
+    if(!qs('#qxScrollTop')){const b=add('button',{id:'qxScrollTop',type:'button','aria-label':'Volver arriba',title:'Volver arriba'},document.body);b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 14 6-6 6 6"></path></svg>';b.querySelector('svg').style.width='18px';b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}))}
+    if(!qs('#qxUltraStatus')){const s=add('div',{id:'qxUltraStatus','aria-live':'polite'},document.body);s.innerHTML='<i class="dot"></i><span id="qxUltraStatusText">SISTEMA ONLINE</span>'}
+    if(!qs('#qxUltraWelcome'))add('div',{id:'qxUltraWelcome','aria-hidden':'true'},document.body);
+    window.addEventListener('scroll',()=>qs('#qxScrollTop')?.classList.toggle('show',window.scrollY>480),{passive:true});
+    let healthBusy=false;
+    const updateHealth=async()=>{
+      const s=qs('#qxUltraStatus'),t=qs('#qxUltraStatusText'); if(!s||!t||healthBusy)return;
+      if(!navigator.onLine){s.classList.remove('busy');s.classList.add('offline');t.textContent='SIN CONEXIÓN';return;}
+      healthBusy=true;s.classList.add('busy');s.classList.remove('offline');t.textContent='COMPROBANDO API';
+      const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),5000);
+      try{
+        const r=await fetch('/api/health',{headers:{'Accept':'application/json'},cache:'no-store',signal:ctrl.signal});
+        const d=await r.json().catch(()=>({}));
+        if(!r.ok||d.ok===false)throw new Error('health');
+        s.classList.remove('offline','busy'); t.textContent=d.mongo?'API ONLINE · DB OK':'API ONLINE · DB';
+      }catch(_){s.classList.remove('busy');s.classList.add('offline');t.textContent='API OFFLINE';}
+      finally{clearTimeout(timer);healthBusy=false;}
+    };
+    window.addEventListener('online',updateHealth);window.addEventListener('offline',updateHealth);updateHealth();setInterval(updateHealth,45000);
+  }
+  function enhanceLinks(){
+    qsa('a[href="/"]').forEach(a=>{if(a.closest('#appView')&&a.dataset.qxNoRoute!=='1'){a.addEventListener('click',()=>{progress(true);setTimeout(()=>progress(false),260)})}})
+  }
+  function bindKeys(){
+    document.addEventListener('keydown',e=>{
+      const tag=(e.target?.tagName||'').toLowerCase();const editing=['input','textarea','select'].includes(tag)||e.target?.isContentEditable;
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();safe(()=>window.qxOpenCmd?.());return}
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='b'&&!editing&&window.matchMedia('(min-width:901px)').matches){e.preventDefault();safe(()=>window.toggleSidebarCollapse?.());return}
+      if(e.key==='Escape'&&qs('#qxCommandOverlay')?.classList.contains('show'))safe(()=>window.qxCloseCmd?.());
+      if(e.key==='/'&&!editing&&!e.ctrlKey&&!e.metaKey){e.preventDefault();safe(()=>window.qxOpenCmd?.())}
+    });
+  }
+  function observe(){
+    const app=qs('#appView');if(!app)return;
+    let scheduled=false;const sync=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;setLogos();setupPagebar();updatePagebar()})};
+    new MutationObserver(sync).observe(app,{subtree:true,attributes:true,attributeFilter:['class','style']});sync();
+    const go=window.go;if(typeof go==='function'&&!window.__qxUltraGo){window.__qxUltraGo=true;window.go=function(){progress(true);const r=go.apply(this,arguments);setTimeout(()=>{progress(false);updatePagebar()},80);return r}}
+    window.addEventListener('popstate',()=>setTimeout(updatePagebar,70));
+  }
+  function boot(){
+    document.documentElement.classList.add('qx-ultra');setLogos();setupHud();setupCommand();setupPagebar();bindKeys();enhanceLinks();observe();
+    setTimeout(()=>{if(window.currentUser)showWelcome()},900)
+    // Make every image resilient without changing its source unless it actually fails.
+    qsa('img').forEach(img=>{if(!img.loading&&img!==qs('.qx-loader img'))img.loading='lazy';img.addEventListener('error',()=>{if(img.src!==LOGO&&img.alt.toLowerCase().includes('qyrex')){img.src=LOGO}}, {once:true})});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 
