@@ -13,6 +13,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cambia-este-secret-por-uno-largo';
+const DEFAULT_JWT_SECRET_WARNING = !process.env.JWT_SECRET;
 const MONGO_URI = process.env.MONGO_URI || '';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/auto';
@@ -22,7 +23,8 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
 
 // Voltils Obfuscator API
-const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltils_1267954195982581782_b24de9d9410f9e7a0dcb7db05b18cda598f9415f';
+const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || '';
+const HAS_VOLTILS_KEY = Boolean(VOLTILS_API_KEY);
 const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltils.nxtdev.xyz/v1/obfuscate';
 
 const PORT = process.env.PORT || 10000;
@@ -2749,4 +2751,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log('QrexApi listening on 0.0.0.0:' + PORT);
   console.log('MONGO_URI set:', !!MONGO_URI);
+  if (DEFAULT_JWT_SECRET_WARNING) console.warn('[SECURITY] Define JWT_SECRET in Render Environment before production use.');
+  if (!VOLTILS_API_KEY) console.warn('[CONFIG] VOLTILS_API_KEY is not configured; remote obfuscator access may be unavailable.');
 });

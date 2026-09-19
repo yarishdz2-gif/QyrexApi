@@ -21,7 +21,7 @@ function baseUrl() {
 
 function apiHeaders() {
   const h = { 'Content-Type': 'application/json', Accept: 'application/json' };
-  const key = process.env.QYREXOBF_API_KEY || process.env.API_KEY || 'qyrex_obf_7f3a9c2e1b8d4e6f0a1c2d3e4f5a6b7c';
+  const key = process.env.QYREXOBF_API_KEY || process.env.API_KEY || '';
   if (key) h['x-api-key'] = key;
   return h;
 }
