@@ -1390,6 +1390,117 @@ html.qx-ultra #appView .qx-modal-box,html.qx-ultra #appView .vip-modal{backgroun
 @media(prefers-reduced-motion:reduce){#qxUltraBackdrop:before,#qxUltraBackdrop:after,#qxTopProgress i,#qxUltraStatus .dot{animation:none!important}html.qx-ultra #appView .page:not(.hidden),.qx-command{animation:none!important}}
 </style>
 
+
+<style id="qyrex-nexus-v3">
+:root{
+  --nx-bg:#04070b;--nx-bg2:#071018;--nx-panel:rgba(9,17,25,.78);--nx-panel2:rgba(11,22,31,.92);
+  --nx-line:rgba(125,211,252,.11);--nx-line2:rgba(125,211,252,.22);--nx-text:#edfaff;--nx-muted:#7e9cac;
+  --nx-dim:#4f6979;--nx-blue:#7dd3fc;--nx-blue2:#38bdf8;--nx-cyan:#22d3ee;--nx-green:#34d399;--nx-gold:#fbbf24;
+  --nx-ease:cubic-bezier(.22,1,.36,1)
+}
+html.qx-ultra{scroll-behavior:smooth}
+html.qx-ultra body{background:
+ radial-gradient(900px 600px at 14% -10%,rgba(56,189,248,.10),transparent 68%),
+ radial-gradient(1000px 760px at 110% 110%,rgba(14,165,233,.08),transparent 65%),
+ linear-gradient(180deg,#03060a,#05090e 48%,#030609)!important;
+}
+#appView{isolation:isolate;overflow-x:clip}
+#appView:before,#appView:after{content:"";position:fixed;pointer-events:none;z-index:-2;opacity:.7}
+#appView:before{inset:0;background-image:linear-gradient(rgba(125,211,252,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(125,211,252,.016) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black 0%,transparent 88%)}
+#appView:after{width:620px;height:620px;right:-210px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.11),rgba(56,189,248,.035) 38%,transparent 70%);filter:blur(8px)}
+#appView .sidebar{background:linear-gradient(180deg,rgba(4,9,14,.98),rgba(3,7,11,.98))!important;border-right:1px solid rgba(125,211,252,.09)!important;box-shadow:18px 0 70px rgba(0,0,0,.34),inset -1px 0 rgba(255,255,255,.014)!important;backdrop-filter:blur(24px)!important}
+#appView .sidebar-brand{position:relative;border-bottom:1px solid rgba(125,211,252,.055);background:linear-gradient(180deg,rgba(125,211,252,.018),transparent)}
+#appView .sidebar-brand:after{content:"";position:absolute;left:20px;right:20px;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(125,211,252,.22),transparent)}
+#appView .sidebar-brand img{border:1px solid rgba(125,211,252,.19)!important;box-shadow:0 0 0 4px rgba(125,211,252,.025),0 14px 35px rgba(0,0,0,.34)!important}
+#appView .nav-item{position:relative;min-height:42px;border-radius:12px!important;color:#7894a4!important}
+#appView .nav-item:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:2px;border-radius:999px;background:linear-gradient(180deg,var(--nx-blue),var(--nx-cyan));opacity:0;transform:scaleY(.3);transition:.22s var(--nx-ease)}
+#appView .nav-item:hover{background:linear-gradient(90deg,rgba(125,211,252,.055),rgba(125,211,252,.012))!important;border-color:rgba(125,211,252,.08)!important;color:#dff7ff!important;transform:translateX(2px)}
+#appView .nav-item.active{background:linear-gradient(90deg,rgba(56,189,248,.13),rgba(125,211,252,.035))!important;border-color:rgba(125,211,252,.14)!important;color:#ecfbff!important;box-shadow:inset 0 1px rgba(255,255,255,.024),0 10px 28px rgba(0,0,0,.13)!important}
+#appView .nav-item.active:before{opacity:1;transform:scaleY(1)}
+#appView .nav-item svg{color:#648696}
+#appView .nav-item.active svg{color:var(--nx-blue)}
+#appView .user-pill{background:linear-gradient(180deg,rgba(11,20,28,.82),rgba(7,13,19,.92))!important;border:1px solid rgba(125,211,252,.08)!important;box-shadow:inset 0 1px rgba(255,255,255,.018),0 14px 32px rgba(0,0,0,.18)!important}
+#appView .avatar{background:linear-gradient(145deg,#dffaff,#51bee9 52%,#12769a)!important;color:#05202b!important;box-shadow:0 8px 24px rgba(56,189,248,.15)}
+#appView .top-tools button,.mobile-topbar .lang-btn,.vip-top-btn,.notif-btn{backdrop-filter:blur(14px);transition:.2s var(--nx-ease)}
+#appView .vip-top-btn,.mobile-topbar .lang-btn{border-color:rgba(125,211,252,.08)!important;background:rgba(8,15,22,.72)!important;color:#7593a4!important}
+#appView .vip-top-btn:hover,.mobile-topbar .lang-btn:hover,.notif-btn:hover{border-color:rgba(125,211,252,.18)!important;color:#dff8ff!important;transform:translateY(-1px)}
+#appView .main-content{background:transparent!important}
+#appView .main-content>div.border-b{background:linear-gradient(180deg,rgba(5,10,15,.72),rgba(4,8,12,.46))!important;backdrop-filter:blur(24px);position:sticky;top:0;z-index:18}
+#qxPagebar{position:relative;overflow:hidden;border-bottom:1px solid rgba(125,211,252,.055);background:linear-gradient(180deg,rgba(7,14,20,.86),rgba(6,12,17,.56))!important;padding:22px 32px 18px!important}
+#qxPagebar:before{content:"";position:absolute;width:420px;height:180px;right:-100px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.075),transparent 68%);pointer-events:none}
+#qxPagebar .qx-page-title{font-family:Outfit,Inter,sans-serif!important;letter-spacing:-.035em!important;font-size:28px!important;color:#effaff!important}
+#qxPagebar .qx-page-kicker{color:#6fa8c1!important;font-weight:800!important;letter-spacing:.16em!important}
+#qxPagebar .qx-page-sub{color:#5d7d8e!important;max-width:760px}
+#qxPagebar .qx-mini-pill{background:rgba(7,14,20,.72)!important;border-color:rgba(125,211,252,.07)!important;color:#668293!important;box-shadow:inset 0 1px rgba(255,255,255,.018)}
+#qxPagebar .qx-mini-pill b{color:#9ec7d7}
+#appView .section-resource{position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(10,28,40,.68),rgba(7,14,20,.48))!important;border-color:rgba(125,211,252,.09)!important;color:#6d96aa!important;box-shadow:inset 0 1px rgba(255,255,255,.014),0 10px 26px rgba(0,0,0,.10)!important}
+#appView .section-resource:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(125,211,252,.045),transparent 35%);pointer-events:none}
+#appView .section-resource a{color:#7bd0f4!important}
+#appView .page{animation:qxNxPageIn .48s var(--nx-ease) both}
+@keyframes qxNxPageIn{from{opacity:0;transform:translateY(8px);filter:blur(1px)}to{opacity:1;transform:none;filter:none}}
+#appView .card,#appView .ov-stat{background:linear-gradient(180deg,rgba(11,20,28,.84),rgba(7,13,18,.84))!important;border-color:rgba(125,211,252,.075)!important;box-shadow:inset 0 1px rgba(255,255,255,.018),0 14px 40px rgba(0,0,0,.17)!important}
+#appView .card:hover{border-color:rgba(125,211,252,.15)!important;box-shadow:inset 0 1px rgba(255,255,255,.03),0 18px 48px rgba(0,0,0,.25)!important;transform:translateY(-1px)}
+#appView input,#appView textarea,#appView select{background:rgba(4,10,15,.88)!important;border-color:rgba(125,211,252,.08)!important;color:#dff6ff!important;box-shadow:inset 0 1px rgba(255,255,255,.015)!important}
+#appView input::placeholder,#appView textarea::placeholder{color:#496776!important}
+#appView input:focus,#appView textarea:focus,#appView select:focus{border-color:rgba(125,211,252,.24)!important;box-shadow:0 0 0 4px rgba(56,189,248,.055),inset 0 1px rgba(255,255,255,.02)!important}
+#appView .btn-primary{background:linear-gradient(135deg,#effcff 0%,#9fe5fa 44%,#38bdf8 100%)!important;color:#03141c!important;border-color:rgba(255,255,255,.22)!important;box-shadow:0 14px 34px rgba(56,189,248,.16)!important}
+#appView .btn-primary:hover{filter:brightness(1.04) saturate(1.04)!important;box-shadow:0 18px 42px rgba(56,189,248,.21)!important}
+#appView .btn-ghost{background:rgba(8,16,23,.58)!important;border-color:rgba(125,211,252,.085)!important;color:#7897a8!important}
+#appView .btn-ghost:hover{background:rgba(125,211,252,.05)!important;border-color:rgba(125,211,252,.18)!important;color:#dff8ff!important}
+#appView .ov-hero{position:relative;overflow:hidden;background:
+ radial-gradient(520px 270px at 84% 10%,rgba(56,189,248,.11),transparent 68%),
+ linear-gradient(145deg,rgba(9,21,30,.92),rgba(7,13,18,.88))!important;border-color:rgba(125,211,252,.09)!important;box-shadow:0 24px 70px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.022)!important}
+#appView .ov-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 0 68%,rgba(125,211,252,.035) 75%,transparent 88%);pointer-events:none}
+#appView .ov-logo{border-color:rgba(125,211,252,.19)!important;box-shadow:0 0 0 5px rgba(125,211,252,.02),0 18px 45px rgba(0,0,0,.33)!important}
+#appView .ov-title{font-family:Outfit,Inter,sans-serif!important;font-size:clamp(32px,4vw,52px)!important;line-height:1!important;letter-spacing:-.045em!important;color:#effdff!important}
+#appView .ov-sub{max-width:680px!important;color:#6f8f9f!important;font-size:14px!important;line-height:1.7!important}
+#appView .ov-kicker{color:#6ec2e6!important;letter-spacing:.16em!important;font-weight:900!important}
+#appView .ov-cta{background:linear-gradient(135deg,#effcff,#7dd3fc 58%,#38bdf8)!important;color:#03141c!important;box-shadow:0 16px 44px rgba(56,189,248,.17)!important}
+#appView .ov-ghost{background:rgba(8,16,23,.6)!important;border-color:rgba(125,211,252,.10)!important;color:#86a4b4!important}
+#appView .vip-plan{background:linear-gradient(180deg,rgba(13,20,25,.9),rgba(8,13,18,.9))!important;border-color:rgba(251,191,36,.10)!important}
+#appView .vip-plan.featured{box-shadow:0 18px 50px rgba(251,191,36,.07),inset 0 1px rgba(255,255,255,.02)!important}
+#qxUltraStatus{background:rgba(5,12,17,.84)!important;border-color:rgba(125,211,252,.09)!important;color:#7190a1!important;box-shadow:0 18px 42px rgba(0,0,0,.24)!important;backdrop-filter:blur(20px)}
+#qxScrollTop{background:rgba(7,15,21,.82)!important;border-color:rgba(125,211,252,.12)!important;backdrop-filter:blur(18px);box-shadow:0 18px 45px rgba(0,0,0,.27)}
+#qxUltraWelcome{background:linear-gradient(135deg,#e9fbff,#7dd3fc)!important;color:#04141b!important;border-color:rgba(255,255,255,.35)!important;box-shadow:0 20px 70px rgba(56,189,248,.2)!important}
+#qxTopProgress i{background:linear-gradient(90deg,#22d3ee,#7dd3fc,#38bdf8)!important;box-shadow:0 0 24px rgba(56,189,248,.6)!important}
+.qx-nx-live{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px;padding:0}
+.qx-nx-chip{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 11px;border:1px solid rgba(125,211,252,.075);border-radius:11px;background:linear-gradient(180deg,rgba(10,19,27,.78),rgba(6,12,17,.78));color:#648494;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;box-shadow:inset 0 1px rgba(255,255,255,.018)}
+.qx-nx-chip b{color:#a8d7e9}
+.qx-nx-chip i{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 14px rgba(52,211,153,.58)}
+.qx-nx-chip.warn i{background:#fbbf24;box-shadow:0 0 14px rgba(251,191,36,.45)}
+.qx-nx-chip.off i{background:#f87171;box-shadow:0 0 14px rgba(248,113,113,.42)}
+.qx-nx-cockpit{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.qx-nx-metric{position:relative;overflow:hidden;padding:15px 16px;border-radius:15px;border:1px solid rgba(125,211,252,.075);background:linear-gradient(180deg,rgba(10,19,27,.86),rgba(6,12,17,.82));box-shadow:inset 0 1px rgba(255,255,255,.02),0 12px 30px rgba(0,0,0,.13)}
+.qx-nx-metric:after{content:"";position:absolute;width:100px;height:100px;right:-42px;top:-42px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.10),transparent 70%);pointer-events:none}
+.qx-nx-metric .k{color:#567786;font-size:9px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}.qx-nx-metric .v{margin-top:7px;color:#e9faff;font:800 24px/1 Outfit,Inter,sans-serif;letter-spacing:-.03em}.qx-nx-metric .s{margin-top:3px;color:#456372;font-size:10px}
+.qx-nx-spotlight{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;transition:opacity .35s;mix-blend-mode:screen;background:radial-gradient(420px 420px at var(--mx,50%) var(--my,50%),rgba(56,189,248,.045),transparent 68%)}
+.qx-nx-fab{position:fixed;right:22px;bottom:24px;z-index:90}.qx-nx-fab>button{width:48px;height:48px;border-radius:16px;border:1px solid rgba(125,211,252,.14);background:linear-gradient(145deg,rgba(16,34,46,.94),rgba(6,14,20,.96));color:#bcefff;box-shadow:0 18px 42px rgba(0,0,0,.32),0 0 0 1px rgba(125,211,252,.025);cursor:pointer;display:grid;place-items:center;font-size:17px;transition:.25s var(--nx-ease)}
+.qx-nx-fab>button:hover{transform:translateY(-3px) rotate(2deg);border-color:rgba(125,211,252,.28);box-shadow:0 24px 52px rgba(0,0,0,.38),0 0 28px rgba(56,189,248,.10)}
+.qx-nx-fab-menu{position:absolute;right:0;bottom:60px;width:220px;padding:8px;display:none;gap:5px;border:1px solid rgba(125,211,252,.11);border-radius:16px;background:rgba(5,12,18,.94);backdrop-filter:blur(22px);box-shadow:0 30px 80px rgba(0,0,0,.48)}
+.qx-nx-fab.open .qx-nx-fab-menu{display:grid;animation:qxNxMenu .2s var(--nx-ease) both}@keyframes qxNxMenu{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.qx-nx-fab-menu button{border:1px solid transparent;background:transparent;color:#7796a8;padding:10px;border-radius:10px;text-align:left;font-size:11px;font-weight:800;cursor:pointer}.qx-nx-fab-menu button:hover{background:rgba(125,211,252,.06);border-color:rgba(125,211,252,.09);color:#def8ff}
+.qx-nx-mobile-dock{display:none}
+.qx-nx-mobile-dock button{border:1px solid rgba(125,211,252,.08);background:rgba(5,12,18,.86);color:#7896a5;border-radius:12px;min-height:42px;font-size:10px;font-weight:900}.qx-nx-mobile-dock button.active{color:#dff9ff;border-color:rgba(125,211,252,.16);background:rgba(56,189,248,.08)}
+.qx-nx-key{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:20px;padding:0 5px;border:1px solid rgba(125,211,252,.10);border-bottom-color:rgba(125,211,252,.18);border-radius:6px;background:rgba(12,23,31,.75);color:#7ea3b5;font-size:9px;font-weight:900;font-family:ui-monospace,monospace}
+.qx-nx-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(125,211,252,.09),transparent);margin:18px 0}
+@media(max-width:1100px){.qx-nx-cockpit{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){
+ #appView .main-content{margin-left:0!important}.qx-nx-cockpit{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #qxPagebar{padding:18px 16px 15px!important}.qx-nx-fab{right:16px;bottom:78px}.qx-nx-mobile-dock{position:fixed;left:12px;right:12px;bottom:12px;z-index:80;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:7px;border:1px solid rgba(125,211,252,.09);border-radius:16px;background:rgba(4,10,15,.88);backdrop-filter:blur(22px);box-shadow:0 22px 60px rgba(0,0,0,.40)}
+ #appView .p-8{padding:16px!important}.section-resource{margin-bottom:13px!important}
+}
+@media(max-width:560px){.qx-nx-cockpit{grid-template-columns:1fr 1fr}.qx-nx-chip{font-size:9px}.qx-nx-metric .v{font-size:21px}.qx-nx-fab{bottom:77px}.qx-nx-mobile-dock button{font-size:9px}}
+@media(prefers-reduced-motion:reduce){#appView .page{animation:none!important}.qx-nx-spotlight{display:none!important}.qx-nx-fab *{transition:none!important}}
+</style>
+
+<link rel="stylesheet" href="/qyrex-nexus-v5.css"><script defer src="/qyrex-nexus-v5.js"></script>
+<script defer src="/qyrex-ultra-v6.js"></script>
+<link rel="stylesheet" href="/qyrex-ultra-v6.css">
+<link rel="stylesheet" href="/qyrex-nexus-v7.css">
+<script defer src="/qyrex-nexus-v7.js"></script>
+
+<link rel="stylesheet" href="/qyrex-nexus-v8.css">
+<script defer src="/qyrex-nexus-v8.js"></script>
 </head>
 <body>
 <a class="qx-skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -5414,7 +5525,10 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
 
 
 
-</body>
+
+
+
+<!-- QYREX_NEXUS_V5_RUNTIME_MARKER --></body>
 \x3C/html>`;
   async function siteFetch(url,opts){const r=await fetch(url,Object.assign({},opts||{},{headers:Object.assign({},headers())}));const d=await r.json().catch(()=>({}));if(!r.ok) throw new Error(d.error||'Error');return d;}
   el('siteFile')?.addEventListener('change',function(){const f=this.files?.[0];if(!f)return;if(f.size>900000){this.value='';toast('index.html demasiado grande (máx. 900 KB)','err');return}const r=new FileReader();r.onload=()=>{el('siteHtml').value=String(r.result||'');qxSiteFormatCheck()};r.readAsText(f)});
@@ -5657,5 +5771,61 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
 })();
 </script>
 
+<script id="qyrex-nexus-v3-runtime">
+(function(){
+'use strict';
+const LOGO='https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024';
+const K={recent:'qyrex_nx_recent_v3',seen:'qyrex_nx_seen_v3'};
+const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const safe=(fn,f)=>{try{return fn()}catch(e){return f}};
+function goSafe(page){if(typeof window.go==='function')window.go(page);}
+function toast(msg,type='ok'){safe(()=>window.toast?.(msg,type));}
+function inject(sel,html,where='beforeend'){const root=$(sel);if(!root)return null;if(root.querySelector('.qx-nx-injected'))return root.querySelector('.qx-nx-injected');const w=document.createElement('div');w.className='qx-nx-injected';w.innerHTML=html;root.insertAdjacentElement(where,w);return w}
+function updateRecent(page){try{const a=JSON.parse(localStorage.getItem(K.recent)||'[]').filter(x=>x!==page);a.unshift(page);localStorage.setItem(K.recent,JSON.stringify(a.slice(0,7)))}catch(_){} }
+function addLive(){
+ const main=$('#appView .main-content');if(!main||$('#qxNxLive'))return;
+ const live=document.createElement('div');live.id='qxNxLive';live.className='qx-nx-live';
+ live.innerHTML='<span class="qx-nx-chip" id="nxNet"><i></i>Red <b>ONLINE</b></span><span class="qx-nx-chip"><i></i>Workspace <b>READY</b></span><span class="qx-nx-chip" id="nxClock"><i></i>Local <b>--:--:--</b></span><span class="qx-nx-chip"><i></i>Shortcuts <b><span class="qx-nx-key">/</span> <span class="qx-nx-key">K</span></b></span>';
+ const target=$('#qxPagebar');if(target)target.insertAdjacentElement('afterend',live);else main.prepend(live);
+}
+function addCockpit(){
+ const page=$('#page-overview');if(!page||$('#qxNxCockpit'))return;
+ const hero=$('.ov-hero',page);const wrap=document.createElement('div');wrap.id='qxNxCockpit';wrap.className='qx-nx-cockpit';
+ wrap.innerHTML='<div class="qx-nx-metric"><div class="k">Scripts</div><div class="v" id="nxMetricScripts">0</div><div class="s">En tu workspace</div></div><div class="qx-nx-metric"><div class="k">Runs</div><div class="v" id="nxMetricRuns">0</div><div class="s">Ejecuciones registradas</div></div><div class="qx-nx-metric"><div class="k">API</div><div class="v" id="nxMetricApi">--</div><div class="s">Conectividad</div></div><div class="qx-nx-metric"><div class="k">Sesión</div><div class="v" id="nxMetricSession">--:--</div><div class="s">Tiempo activo</div></div>';
+ if(hero)hero.insertAdjacentElement('afterend',wrap);else page.prepend(wrap);
+ const sync=()=>{const a=$('#stScripts')?.textContent?.trim()||'0',b=$('#stExec')?.textContent?.trim()||'0';$('#nxMetricScripts').textContent=a;$('#nxMetricRuns').textContent=b;};
+ sync();setInterval(sync,1200);
+}
+function addSpotlight(){
+ if($('#qxNxSpotlight'))return;const el=document.createElement('div');el.id='qxNxSpotlight';el.className='qx-nx-spotlight';document.body.appendChild(el);
+ if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion:reduce)').matches){let raf=0;window.addEventListener('pointermove',e=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;el.style.setProperty('--mx',e.clientX+'px');el.style.setProperty('--my',e.clientY+'px');el.style.opacity='1'})},{passive:true});window.addEventListener('blur',()=>el.style.opacity='0');}
+}
+function addFab(){
+ if($('#qxNxFab'))return;const f=document.createElement('div');f.id='qxNxFab';f.className='qx-nx-fab';
+ f.innerHTML='<button type="button" aria-label="Acciones rápidas" title="Acciones rápidas">✦</button><div class="qx-nx-fab-menu"><button type="button" data-a="create">＋ Crear script</button><button type="button" data-a="scripts">◇ Mis scripts</button><button type="button" data-a="ia">✧ Abrir QyrexAI</button><button type="button" data-a="studio">▣ Abrir Studio</button><button type="button" data-a="keys">⌁ Keys & Providers</button><button type="button" data-a="settings">⚙ Settings</button></div>';
+ document.body.appendChild(f);const b=f.querySelector(':scope>button');b.addEventListener('click',()=>f.classList.toggle('open'));f.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{f.classList.remove('open');goSafe(x.dataset.a)}));document.addEventListener('click',e=>{if(!f.contains(e.target))f.classList.remove('open')});
+}
+function addMobileDock(){
+ if($('#qxNxDock'))return;const d=document.createElement('nav');d.id='qxNxDock';d.className='qx-nx-mobile-dock';
+ d.innerHTML='<button type="button" data-p="overview">⌂<br>Home</button><button type="button" data-p="scripts">◇<br>Scripts</button><button type="button" data-p="create">＋<br>Crear</button><button type="button" data-p="ia">✧<br>IA</button>';
+ d.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>goSafe(b.dataset.p)));document.body.appendChild(d);syncDock();window.addEventListener('popstate',syncDock);
+}
+function syncDock(){const key=safe(()=>document.documentElement.dataset.qxPage,'overview');$$('#qxNxDock button').forEach(b=>b.classList.toggle('active',b.dataset.p===key));}
+function clock(){const el=$('#nxClock b');if(!el)return;const d=new Date();el.textContent=d.toLocaleTimeString('es-MX',{hour12:false});}
+function network(){const c=$('#nxNet');if(!c)return;const on=navigator.onLine;c.classList.toggle('off',!on);c.innerHTML='<i></i>Red <b>'+ (on?'ONLINE':'OFFLINE') +'</b>';}
+function session(){const el=$('#nxMetricSession');if(!el)return;window.__qxNxStarted??=Date.now();const sec=Math.floor((Date.now()-window.__qxNxStarted)/1000);const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');el.textContent=m+':'+s;}
+function patchGo(){if(window.__qxNxGoPatched||typeof window.go!=='function')return;const original=window.go;window.go=function(page){updateRecent(page);syncDock();const r=original.apply(this,arguments);setTimeout(()=>{syncDock();updateBar();},60);return r};window.__qxNxGoPatched=true;}
+function updateBar(){safe(()=>{const page=$$('#appView .page:not(.hidden)')[0];const key=page?.id?.replace(/^page-/,'')||'overview';document.documentElement.dataset.qxPage=key;syncDock()});}
+function logoGuard(){ $$('#appView img').forEach(img=>{if(!img.src||img.src.includes('i.ibb.co')){img.src=LOGO;img.alt='QyrexApi'}}); }
+function shortcuts(){document.addEventListener('keydown',e=>{const tag=(e.target?.tagName||'').toLowerCase();const typing=['input','textarea','select'].includes(tag)||e.target?.isContentEditable;if(e.key==='/'&&!typing&&!e.ctrlKey&&!e.metaKey){e.preventDefault();safe(()=>window.qxOpenCmd?.())} if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='a'&&!typing){e.preventDefault();goSafe('ia')} if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='m'&&!typing){e.preventDefault();goSafe('create')}});}
+function hookHealth(){setInterval(()=>safe(()=>window.qxCheckHealth?.()),120000);window.addEventListener('online',network);window.addEventListener('offline',network);}
+function observe(){const app=$('#appView');if(!app)return;let t=0;const obs=new MutationObserver(()=>{if(t)return;t=1;requestAnimationFrame(()=>{t=0;updateBar();logoGuard();addCockpit()})});obs.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});}
+function boot(){
+ if(!$('#appView'))return;document.documentElement.classList.add('qx-nexus-v3');addLive();addCockpit();addSpotlight();addFab();addMobileDock();network();clock();session();setInterval(clock,1000);setInterval(session,1000);patchGo();observe();shortcuts();hookHealth();logoGuard();
+ setTimeout(()=>toast('Qyrex Nexus listo · nueva interfaz activada','ok'),1200);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
 </body>
 </html>
