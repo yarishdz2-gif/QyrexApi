@@ -39,6 +39,19 @@ app.disable('x-powered-by');
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 
+app.use((req, res, next) => {
+  const started = Date.now();
+  const requestId = crypto.randomUUID();
+  const originalEnd = res.end;
+  res.setHeader('X-Qyrex-Request-Id', requestId);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.end = function patchedEnd(...args) {
+    if (!res.headersSent) res.setHeader('Server-Timing', 'app;dur=' + Math.max(0, Date.now() - started));
+    return originalEnd.apply(this, args);
+  };
+  next();
+});
+
 function clientIp(req) {
   const xf = req.headers['x-forwarded-for'];
   if (xf) return String(xf).split(',')[0].trim();
@@ -2748,9 +2761,24 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Error interno' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('QrexApi listening on 0.0.0.0:' + PORT);
   console.log('MONGO_URI set:', !!MONGO_URI);
   if (DEFAULT_JWT_SECRET_WARNING) console.warn('[SECURITY] Define JWT_SECRET in Render Environment before production use.');
   if (!VOLTILS_API_KEY) console.warn('[CONFIG] VOLTILS_API_KEY is not configured; remote obfuscator access may be unavailable.');
 });
+
+async function shutdown(signal) {
+  console.log('[LIFECYCLE] ' + signal + ' received; shutting down gracefully.');
+  server.close(async () => {
+    try {
+      if (mongoose.connection.readyState !== 0) await mongoose.connection.close(false);
+    } catch (e) {
+      console.error('[LIFECYCLE] Mongo close error:', e?.message || e);
+    }
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));

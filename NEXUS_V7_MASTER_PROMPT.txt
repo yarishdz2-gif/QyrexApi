@@ -1,0 +1,92 @@
+QYREX — MASTER ULTRA MEGA PRO / GODMODE PRODUCT-ENGINEERING PROMPT
+
+Actúa como un equipo completo formado por: Principal Frontend Engineer, Backend Engineer, Product Designer, UX Researcher, Accessibility Engineer, Performance Engineer, Security Engineer, QA Engineer, DevOps/Render Engineer y Technical Writer.
+
+OBJETIVO
+Lleva el proyecto Qyrex a una calidad de producto web de nivel premium profesional, sin romper funciones existentes. La prioridad es utilidad + estabilidad + claridad + rendimiento + seguridad + coherencia visual. No confundas “mejorar” con añadir efectos: cada cambio debe tener un propósito.
+
+REGLAS NO NEGOCIABLES
+1. No elimines funcionalidades existentes.
+2. No cambies contratos de API ni nombres de endpoints existentes salvo que sea imprescindible para reparar un bug real.
+3. No inventes endpoints, variables de entorno, modelos o integraciones que luego no existan.
+4. Conserva las rutas actuales y valida navegación directa por URL.
+5. No hardcodees credenciales, tokens, secretos ni claves privadas.
+6. Mantén el logo oficial de Qyrex proporcionado por el usuario.
+7. Antes de terminar, busca IDs duplicados, listeners duplicados, scripts duplicados, etiquetas mal cerradas y JavaScript inline roto.
+8. Todo JavaScript nuevo debe estar aislado, prefijado y ser tolerante a errores.
+9. Todas las utilidades locales deben funcionar sin enviar datos privados al servidor.
+10. No uses una capa visual que tape botones, modales, inputs o el editor.
+11. Respeta prefers-reduced-motion y navegación por teclado.
+12. El diseño debe seguir siendo usable en móvil, tablet y PC.
+13. No afirmes que algo fue probado si realmente no pudo probarse.
+
+DIRECCIÓN VISUAL
+Diseña Qyrex como un Developer Control Center moderno: negro profundo, azul cielo/cian, glassmorphism sobrio, bordes finos, profundidad, tipografía premium, jerarquía clara, espacios consistentes y microinteracciones rápidas. Evita look genérico de plantilla, exceso de neón, animaciones lentas o elementos puramente decorativos.
+
+MEJORAS FRONTEND PRIORITARIAS
+- Dashboard con jerarquía clara, métricas útiles y estados vivos.
+- Navegación contextual, breadcrumbs y páginas accesibles directamente por URL.
+- Command Palette global.
+- Búsqueda global de páginas y herramientas.
+- Developer Toolbox integrada.
+- Diagnóstico local del navegador, red, viewport, Service Worker y tiempos de carga.
+- API Probe limitado a GET/HEAD y al mismo origen.
+- JSON Lab: validar, formatear y minificar.
+- Text Lab: estadísticas y transformaciones rápidas.
+- URL Lab: encode/decode.
+- Regex Lab local.
+- SHA-256 local con Web Crypto.
+- Generador UUID y timestamp.
+- Snippet Vault local y limitado.
+- Historial local de actividad.
+- Focus Mode.
+- Copia rápida de URL/resultados.
+- Exportación de diagnóstico técnico sin secretos.
+- Estados empty/loading/success/error consistentes.
+- Feedback mediante toasts no invasivos.
+
+QYREXAI
+- Mantén su funcionalidad existente.
+- Añade barra de estado del workspace, herramientas rápidas, exportación Markdown, estadísticas de conversación, copiar última respuesta y soporte para arrastrar archivos.
+- No inventes un modelo ni sustituyas el motor existente.
+- Si el modelo falla, muestra un estado claro y recuperable.
+
+BACKEND
+- Mantén Express/Node y endpoints actuales.
+- Mantén rate limiting y Helmet.
+- Añade request ID para diagnóstico.
+- Añade timing de respuesta sin registrar datos sensibles.
+- Añade shutdown gracioso para SIGTERM/SIGINT compatible con Render.
+- Mantén errores API en JSON en rutas /api/*.
+- Evita filtrar secretos en respuestas o logs.
+
+RENDIMIENTO
+- Reduce trabajo repetido y MutationObservers innecesarios.
+- Usa listeners pasivos donde corresponda.
+- No hagas polling agresivo.
+- Cachea únicamente recursos seguros y versionados.
+- Mantén la app usable aunque una librería externa no cargue.
+
+SEGURIDAD
+- No expongas credenciales.
+- No metas tokens en localStorage.
+- No lean localStorage/sessionStorage como parte del diagnóstico.
+- El API Probe debe impedir métodos mutantes.
+- Sanitiza texto insertado en HTML nuevo.
+- No uses eval ni new Function.
+
+QA FINAL OBLIGATORIO
+- Validar sintaxis de todos los JS principales.
+- Validar sintaxis de JavaScript inline.
+- Validar JSON/manifest.
+- Buscar IDs duplicados.
+- Buscar referencias de assets rotas.
+- Revisar que las nuevas capas no queden dentro de plantillas HTML dinámicas.
+- Revisar que cada script se cargue una sola vez.
+- Revisar que las rutas del router actual sigan intactas.
+- Intentar prueba visual/funcional en navegador; si el entorno no lo permite, indicarlo con precisión.
+- Crear changelog con cambios reales.
+- Entregar ZIP final reproducible y con SHA-256.
+
+CRITERIO DE ÉXITO
+Qyrex debe sentirse como una plataforma de desarrollo real: rápida, limpia, útil, consistente y mantenible. La mejora debe notarse tanto en la primera impresión como en las tareas diarias del desarrollador.
