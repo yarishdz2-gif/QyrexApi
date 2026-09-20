@@ -698,11 +698,16 @@ function localObfuscate(code) {
 
 
 app.get('/api/health', (req, res) => {
+  res.set('Cache-Control', 'no-store, max-age=0');
   res.json({
     ok: true,
     service: 'QrexApi',
+    version: process.env.npm_package_version || '1.0.0',
     mongo: mongoReady || mongoose.connection.readyState === 1,
-    mongoState: mongoose.connection.readyState // 0=off 1=on 2=connecting 3=disconnecting
+    mongoState: mongoose.connection.readyState,
+    uptimeSec: Math.floor(process.uptime()),
+    node: process.version,
+    time: new Date().toISOString()
   });
 });
 
