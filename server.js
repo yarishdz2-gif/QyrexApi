@@ -677,13 +677,32 @@ async function obfuscateWithVoltils(code, preset) {
 async function resolveObfuscated(source, mode) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
-  // Siempre ofuscar con Voltfuscator
+
+  // 1) Intentar Voltfuscator (remoto)
   try {
     const code = await obfuscateWithVoltils(src, 'normal');
     return { code, doObfuscate: true, obfMode: "voltfuscator" };
   } catch (e) {
     console.error("Voltfuscator fail:", e && e.stack ? e.stack : e);
-    throw new Error("Ofuscación Voltfuscator falló: " + (e.message || "error"));
+  }
+
+  // 2) Fallback: QyrexObf local (no depende de API externa)
+  try {
+    const code = await obfuscateWithQyrexObf(src);
+    console.warn('[OBF] Usando fallback local QyrexObf tras fallo de Voltfuscator');
+    return { code, doObfuscate: true, obfMode: "qyrexobf-local" };
+  } catch (e2) {
+    console.error("QyrexObf local fail:", e2 && e2.stack ? e2.stack : e2);
+  }
+
+  // 3) Último recurso: localObfuscate (XOR layers)
+  try {
+    const code = localObfuscate(src);
+    console.warn('[OBF] Usando fallback localObfuscate');
+    return { code, doObfuscate: true, obfMode: "local" };
+  } catch (e3) {
+    console.error("localObfuscate fail:", e3 && e3.stack ? e3.stack : e3);
+    throw new Error("Ofuscación falló (Voltfuscator y locales): " + (e3.message || "error"));
   }
 }
 
@@ -2796,6 +2815,10 @@ app.use('/api', (req, res) => {
 });
 
 app.get('*', (req, res) => {
+  // No devolver HTML para assets (evita errores de MIME type en CSS/JS)
+  if (/\.(css|js|map|png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|json|webmanifest)$/i.test(req.path)) {
+    return res.status(404).type('text/plain').send('Not found');
+  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
