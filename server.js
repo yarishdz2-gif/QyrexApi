@@ -23,7 +23,7 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
 
 // Voltils Obfuscator API
-const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || '';
+const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltils_1141173377189556324_c3102f5c336c3445442988c4366fe2eb10975a15';
 const HAS_VOLTILS_KEY = Boolean(VOLTILS_API_KEY);
 const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltils.nxtdev.xyz/v1/obfuscate';
 
