@@ -22,10 +22,10 @@ const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491'
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
 
-// Voltils Obfuscator API
-const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltils_1141173377189556324_c3102f5c336c3445442988c4366fe2eb10975a15';
+// Voltfuscator API (Flaxo)
+const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltfuscator_1267954195982581782_688ace9cb0ff47f96888ab4a3f07251e6716cadb';
 const HAS_VOLTILS_KEY = Boolean(VOLTILS_API_KEY);
-const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltils.nxtdev.xyz/v1/obfuscate';
+const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltfuscator-production.up.railway.app/v1/obfuscate';
 
 const PORT = process.env.PORT || 10000;
 
