@@ -599,52 +599,91 @@ function wrapWithEnvLogger(source) {
 }
 
 async function obfuscateWithVoltils(code, preset) {
-  const body = {
-    code: String(code || ''),
-    preset: preset || 'normal'
-  };
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 120000);
-  try {
-    const res = await fetch(VOLTILS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + VOLTILS_API_KEY
-      },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
-    });
-    const text = await res.text();
-    let data = null;
-    try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
-    if (!res.ok) {
-      const errMsg = (data && (data.error || data.message || data.raw)) || text || ('HTTP ' + res.status);
-      throw new Error(String(errMsg).slice(0, 400));
-    }
-    // Respuestas típicas: { code }, { obfuscated }, { result }, o string directo
-    const out =
-      (data && (data.code || data.obfuscated || data.result || data.output || data.script)) ||
-      (typeof data === 'string' ? data : null) ||
-      (typeof text === 'string' && text.trim() && !text.trim().startsWith('{') ? text : null);
-    if (!out || !String(out).trim()) throw new Error('Voltils devolvió respuesta vacía');
-    return String(out);
-  } finally {
-    clearTimeout(t);
+  const src = String(code || '');
+  if (!src.trim()) throw new Error('Código vacío');
+  // Voltfuscator limita a 500 KiB
+  const maxBytes = 500 * 1024;
+  if (Buffer.byteLength(src, 'utf8') > maxBytes) {
+    throw new Error('El código supera el límite de 500 KiB de Voltfuscator');
   }
+  const body = {
+    code: src,
+    preset: (preset === 'max' ? 'max' : 'normal')
+  };
+  const maxAttempts = 3;
+  let lastErr = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 180000);
+    try {
+      const res = await fetch(VOLTILS_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + VOLTILS_API_KEY
+        },
+        body: JSON.stringify(body),
+        signal: ctrl.signal
+      });
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
+
+      if (!res.ok) {
+        const errMsg = (data && (data.error || data.message || data.details || data.raw)) || text || ('HTTP ' + res.status);
+        const msg = String(errMsg).slice(0, 400);
+        // Reintentar solo errores temporales del servicio
+        const retryable = /try again|timeout|temporar|rate.?limit|503|502|504|429/i.test(msg) || res.status >= 500 || res.status === 429;
+        if (retryable && attempt < maxAttempts) {
+          lastErr = new Error(msg);
+          await new Promise(r => setTimeout(r, 1500 * attempt));
+          continue;
+        }
+        throw new Error(msg);
+      }
+
+      // Respuestas: { obfuscated, success }, { code }, etc.
+      if (data && data.success === false) {
+        const errMsg = data.error || data.message || data.details || 'Voltfuscator rechazó el código';
+        throw new Error(String(errMsg).slice(0, 400));
+      }
+      const out =
+        (data && (data.obfuscated || data.code || data.result || data.output || data.script)) ||
+        (typeof data === 'string' ? data : null) ||
+        (typeof text === 'string' && text.trim() && !text.trim().startsWith('{') ? text : null);
+      if (!out || !String(out).trim()) throw new Error('Voltfuscator devolvió respuesta vacía');
+      return String(out);
+    } catch (e) {
+      if (e && e.name === 'AbortError') {
+        lastErr = new Error('Timeout esperando a Voltfuscator');
+      } else {
+        lastErr = e;
+      }
+      const msg = String((lastErr && lastErr.message) || lastErr || '');
+      const retryable = /try again|timeout|temporar|rate.?limit|network|fetch failed|ECONNRESET|ETIMEDOUT/i.test(msg);
+      if (retryable && attempt < maxAttempts) {
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        continue;
+      }
+      throw lastErr;
+    } finally {
+      clearTimeout(t);
+    }
+  }
+  throw lastErr || new Error('Voltfuscator falló tras varios intentos');
 }
 
 async function resolveObfuscated(source, mode) {
   const src = String(source || "");
   if (!src.trim()) throw new Error("Código vacío");
-  // Siempre ofuscar con Voltils (sin opciones)
+  // Siempre ofuscar con Voltfuscator
   try {
     const code = await obfuscateWithVoltils(src, 'normal');
-    return { code, doObfuscate: true, obfMode: "voltils" };
+    return { code, doObfuscate: true, obfMode: "voltfuscator" };
   } catch (e) {
-    console.error("Voltils fail:", e && e.stack ? e.stack : e);
-    throw new Error("Ofuscación Voltils falló: " + (e.message || "error"));
+    console.error("Voltfuscator fail:", e && e.stack ? e.stack : e);
+    throw new Error("Ofuscación Voltfuscator falló: " + (e.message || "error"));
   }
 }
 
@@ -934,8 +973,8 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
       pid = String(prov._id);
     }
 
-    // Siempre ofuscar con Voltils
-    const resolved = await resolveObfuscated(source, 'voltils');
+    // Siempre ofuscar con Voltfuscator
+    const resolved = await resolveObfuscated(source, 'voltfuscator');
     const doc = await Script.create({
       ownerId: req.user.sub,
       name,
@@ -997,15 +1036,15 @@ app.put('/api/scripts/:id', auth, needMongo, async (req, res) => {
         s.providerId = ''; s.providerName = '';
       }
     }
-    // Siempre ofuscar con Voltils al guardar código
+    // Siempre ofuscar con Voltfuscator al guardar código
     if (source) {
       s.source = source;
-      const resolved = await resolveObfuscated(source, 'voltils');
+      const resolved = await resolveObfuscated(source, 'voltfuscator');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
     } else if (s.source && (req.body?.obfMode !== undefined || req.body?.doObfuscate !== undefined)) {
-      const resolved = await resolveObfuscated(s.source, 'voltils');
+      const resolved = await resolveObfuscated(s.source, 'voltfuscator');
       s.obfuscated = resolved.code;
       s.doObfuscate = resolved.doObfuscate;
       s.obfMode = resolved.obfMode;
