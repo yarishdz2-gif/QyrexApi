@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QyrexAI · Developer Workspace</title>
-    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024">
+    <title>Lua u VanguardAI · Developer Workspace</title>
+    <link rel="icon" type="image/png" href="/logo.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -125,7 +125,7 @@
         .markdown-body th { background-color: #1f2937; }
     </style>
 
-<style id="qyrex-ai-godmode">
+<style id="lua-u-vanguard-ai-godmode">
 :root{--qa-bg:#04070a;--qa-panel:#081018;--qa-panel2:#0b151e;--qa-line:rgba(125,211,252,.10);--qa-line2:rgba(125,211,252,.20);--qa-text:#eaf9ff;--qa-muted:#7993a3;--qa-dim:#506978;--qa-blue:#7dd3fc;--qa-blue2:#38bdf8;--qa-ease:cubic-bezier(.22,1,.36,1)}
 html,body{background:var(--qa-bg)!important;color:var(--qa-text)!important}
 body{font-family:Inter,system-ui,sans-serif!important;background:radial-gradient(820px 520px at 80% -8%,rgba(56,189,248,.075),transparent 68%),radial-gradient(680px 440px at 0 110%,rgba(14,165,233,.05),transparent 70%),#04070a!important}
@@ -179,7 +179,7 @@ main.flex-1.flex.flex-col>header{background:rgba(4,9,14,.78)!important;border-co
 </style>
 
 
-<style id="qyrex-ai-ultra-v4">
+<style id="lua-u-vanguard-ai-ultra-v4">
 :root{--ai-bg:#03070b;--ai-panel:rgba(6,14,20,.84);--ai-line:rgba(125,211,252,.09);--ai-blue:#7dd3fc;--ai-blue2:#38bdf8;--ai-text:#eafaff;--ai-muted:#718b99}
 html,body{background:var(--ai-bg)!important;color:var(--ai-text)!important}
 body{background-image:radial-gradient(860px 620px at 88% -10%,rgba(56,189,248,.10),transparent 65%),radial-gradient(720px 520px at -8% 105%,rgba(14,165,233,.065),transparent 68%)!important}
@@ -205,9 +205,9 @@ pre,.code-block-container{border-color:rgba(125,211,252,.10)!important;box-shado
 </style>
 
 
-<style id="qyrex-ai-nexus-v3">
+<style id="lua-u-vanguard-ai-nexus-v3">
 :root{--an-bg:#03080c;--an-panel:rgba(6,14,20,.86);--an-panel2:rgba(8,18,25,.94);--an-line:rgba(125,211,252,.09);--an-line2:rgba(125,211,252,.18);--an-text:#ebfbff;--an-muted:#718d9c;--an-dim:#4b6573;--an-blue:#7dd3fc;--an-blue2:#38bdf8;--an-ease:cubic-bezier(.22,1,.36,1)}
-html[data-qyrex="ultra"] body{background:radial-gradient(900px 600px at 75% -8%,rgba(56,189,248,.10),transparent 68%),radial-gradient(760px 520px at 0 108%,rgba(14,165,233,.065),transparent 70%),linear-gradient(180deg,#03070b,#04090e 55%,#020609)!important}
+html[data-lua-u-vanguard="ultra"] body{background:radial-gradient(900px 600px at 75% -8%,rgba(56,189,248,.10),transparent 68%),radial-gradient(760px 520px at 0 108%,rgba(14,165,233,.065),transparent 70%),linear-gradient(180deg,#03070b,#04090e 55%,#020609)!important}
 body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(125,211,252,.014) 1px,transparent 1px),linear-gradient(90deg,rgba(125,211,252,.014) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
 #sidebar{background:linear-gradient(180deg,rgba(4,10,15,.98),rgba(3,7,11,.98))!important;border-right:1px solid var(--an-line)!important;box-shadow:22px 0 72px rgba(0,0,0,.32)!important;backdrop-filter:blur(26px)!important}
 #sidebar .border-b{border-color:rgba(125,211,252,.055)!important}
@@ -249,10 +249,10 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 
-<link rel="stylesheet" href="/qyrex-ai-v5.css"><script defer src="/qyrex-ai-v5.js"></script>
-<link rel="stylesheet" href="/qyrex-ai-v6.css">
-<link rel="stylesheet" href="/qyrex-nexus-v7.css">
-<script defer src="/qyrex-nexus-v7.js"></script>
+<link rel="stylesheet" href="/lua-u-vanguard-ai-v5.css"><script defer src="/lua-u-vanguard-ai-v5.js"></script>
+<link rel="stylesheet" href="/lua-u-vanguard-ai-v6.css">
+<link rel="stylesheet" href="/lua-u-vanguard-nexus-v7.css">
+<script defer src="/lua-u-vanguard-nexus-v7.js"></script>
 </head>
 <body class="h-screen flex overflow-hidden">
 
@@ -262,10 +262,10 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
         <div class="p-4 border-b border-dark-700 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <img src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024" alt="QrexApi" class="qx-ai-logo">
+                    <img src="/logo.png" alt="Lua u Vanguard" class="qx-ai-logo">
                 </div>
                 <div>
-                    <h1 class="font-bold text-base tracking-wide text-white">QyrexAI</h1>
+                    <h1 class="font-bold text-base tracking-wide text-white">Lua u VanguardAI</h1>
                     <span class="text-xs text-indigo-400 font-medium">Workspace v3.1 · ZIP + OpenRouter</span>
                 </div>
             </div>
@@ -353,7 +353,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
                 <div class="w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl shadow-xl shadow-indigo-500/5">
                     <i class="fa-solid fa-sparkles"></i>
                 </div>
-                <h2 class="text-xl font-bold text-white">Welcome to QyrexAI Workspace</h2>
+                <h2 class="text-xl font-bold text-white">Welcome to Lua u VanguardAI Workspace</h2>
                 <p class="text-sm text-gray-400">Select your performance tier above and start creating.</p>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-4">
@@ -378,7 +378,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
                     <textarea 
                         id="user-input" 
                         rows="1" 
-                        placeholder="Message QyrexAI (Shift+Enter for newline)..." 
+                        placeholder="Message Lua u VanguardAI (Shift+Enter for newline)..." 
                         class="w-full bg-transparent text-gray-100 placeholder-gray-500 p-3.5 focus:outline-none resize-none max-h-40 text-sm"
                     ></textarea>
 
@@ -404,7 +404,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
                     </div>
                 </form>
                 <div class="text-center mt-2">
-                    <span class="text-[11px] text-gray-500">QyrexAI Workspace · Powered by OpenRouter</span>
+                    <span class="text-[11px] text-gray-500">Lua u VanguardAI Workspace · Powered by OpenRouter</span>
                 </div>
             </div>
         </div>
@@ -425,7 +425,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">System Prompt</label>
-                    <textarea id="system-prompt-input" rows="4" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">You are QyrexAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.</textarea>
+                    <textarea id="system-prompt-input" rows="4" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">You are Lua u VanguardAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.</textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Temperature (<span id="temp-val">0.7</span>)</label>
@@ -475,11 +475,11 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
 
     <!-- Application Logic Script -->
     <script>
-        let chats = JSON.parse(localStorage.getItem('qyrex_chats')) || [];
-        let currentChatId = localStorage.getItem('qyrex_current_chat') || null;
-        let systemPrompt = localStorage.getItem('qyrex_system_prompt') || 'You are QyrexAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.';
-        let temperature = parseFloat(localStorage.getItem('qyrex_temperature')) || 0.7;
-        let scratchpadContent = localStorage.getItem('qyrex_scratchpad') || '';
+        let chats = JSON.parse(localStorage.getItem('lua-u-vanguard_chats')) || [];
+        let currentChatId = localStorage.getItem('lua-u-vanguard_current_chat') || null;
+        let systemPrompt = localStorage.getItem('lua-u-vanguard_system_prompt') || 'You are Lua u VanguardAI, an expert senior software engineer and AI assistant (inspired by Grok). You excel at reading entire codebases from ZIP files, analyzing architecture, refactoring, debugging, writing clean code, and explaining complex systems. When the user attaches files or a ZIP project, carefully examine all the provided files before answering. Be direct, helpful, and thorough.';
+        let temperature = parseFloat(localStorage.getItem('lua-u-vanguard_temperature')) || 0.7;
+        let scratchpadContent = localStorage.getItem('lua-u-vanguard_scratchpad') || '';
         let pendingFiles = [];
         let abortController = null;
 
@@ -576,8 +576,8 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
         }
 
         function saveChats() {
-            localStorage.setItem('qyrex_chats', JSON.stringify(chats));
-            localStorage.setItem('qyrex_current_chat', currentChatId);
+            localStorage.setItem('lua-u-vanguard_chats', JSON.stringify(chats));
+            localStorage.setItem('lua-u-vanguard_current_chat', currentChatId);
         }
 
         function renderChatHistory() {
@@ -888,7 +888,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
                         <i class="fa-solid ${isUser ? 'fa-user text-xs' : 'fa-cube text-sm'}"></i>
                     </div>
                     <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">${isUser ? 'You' : 'QyrexAI'}</div>
+                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">${isUser ? 'You' : 'Lua u VanguardAI'}</div>
                         <div class="p-4 rounded-2xl shadow-sm text-sm ${isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-dark-800 text-gray-100 border border-dark-700 rounded-tl-none markdown-body w-full'}">
                             ${attachmentsHtml}
                             <div class="message-body">${parsedContent}</div>
@@ -1016,7 +1016,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
                         <i class="fa-solid fa-cube text-sm"></i>
                     </div>
                     <div class="flex flex-col items-start">
-                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">QyrexAI</div>
+                        <div class="text-xs text-gray-400 mb-1 px-1 font-medium">Lua u VanguardAI</div>
                         <div class="p-4 rounded-2xl shadow-sm text-sm bg-dark-800 text-gray-100 border border-dark-700 rounded-tl-none markdown-body w-full">
                             <div class="message-body"><span class="inline-block animate-pulse">Thinking...</span></div>
                         </div>
@@ -1097,7 +1097,7 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chats, null, 2));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `qyrex_workspace_chats_${Date.now()}.json`);
+            dlAnchor.setAttribute("download", `lua-u-vanguard_workspace_chats_${Date.now()}.json`);
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
@@ -1116,8 +1116,8 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
             systemPrompt = systemPromptInput.value.trim();
             temperature = parseFloat(temperatureInput.value);
 
-            localStorage.setItem('qyrex_system_prompt', systemPrompt);
-            localStorage.setItem('qyrex_temperature', temperature);
+            localStorage.setItem('lua-u-vanguard_system_prompt', systemPrompt);
+            localStorage.setItem('lua-u-vanguard_temperature', temperature);
 
             settingsModal.classList.add('hidden');
             showToast('Settings saved successfully');
@@ -1131,11 +1131,11 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
 
         scratchpadTextarea.addEventListener('input', () => {
             scratchpadContent = scratchpadTextarea.value;
-            localStorage.setItem('qyrex_scratchpad', scratchpadContent);
+            localStorage.setItem('lua-u-vanguard_scratchpad', scratchpadContent);
         });
 
         function saveScratchpad() {
-            localStorage.setItem('qyrex_scratchpad', scratchpadTextarea.value);
+            localStorage.setItem('lua-u-vanguard_scratchpad', scratchpadTextarea.value);
             showToast('Scratchpad updated');
         }
 
@@ -1180,14 +1180,14 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
         window.onload = initApp;
     </script>
 
-<script id="qyrex-ai-godmode-runtime">
+<script id="lua-u-vanguard-ai-godmode-runtime">
 (function(){
  'use strict';
- const logo='https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024';
- function logos(){document.querySelectorAll('img[src*="i.ibb.co"],img.qx-ai-logo').forEach(i=>{i.src=logo;i.alt='QrexApi'})}
+ const logo='/logo.png';
+ function logos(){document.querySelectorAll('img[src*="i.ibb.co"],img.qx-ai-logo').forEach(i=>{i.src=logo;i.alt='Lua u Vanguard'})}
  function autosize(){const i=document.getElementById('user-input');if(i){i.style.height='auto';i.style.height=Math.min(i.scrollHeight,160)+'px'}}
  const n=window.showToast||function(){};
- document.addEventListener('DOMContentLoaded',()=>{logos();autosize();document.getElementById('user-input')?.addEventListener('input',autosize);document.getElementById('scratchpad-textarea')?.addEventListener('input',e=>localStorage.setItem('qyrex_scratchpad',e.target.value||''))},{once:true});
+ document.addEventListener('DOMContentLoaded',()=>{logos();autosize();document.getElementById('user-input')?.addEventListener('input',autosize);document.getElementById('scratchpad-textarea')?.addEventListener('input',e=>localStorage.setItem('lua-u-vanguard_scratchpad',e.target.value||''))},{once:true});
  window.addEventListener('online',()=>{try{n('Conexión restaurada')}catch(_){}});
  window.addEventListener('offline',()=>{try{n('Sin conexión · revisa tu conexión antes de enviar')}catch(_){}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('settings-modal')?.classList.add('hidden');document.getElementById('scratchpad-modal')?.classList.add('hidden')}});
@@ -1195,32 +1195,32 @@ main.flex-1.flex.flex-col>header{background:linear-gradient(180deg,rgba(4,10,15,
 </script>
 
 
-<script id="qyrex-ai-ultra-v4-runtime">
+<script id="lua-u-vanguard-ai-ultra-v4-runtime">
 (function(){
- const logo="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024";
- function boot(){document.documentElement.dataset.qyrex='ultra';document.querySelectorAll('img').forEach(i=>{if((i.getAttribute('src')||'').includes('i.ibb.co/wZbspqp2'))i.src=logo});if(!document.getElementById('qxAiPulse')){const p=document.createElement('div');p.id='qxAiPulse';p.innerHTML='<i></i><span>QYREXAI LOCAL WORKSPACE</span>';document.body.appendChild(p)}document.title='QyrexAI · Developer Workspace';}
+ const logo="/logo.png";
+ function boot(){document.documentElement.dataset.lua-u-vanguard='ultra';document.querySelectorAll('img').forEach(i=>{if((i.getAttribute('src')||'').includes('i.ibb.co/wZbspqp2'))i.src=logo});if(!document.getElementById('qxAiPulse')){const p=document.createElement('div');p.id='qxAiPulse';p.innerHTML='<i></i><span>LUA-U-VANGUARDAI LOCAL WORKSPACE</span>';document.body.appendChild(p)}document.title='Lua u VanguardAI · Developer Workspace';}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 
 
-<script id="qyrex-ai-nexus-v3-runtime">
+<script id="lua-u-vanguard-ai-nexus-v3-runtime">
 (function(){
 'use strict';
-const logo='https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024';
+const logo='/logo.png';
 const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 function toast(m){try{window.showToast?.(m)}catch(_){} }
-function logos(){$$('img').forEach(i=>{if((i.getAttribute('src')||'').includes('i.ibb.co')||i.classList.contains('qx-ai-logo')){i.src=logo;i.alt='QyrexApi'}})}
+function logos(){$$('img').forEach(i=>{if((i.getAttribute('src')||'').includes('i.ibb.co')||i.classList.contains('qx-ai-logo')){i.src=logo;i.alt='Lua u VanguardApi'}})}
 function addBar(){if($('#qyAiNxBar'))return;const bar=document.createElement('div');bar.id='qyAiNxBar';bar.className='qy-ai-nx-bar';bar.innerHTML='<div class="qy-ai-nx-status" id="qyAiNxStatus"><i></i><span>LOCAL WORKSPACE READY</span></div><div class="qy-ai-nx-tools"><button type="button" data-act="scratch">⌘ Notes</button><button type="button" data-act="settings">⚙ Settings</button><button type="button" data-act="clear">⌫ Clear</button></div>';const main=$('main.flex-1.flex.flex-col');const head=main?.querySelector(':scope>header');if(main&&head)head.insertAdjacentElement('afterend',bar);bar.querySelector('[data-act="scratch"]')?.addEventListener('click',()=>$('#open-scratchpad-btn')?.click());bar.querySelector('[data-act="settings"]')?.addEventListener('click',()=>$('#settings-btn')?.click());bar.querySelector('[data-act="clear"]')?.addEventListener('click',()=>toast('Usa el botón de limpiar del chat para borrar la conversación actual.'))}
 function net(){const s=$('#qyAiNxStatus');if(!s)return;const on=navigator.onLine;s.classList.toggle('off',!on);s.querySelector('span').textContent=on?'LOCAL WORKSPACE READY':'OFFLINE · MODO LOCAL'}
-function drop(){if($('#qyAiDrop'))return;const d=document.createElement('div');d.id='qyAiDrop';d.className='qy-ai-drop';d.innerHTML='<div><strong>Soltar archivos en QyrexAI</strong><p>Imágenes, código, documentos o ZIP compatibles con el workspace.</p></div>';document.body.appendChild(d);const zone=d.firstElementChild;let depth=0;document.addEventListener('dragenter',e=>{if(!e.dataTransfer)return;depth++;d.classList.add('show')});document.addEventListener('dragleave',()=>{depth=Math.max(0,depth-1);if(!depth)d.classList.remove('show')});document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();depth=0;d.classList.remove('show');const input=$('#file-upload');if(input&&e.dataTransfer.files?.length){const dt=new DataTransfer();Array.from(e.dataTransfer.files).forEach(f=>dt.items.add(f));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));toast('Archivos preparados para adjuntar.')}});zone.addEventListener('click',()=>d.classList.remove('show'))}
+function drop(){if($('#qyAiDrop'))return;const d=document.createElement('div');d.id='qyAiDrop';d.className='qy-ai-drop';d.innerHTML='<div><strong>Soltar archivos en Lua u VanguardAI</strong><p>Imágenes, código, documentos o ZIP compatibles con el workspace.</p></div>';document.body.appendChild(d);const zone=d.firstElementChild;let depth=0;document.addEventListener('dragenter',e=>{if(!e.dataTransfer)return;depth++;d.classList.add('show')});document.addEventListener('dragleave',()=>{depth=Math.max(0,depth-1);if(!depth)d.classList.remove('show')});document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();depth=0;d.classList.remove('show');const input=$('#file-upload');if(input&&e.dataTransfer.files?.length){const dt=new DataTransfer();Array.from(e.dataTransfer.files).forEach(f=>dt.items.add(f));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));toast('Archivos preparados para adjuntar.')}});zone.addEventListener('click',()=>d.classList.remove('show'))}
 function shortcut(){document.addEventListener('keydown',e=>{const typing=['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)||e.target?.isContentEditable;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='j'){e.preventDefault();$('#user-input')?.focus()}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='n'&&!typing){e.preventDefault();$('#open-scratchpad-btn')?.click()}if(e.key==='Escape'){$('#qyAiDrop')?.classList.remove('show')}})}
 function observe(){const target=$('#chat-container');if(!target)return;new MutationObserver(()=>{logos()}).observe(target,{childList:true,subtree:true})}
-function boot(){document.documentElement.dataset.qyrex='ultra-v3';logos();addBar();drop();net();shortcut();observe();window.addEventListener('online',net);window.addEventListener('offline',net);const u=$('#user-input');u?.addEventListener('paste',()=>setTimeout(()=>{u.style.height='auto';u.style.height=Math.min(u.scrollHeight,180)+'px'},0));setTimeout(()=>toast('QyrexAI Nexus listo'),900)}
+function boot(){document.documentElement.dataset.lua-u-vanguard='ultra-v3';logos();addBar();drop();net();shortcut();observe();window.addEventListener('online',net);window.addEventListener('offline',net);const u=$('#user-input');u?.addEventListener('paste',()=>setTimeout(()=>{u.style.height='auto';u.style.height=Math.min(u.scrollHeight,180)+'px'},0));setTimeout(()=>toast('Lua u VanguardAI Nexus listo'),900)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 
-<script defer src="/qyrex-ai-v6.js"></script>
+<script defer src="/lua-u-vanguard-ai-v6.js"></script>
 </body>
 </html>
