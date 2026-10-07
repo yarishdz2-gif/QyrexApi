@@ -1,4 +1,4 @@
-# Qyrex Nexus APEX v6 — Ultra Mega Pro
+# Lua u Vanguard Nexus APEX v6 — Ultra Mega Pro
 
 ## Productivity layer
 - Developer Toolbox local con 9 módulos: Overview, JSON, API Probe, Text, URL, Regex, Time/UUID, Snippets y System.
@@ -14,7 +14,7 @@
 - Métricas de runtime y almacenamiento del navegador.
 - Atajos: Ctrl+Shift+X, Esc y 1–9 dentro de Toolbox.
 
-## QyrexAI
+## Lua u VanguardAI
 - Barra de productividad v6.
 - Stats de sesión, copiar última respuesta, exportar Markdown y compactar prompts.
 - No reemplaza el motor de chat ni sus rutas existentes.

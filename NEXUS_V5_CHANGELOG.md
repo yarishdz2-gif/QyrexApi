@@ -1,4 +1,4 @@
-# Qyrex Nexus APEX v5
+# Lua u Vanguard Nexus APEX v5
 
 - Workspace Center con diagnóstico, backups de preferencias, restore y mantenimiento de UI.
 - Búsqueda global con Ctrl+Shift+F y navegación por teclado.

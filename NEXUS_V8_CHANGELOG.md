@@ -1,7 +1,7 @@
 # NEXUS v8 CHANGELOG
 
-- Nuevo `public/qyrex-nexus-v8.css`.
-- Nuevo `public/qyrex-nexus-v8.js`.
+- Nuevo `public/lua-u-vanguard-nexus-v8.css`.
+- Nuevo `public/lua-u-vanguard-nexus-v8.js`.
 - Cockpit / health / performance / diagnostics.
 - Quick Switcher / Command Center / Favorites.
 - PWA install prompt.

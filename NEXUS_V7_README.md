@@ -1,6 +1,6 @@
-# Qyrex Nexus v7 — Ultra Mega Pro
+# Lua u Vanguard Nexus v7 — Ultra Mega Pro
 
-v7 adds a utility-first developer workspace layer on top of the existing Qyrex application without replacing the existing router, API contracts, obfuscator, loader or QyrexAI engine.
+v7 adds a utility-first developer workspace layer on top of the existing Lua u Vanguard application without replacing the existing router, API contracts, obfuscator, loader or Lua u VanguardAI engine.
 
 ## New
 
@@ -17,7 +17,7 @@ v7 adds a utility-first developer workspace layer on top of the existing Qyrex a
 - Local Snippets Vault (30 items)
 - Focus Mode
 - Support diagnostics that intentionally exclude local/session storage and credentials
-- Qyrex logo applied to the new utility layer
+- Lua u Vanguard logo applied to the new utility layer
 - Versioned Service Worker shell entries
 - Backend request ID and response timing headers
 - Graceful SIGTERM/SIGINT shutdown for Render-style environments

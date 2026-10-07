@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { obfuscate: qyrexObfuscate } = require('./obfuscate');
+const { obfuscate: luaUVanguardObfuscate } = require('./obfuscate');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -20,7 +20,7 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/auto';
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491';
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://qyrex.hopto.org/auth/discord/callback';
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://lua-u-vanguard.hopto.org/auth/discord/callback';
 
 // Voltfuscator API (Flaxo)
 const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltfuscator_1267954195982581782_688ace9cb0ff47f96888ab4a3f07251e6716cadb';
@@ -43,7 +43,7 @@ app.use((req, res, next) => {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   const originalEnd = res.end;
-  res.setHeader('X-Qyrex-Request-Id', requestId);
+  res.setHeader('X-Lua u Vanguard-Request-Id', requestId);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.end = function patchedEnd(...args) {
     if (!res.headersSent) res.setHeader('Server-Timing', 'app;dur=' + Math.max(0, Date.now() - started));
@@ -444,56 +444,56 @@ const VipCode = mongoose.models.QrexVipCode || mongoose.model('QrexVipCode', new
 }));
 
 const BOOTSTRAP_VIP_KEYS = [
-  "QYREX-VIP-E13F-520E-164079",
-  "QYREX-VIP-4EC0-79EE-C72E92",
-  "QYREX-VIP-B1FC-1CFB-928515",
-  "QYREX-VIP-1BAB-2B17-E385B8",
-  "QYREX-VIP-D567-E462-7B586A",
-  "QYREX-VIP-E02B-C3AA-EAA997",
-  "QYREX-VIP-5F4A-B79E-093EC1",
-  "QYREX-VIP-705A-0FBE-F807A9",
-  "QYREX-VIP-B72D-EC5C-25EE03",
-  "QYREX-VIP-0357-C159-B37CAB",
-  "QYREX-VIP-6845-6F86-A6AA32",
-  "QYREX-VIP-CA88-B276-7AD428",
-  "QYREX-VIP-957A-8576-3005B1",
-  "QYREX-VIP-D9C8-404C-84374A",
-  "QYREX-VIP-B48C-511B-42069C",
-  "QYREX-VIP-2A97-76F0-DA3DAD",
-  "QYREX-VIP-37EA-A4DE-04F9CC",
-  "QYREX-VIP-51CE-DCDA-FE352C",
-  "QYREX-VIP-72F0-07BF-E27516",
-  "QYREX-VIP-51E8-954E-06A868",
-  "QYREX-VIP-7BAF-CE84-E9F4E9",
-  "QYREX-VIP-F062-E538-9CE073",
-  "QYREX-VIP-6CEC-4362-694B38",
-  "QYREX-VIP-6B16-BADE-FEEC7F",
-  "QYREX-VIP-A24C-CF36-F986A8",
-  "QYREX-VIP-F1E1-C28A-C1783B",
-  "QYREX-VIP-6257-6E1A-977A02",
-  "QYREX-VIP-7BF7-6E70-B9DD8B",
-  "QYREX-VIP-D1D9-942F-21883B",
-  "QYREX-VIP-3881-4939-143D40",
-  "QYREX-VIP-FA48-7E1B-4B5B46",
-  "QYREX-VIP-9580-EC09-A36C4E",
-  "QYREX-VIP-F956-FE91-0DA808",
-  "QYREX-VIP-F420-8961-E26A8A",
-  "QYREX-VIP-7A6A-826B-A3EB2E",
-  "QYREX-VIP-E8DB-1DFD-BD1F75",
-  "QYREX-VIP-DFBE-1551-F2D4EB",
-  "QYREX-VIP-6C8B-AAA9-F05A61",
-  "QYREX-VIP-7FFE-1676-3AD751",
-  "QYREX-VIP-814E-7BB8-080F11",
-  "QYREX-VIP-5FAE-B230-6419A9",
-  "QYREX-VIP-6A6A-C171-095C8D",
-  "QYREX-VIP-518A-D491-EEA75E",
-  "QYREX-VIP-4B53-B67B-C90B60",
-  "QYREX-VIP-427E-6264-1E8A12",
-  "QYREX-VIP-64AC-46DC-BAF4A9",
-  "QYREX-VIP-DAF5-C082-F3F0A0",
-  "QYREX-VIP-B595-BCB7-F9E64A",
-  "QYREX-VIP-57D6-79C1-8EFB99",
-  "QYREX-VIP-55FF-14BD-3FFB06"
+  "LUA-U-VANGUARD-VIP-E13F-520E-164079",
+  "LUA-U-VANGUARD-VIP-4EC0-79EE-C72E92",
+  "LUA-U-VANGUARD-VIP-B1FC-1CFB-928515",
+  "LUA-U-VANGUARD-VIP-1BAB-2B17-E385B8",
+  "LUA-U-VANGUARD-VIP-D567-E462-7B586A",
+  "LUA-U-VANGUARD-VIP-E02B-C3AA-EAA997",
+  "LUA-U-VANGUARD-VIP-5F4A-B79E-093EC1",
+  "LUA-U-VANGUARD-VIP-705A-0FBE-F807A9",
+  "LUA-U-VANGUARD-VIP-B72D-EC5C-25EE03",
+  "LUA-U-VANGUARD-VIP-0357-C159-B37CAB",
+  "LUA-U-VANGUARD-VIP-6845-6F86-A6AA32",
+  "LUA-U-VANGUARD-VIP-CA88-B276-7AD428",
+  "LUA-U-VANGUARD-VIP-957A-8576-3005B1",
+  "LUA-U-VANGUARD-VIP-D9C8-404C-84374A",
+  "LUA-U-VANGUARD-VIP-B48C-511B-42069C",
+  "LUA-U-VANGUARD-VIP-2A97-76F0-DA3DAD",
+  "LUA-U-VANGUARD-VIP-37EA-A4DE-04F9CC",
+  "LUA-U-VANGUARD-VIP-51CE-DCDA-FE352C",
+  "LUA-U-VANGUARD-VIP-72F0-07BF-E27516",
+  "LUA-U-VANGUARD-VIP-51E8-954E-06A868",
+  "LUA-U-VANGUARD-VIP-7BAF-CE84-E9F4E9",
+  "LUA-U-VANGUARD-VIP-F062-E538-9CE073",
+  "LUA-U-VANGUARD-VIP-6CEC-4362-694B38",
+  "LUA-U-VANGUARD-VIP-6B16-BADE-FEEC7F",
+  "LUA-U-VANGUARD-VIP-A24C-CF36-F986A8",
+  "LUA-U-VANGUARD-VIP-F1E1-C28A-C1783B",
+  "LUA-U-VANGUARD-VIP-6257-6E1A-977A02",
+  "LUA-U-VANGUARD-VIP-7BF7-6E70-B9DD8B",
+  "LUA-U-VANGUARD-VIP-D1D9-942F-21883B",
+  "LUA-U-VANGUARD-VIP-3881-4939-143D40",
+  "LUA-U-VANGUARD-VIP-FA48-7E1B-4B5B46",
+  "LUA-U-VANGUARD-VIP-9580-EC09-A36C4E",
+  "LUA-U-VANGUARD-VIP-F956-FE91-0DA808",
+  "LUA-U-VANGUARD-VIP-F420-8961-E26A8A",
+  "LUA-U-VANGUARD-VIP-7A6A-826B-A3EB2E",
+  "LUA-U-VANGUARD-VIP-E8DB-1DFD-BD1F75",
+  "LUA-U-VANGUARD-VIP-DFBE-1551-F2D4EB",
+  "LUA-U-VANGUARD-VIP-6C8B-AAA9-F05A61",
+  "LUA-U-VANGUARD-VIP-7FFE-1676-3AD751",
+  "LUA-U-VANGUARD-VIP-814E-7BB8-080F11",
+  "LUA-U-VANGUARD-VIP-5FAE-B230-6419A9",
+  "LUA-U-VANGUARD-VIP-6A6A-C171-095C8D",
+  "LUA-U-VANGUARD-VIP-518A-D491-EEA75E",
+  "LUA-U-VANGUARD-VIP-4B53-B67B-C90B60",
+  "LUA-U-VANGUARD-VIP-427E-6264-1E8A12",
+  "LUA-U-VANGUARD-VIP-64AC-46DC-BAF4A9",
+  "LUA-U-VANGUARD-VIP-DAF5-C082-F3F0A0",
+  "LUA-U-VANGUARD-VIP-B595-BCB7-F9E64A",
+  "LUA-U-VANGUARD-VIP-57D6-79C1-8EFB99",
+  "LUA-U-VANGUARD-VIP-55FF-14BD-3FFB06"
 ];
 
 async function seedVipKeysIfEmpty() {
@@ -578,8 +578,8 @@ function needMongo(req, res, next) {
   next();
 }
 
-async function obfuscateWithQyrexObf(code) {
-  const result = qyrexObfuscate(String(code || ''));
+async function obfuscateWithLuaUVanguardObf(code) {
+  const result = luaUVanguardObfuscate(String(code || ''));
   const out = result && result.code ? result.code : String(result || '');
   if (!out.trim()) throw new Error('Ofuscador produjo una respuesta vacía');
   return out;
@@ -686,13 +686,13 @@ async function resolveObfuscated(source, mode) {
     console.error("Voltfuscator fail:", e && e.stack ? e.stack : e);
   }
 
-  // 2) Fallback: QyrexObf local (no depende de API externa)
+  // 2) Fallback: Lua u VanguardObf local (no depende de API externa)
   try {
-    const code = await obfuscateWithQyrexObf(src);
-    console.warn('[OBF] Usando fallback local QyrexObf tras fallo de Voltfuscator');
-    return { code, doObfuscate: true, obfMode: "qyrexobf-local" };
+    const code = await obfuscateWithLuaUVanguardObf(src);
+    console.warn('[OBF] Usando fallback local Lua u VanguardObf tras fallo de Voltfuscator');
+    return { code, doObfuscate: true, obfMode: "lua-u-vanguard-obf-local" };
   } catch (e2) {
-    console.error("QyrexObf local fail:", e2 && e2.stack ? e2.stack : e2);
+    console.error("Lua u VanguardObf local fail:", e2 && e2.stack ? e2.stack : e2);
   }
 
   // 3) Último recurso: localObfuscate (XOR layers)
@@ -1100,8 +1100,8 @@ function buildExecReporterLua(apiBase, scriptId) {
   const base = String(apiBase || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const sid = String(scriptId || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return [
-    '--[[ Qyrex exec reporter ]]',
-    'local function __qyrexReport()',
+    '--[[ Lua u Vanguard exec reporter ]]',
+    'local function __luaUVanguardReport()',
     '  pcall(function()',
     '    local HttpService = game:GetService("HttpService")',
     '    local Players = game:GetService("Players")',
@@ -1138,7 +1138,7 @@ function buildExecReporterLua(apiBase, scriptId) {
     '    end',
     '  end)',
     'end',
-    'task.spawn(__qyrexReport)',
+    'task.spawn(__luaUVanguardReport)',
     ''
   ].join('\n');
 }
@@ -1151,19 +1151,19 @@ function wrapDeliveredScript(code, apiBase, scriptId) {
 function buildDoubleLinkStub(cacheUrl) {
   const u = String(cacheUrl).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return [
-    'local __QYREX_URL = "' + u + '"',
-    'local __QYREX_SRC',
-    'local __QYREX_OK, __QYREX_ERR = pcall(function()',
-    '  __QYREX_SRC = game:HttpGet(__QYREX_URL)',
+    'local __LUA-U-VANGUARD_URL = "' + u + '"',
+    'local __LUA-U-VANGUARD_SRC',
+    'local __LUA-U-VANGUARD_OK, __LUA-U-VANGUARD_ERR = pcall(function()',
+    '  __LUA-U-VANGUARD_SRC = game:HttpGet(__LUA-U-VANGUARD_URL)',
     'end)',
-    'if not __QYREX_OK or type(__QYREX_SRC) ~= "string" or #__QYREX_SRC < 8 then',
-    '  error(__QYREX_ERR or "Qyrex delivery failed")',
+    'if not __LUA-U-VANGUARD_OK or type(__LUA-U-VANGUARD_SRC) ~= "string" or #__LUA-U-VANGUARD_SRC < 8 then',
+    '  error(__LUA-U-VANGUARD_ERR or "Lua u Vanguard delivery failed")',
     'end',
-    'local __QYREX_FN, __QYREX_LOAD_ERR = loadstring(__QYREX_SRC)',
-    'if type(__QYREX_FN) ~= "function" then',
-    '  error(__QYREX_LOAD_ERR or "Qyrex compile failed")',
+    'local __LUA-U-VANGUARD_FN, __LUA-U-VANGUARD_LOAD_ERR = loadstring(__LUA-U-VANGUARD_SRC)',
+    'if type(__LUA-U-VANGUARD_FN) ~= "function" then',
+    '  error(__LUA-U-VANGUARD_LOAD_ERR or "Lua u Vanguard compile failed")',
     'end',
-    'return __QYREX_FN()'
+    'return __LUA-U-VANGUARD_FN()'
   ].join('\n');
 }
 function publicBase(req) {
@@ -1264,27 +1264,27 @@ function escapeHtml(value) {
 }
 
 function renderPublicScriptPage(s, owner, base) {
-  const name = escapeHtml(s.name || 'Qyrex Script');
-  const desc = escapeHtml(s.description || 'Script protegido servido por Qyrex.');
-  const ownerName = escapeHtml(owner?.displayName || owner?.username || 'Qyrex');
-  const ownerUser = escapeHtml(owner?.username ? '@' + owner.username : '@qyrex');
+  const name = escapeHtml(s.name || 'Lua u Vanguard Script');
+  const desc = escapeHtml(s.description || 'Script protegido servido por Lua u Vanguard.');
+  const ownerName = escapeHtml(owner?.displayName || owner?.username || 'Lua u Vanguard');
+  const ownerUser = escapeHtml(owner?.username ? '@' + owner.username : '@lua-u-vanguard');
   const avatar = owner?.avatar ? escapeHtml(owner.avatar) : '';
   const endpoint = base + '/api/v1/luascripts/public/' + encodeURIComponent(s.id) + '/download';
   const loadstring = 'loadstring(game:HttpGet("' + endpoint + '"))()';
   const mode = s.keyMode === 'key' ? 'Key System' : 'Keyless';
-  const provider = escapeHtml(s.providerName || 'Qyrex API');
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#08080d"><title>${name} · Qyrex</title><style>
+  const provider = escapeHtml(s.providerName || 'Lua u Vanguard API');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#08080d"><title>${name} · Lua u Vanguard</title><style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;color:#f5f5f7;background:#06070b;font:14px Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body:before{content:"";position:fixed;inset:-20%;pointer-events:none;background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.24),transparent 30%),radial-gradient(circle at 90% 10%,rgba(0,212,255,.12),transparent 25%);filter:blur(12px)}.shell{position:relative;max-width:1120px;margin:auto;padding:28px 20px 60px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:18px}.mark{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#7c5cff,#31d7ff);box-shadow:0 0 35px rgba(124,92,255,.3)}.brand small{display:block;color:#77798a;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.nav a,.btn{border:1px solid #292c39;background:#10121a;color:#f4f5f7;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer}.hero,.panel{border:1px solid #282b38;background:rgba(13,14,20,.9);box-shadow:0 28px 100px rgba(0,0,0,.35)}.hero{border-radius:28px;padding:34px;overflow:hidden;position:relative}.eyebrow{font-size:11px;color:#85889b;letter-spacing:.18em;text-transform:uppercase;font-weight:800}.title{font-size:clamp(40px,7vw,78px);line-height:.98;letter-spacing:-.05em;margin:10px 0 15px;max-width:900px}.desc{color:#a8abba;line-height:1.8;max-width:820px;font-size:15px}.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.badge{border:1px solid #2b2f3d;background:#0d0f15;border-radius:999px;padding:7px 10px;color:#adb2c5;font-size:11px;font-weight:700}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.primary{background:#f4f5f7;color:#08090d;border-color:#fff}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.panel{border-radius:22px;padding:22px}.panel h2{font-size:15px;margin:0 0 5px}.muted{font-size:12px;color:#717489}.loadbox{display:flex;gap:8px;align-items:center;margin-top:14px}.load{min-width:0;flex:1;overflow:auto;padding:14px;border-radius:14px;border:1px solid #282c39;background:#080a0f;color:#a5edcb;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.stat{border:1px solid #272b37;background:#0b0d13;border-radius:15px;padding:14px}.stat span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6e7184}.stat strong{display:block;margin-top:6px;font-size:18px}.owner{display:flex;align-items:center;gap:12px;margin-top:16px}.avatar{width:44px;height:44px;border-radius:14px;overflow:hidden;background:#151821;border:1px solid #292d39;display:grid;place-items:center;font-weight:800}.avatar img{width:100%;height:100%;object-fit:cover}.owner b{display:block;font-size:13px}.owner span{font-size:11px;color:#686b7e}.notice{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid #263b33;background:#0d1210;color:#83d9b3;font-size:11px}.foot{text-align:center;color:#55596c;font-size:11px;margin-top:18px}@media(max-width:820px){.grid{grid-template-columns:1fr}.hero{padding:24px}.loadbox{flex-direction:column;align-items:stretch}.statgrid{grid-template-columns:1fr}.copybtn{width:100%}}
-</style></head><body><main class="shell"><nav class="nav"><div class="brand"><div class="mark">Q</div><div>Qyrex<small>Protected API</small></div></div><a href="/">Dashboard</a></nav><section class="hero"><div class="eyebrow">Public endpoint</div><h1 class="title">${name}</h1><div class="desc">${desc}</div><div class="badges"><span class="badge">${provider}</span><span class="badge">${mode}</span><span class="badge">ID ${escapeHtml(s.id)}</span><span class="badge">● Online</span></div><div class="actions"><button class="btn primary" id="copy">Copiar Loadstring</button><a class="btn" href="${endpoint}">Abrir recurso</a></div></section><section class="grid"><div class="panel"><h2>Loadstring</h2><div class="muted">Esta página es la vista pública del endpoint. El código servido se mantiene fuera de esta interfaz.</div><div class="loadbox"><div class="load">${escapeHtml(loadstring)}</div><button class="btn copybtn" id="copy2">Copiar</button></div><div class="notice">🔒 El enlace de ejecución sigue funcionando por separado para clientes compatibles.</div></div><div class="panel"><h2>Detalles</h2><div class="statgrid"><div class="stat"><span>Ejecuciones</span><strong>${Number(s.executions||0).toLocaleString('en-US')}</strong></div><div class="stat"><span>Modo</span><strong>${mode}</strong></div><div class="stat"><span>Proveedor</span><strong>${provider}</strong></div></div><div class="owner"><div class="avatar">${avatar ? '<img src="'+avatar+'" alt="">' : 'Q'}</div><div><b>${ownerName}</b><span>${ownerUser}</span></div></div></div></section><div class="foot">Qyrex · Página pública del script</div></main><script>const load=${JSON.stringify(loadstring)};async function cp(){try{await navigator.clipboard.writeText(load)}catch{const t=document.createElement('textarea');t.value=load;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}for(const id of ['copy','copy2']){const b=document.getElementById(id);if(b){const old=b.textContent;b.textContent='✓ Copiado';setTimeout(()=>b.textContent=old,1500)}}}document.getElementById('copy').onclick=cp;document.getElementById('copy2').onclick=cp;</script></body></html>`;
+</style></head><body><main class="shell"><nav class="nav"><div class="brand"><div class="mark">Q</div><div>Lua u Vanguard<small>Protected API</small></div></div><a href="/">Dashboard</a></nav><section class="hero"><div class="eyebrow">Public endpoint</div><h1 class="title">${name}</h1><div class="desc">${desc}</div><div class="badges"><span class="badge">${provider}</span><span class="badge">${mode}</span><span class="badge">ID ${escapeHtml(s.id)}</span><span class="badge">● Online</span></div><div class="actions"><button class="btn primary" id="copy">Copiar Loadstring</button><a class="btn" href="${endpoint}">Abrir recurso</a></div></section><section class="grid"><div class="panel"><h2>Loadstring</h2><div class="muted">Esta página es la vista pública del endpoint. El código servido se mantiene fuera de esta interfaz.</div><div class="loadbox"><div class="load">${escapeHtml(loadstring)}</div><button class="btn copybtn" id="copy2">Copiar</button></div><div class="notice">🔒 El enlace de ejecución sigue funcionando por separado para clientes compatibles.</div></div><div class="panel"><h2>Detalles</h2><div class="statgrid"><div class="stat"><span>Ejecuciones</span><strong>${Number(s.executions||0).toLocaleString('en-US')}</strong></div><div class="stat"><span>Modo</span><strong>${mode}</strong></div><div class="stat"><span>Proveedor</span><strong>${provider}</strong></div></div><div class="owner"><div class="avatar">${avatar ? '<img src="'+avatar+'" alt="">' : 'Q'}</div><div><b>${ownerName}</b><span>${ownerUser}</span></div></div></div></section><div class="foot">Lua u Vanguard · Página pública del script</div></main><script>const load=${JSON.stringify(loadstring)};async function cp(){try{await navigator.clipboard.writeText(load)}catch{const t=document.createElement('textarea');t.value=load;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}for(const id of ['copy','copy2']){const b=document.getElementById(id);if(b){const old=b.textContent;b.textContent='✓ Copiado';setTimeout(()=>b.textContent=old,1500)}}}document.getElementById('copy').onclick=cp;document.getElementById('copy2').onclick=cp;</script></body></html>`;
 }
 
 app.get('/script/:id', async (req,res)=>{
   try {
     const s=await Script.findOne({id:req.params.id}).select('id name description keyMode providerName executions createdAt ownerId').lean();
-    if(!s) return res.status(404).send('<!doctype html><title>Qyrex</title><body style="margin:0;background:#07070c;color:#fff;font:16px system-ui;display:grid;place-items:center;height:100vh">Script no encontrado</body>');
+    if(!s) return res.status(404).send('<!doctype html><title>Lua u Vanguard</title><body style="margin:0;background:#07070c;color:#fff;font:16px system-ui;display:grid;place-items:center;height:100vh">Script no encontrado</body>');
     const owner=await User.findById(s.ownerId).select('username displayName avatar').lean();
     res.type('html').send(renderPublicScriptPage(s, owner, publicBase(req)));
-  } catch { res.status(500).send('Qyrex error'); }
+  } catch { res.status(500).send('Lua u Vanguard error'); }
 });
 
 app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luascripts/public/:id'], rawBurstLimiter, rawLimiter, async (req, res) => {
@@ -1420,7 +1420,7 @@ app.post('/api/admin/vip-keys', auth, needMongo, requireAdmin, async (req, res) 
     const note = String((req.body || {}).note || '').slice(0, 80);
     const created = [];
     for (let i = 0; i < amount; i++) {
-      const code = ('QYREX-VIP-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(3).toString('hex')).toUpperCase();
+      const code = ('LUA-U-VANGUARD-VIP-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(2).toString('hex') + '-' + crypto.randomBytes(3).toString('hex')).toUpperCase();
       const doc = await VipCode.create({
         code,
         days,
@@ -1768,7 +1768,7 @@ function buildKeyGateLua({ apiBase, providerName, getKeyLink, scriptId }) {
   const prov = String(providerName || 'Qrex').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   const link = String(getKeyLink || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return `-- QrexApi Key System
--- Protected by QyrexObf · #
+-- Protected by Lua u VanguardObf · #
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -1811,11 +1811,11 @@ local function httpRequest(opts)
   error("No request function")
 end
 
-local QyrexAPI = {}
-function QyrexAPI.GetKeyLink()
+local Lua u VanguardAPI = {}
+function Lua u VanguardAPI.GetKeyLink()
   return _GETKEY
 end
-function QyrexAPI.VerifyKey(key)
+function Lua u VanguardAPI.VerifyKey(key)
   key = tostring(key or ""):gsub("%s+", "")
   if key == "" then return false, nil end
   local body = HttpService:JSONEncode({ key = key, hwid = getHwid(), provider = _PROVIDER, scriptId = _SCRIPT_ID })
@@ -1834,8 +1834,8 @@ function QyrexAPI.VerifyKey(key)
 end
 
 local cfg = {
-  title = "QyrexApi",
-  keyFile = "QyrexApi_Key.txt",
+  title = "Lua u VanguardApi",
+  keyFile = "Lua u VanguardApi_Key.txt",
   accentA = Color3.fromRGB(168, 85, 247),
   accentB = Color3.fromRGB(236, 72, 199),
   accentC = Color3.fromRGB(96, 200, 255),
@@ -1856,7 +1856,7 @@ local function notify(kind, title, content)
   local colors = { Info = Color3.fromRGB(96,165,250), Success = Color3.fromRGB(52,211,153), Error = Color3.fromRGB(248,113,113) }
   local accent = colors[kind] or colors.Info
   local sg = Instance.new("ScreenGui")
-  sg.Name = "QyrexApi_Notif"
+  sg.Name = "Lua u VanguardApi_Notif"
   sg.ResetOnSpawn = false
   sg.DisplayOrder = 999999
   sg.Parent = GetGuiParent()
@@ -1893,22 +1893,22 @@ end
 
 local function runScriptFromToken(token)
   if type(token) ~= "string" or token == "" then
-    warn("[QyrexApi] missing delivery token")
+    warn("[Lua u VanguardApi] missing delivery token")
     return false
   end
   local url = _API .. "/api/v1/luascripts/cache/public/" .. _SCRIPT_ID .. "/download?t=" .. HttpService:UrlEncode(token)
   local okFetch, src = pcall(function() return game:HttpGet(url) end)
   if not okFetch or type(src) ~= "string" or #src < 8 then
-    warn("[QyrexApi] protected delivery failed")
+    warn("[Lua u VanguardApi] protected delivery failed")
     return false
   end
   local fn, err = loadstring(src)
   if type(fn) ~= "function" then
-    warn("[QyrexApi] protected compile failed:", err)
+    warn("[Lua u VanguardApi] protected compile failed:", err)
     return false
   end
   local okRun, runErr = pcall(fn)
-  if not okRun then warn("[QyrexApi] script error:", runErr) end
+  if not okRun then warn("[Lua u VanguardApi] script error:", runErr) end
   return okRun
 end
 
@@ -1916,7 +1916,7 @@ end
 do
   local saved = loadKey()
   if saved ~= "" then
-    local valid, token = QyrexAPI.VerifyKey(saved)
+    local valid, token = Lua u VanguardAPI.VerifyKey(saved)
     if valid and token then
       notify("Success", "Welcome", "Key valida · cargando script")
       task.wait(0.2)
@@ -1927,7 +1927,7 @@ do
 end
 
 local Screen = Instance.new("ScreenGui")
-Screen.Name = "QyrexApi_KeySystem"
+Screen.Name = "Lua u VanguardApi_KeySystem"
 Screen.ResetOnSpawn = false
 Screen.IgnoreGuiInset = true
 Screen.Parent = GetGuiParent()
@@ -1955,7 +1955,7 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextColor3 = Color3.fromRGB(205, 200, 218)
-Title.Text = "QyrexApi KeySystem"
+Title.Text = "Lua u VanguardApi KeySystem"
 Title.Parent = Titlebar
 
 local CloseBtn = Instance.new("TextButton")
@@ -2046,7 +2046,7 @@ Hint.Text = "La key se guarda localmente · QrexApi"
 Hint.Parent = Main
 
 GetKeyBtn.MouseButton1Click:Connect(function()
-  local link = QyrexAPI.GetKeyLink()
+  local link = Lua u VanguardAPI.GetKeyLink()
   if not link or link == "" then
     notify("Error", "No configurado", "El owner no puso link de key")
     return
@@ -2069,7 +2069,7 @@ local function doVerify()
   verifying = true
   notify("Info", "Checking...", "Validando key")
   task.spawn(function()
-    local ok, token = QyrexAPI.VerifyKey(key)
+    local ok, token = Lua u VanguardAPI.VerifyKey(key)
     verifying = false
     if ok and token then
       saveKey(key)
@@ -2120,12 +2120,12 @@ h1{font-size:20px;margin:0 0 8px}p{color:#8b8b9e;font-size:13px;line-height:1.5}
 button{margin-top:14px;width:100%;border:0;border-radius:12px;padding:12px;font-weight:700;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;cursor:pointer}
 .meta{margin-top:12px;font-size:11px;color:#5a5a6e}
 </style></head><body><div class="card">
-<div class="badge">QYREXAPI KEY</div>
+<div class="badge">LUA-U-VANGUARDAPI KEY</div>
 <h1>Key generada</h1>
 <p>Provider: <b style="color:#ddd">${p}</b>. Copia la key y pégala en el KeySystem del script.</p>
 <div class="keybox" id="k">${k}</div>
 <button onclick="navigator.clipboard.writeText(document.getElementById('k').innerText);this.textContent='¡Copiada!'">Copiar key</button>
-<div class="meta">Protected by <b style="color:#c4b5fd">QyrexObf</b> · <a href="#" style="color:#a78bfa">Discord</a></div>
+<div class="meta">Protected by <b style="color:#c4b5fd">Lua u VanguardObf</b> · <a href="#" style="color:#a78bfa">Discord</a></div>
 <div class="meta">Validez aprox: ${hours || 24}h · cada visita genera una key unica</div>
 </div></body></html>`;
 }
@@ -2501,7 +2501,7 @@ app.post('/api/ai/generate', auth, aiLimiter, async (req, res) => {
       headers: {
         'Authorization': 'Bearer ' + OPENROUTER_API_KEY,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://qyrexapi.onrender.com',
+        'HTTP-Referer': 'https://lua-u-vanguardapi.onrender.com',
         'X-Title': 'QrexApi Studio'
       },
       body: JSON.stringify({
@@ -2535,7 +2535,7 @@ app.get('/api/ai/status', auth, (req, res) => {
   res.json({ configured: !!OPENROUTER_API_KEY, model: OPENROUTER_MODEL });
 });
 
-// --- QyrexAI Chat (OpenRouter proxy) — key from Environment ---
+// --- Lua u VanguardAI Chat (OpenRouter proxy) — key from Environment ---
 function isValidChatMessages(messages) {
   if (!Array.isArray(messages) || messages.length === 0) return false;
   return messages.every((msg) => {
@@ -2586,8 +2586,8 @@ app.post('/api/chat', async (req, res) => {
       headers: {
         Authorization: 'Bearer ' + OPENROUTER_API_KEY,
         'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'https://qyrexapi.onrender.com',
-        'X-Title': process.env.OPENROUTER_SITE_NAME || 'QyrexAI Workspace',
+        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'https://lua-u-vanguardapi.onrender.com',
+        'X-Title': process.env.OPENROUTER_SITE_NAME || 'Lua u VanguardAI Workspace',
       },
       body: JSON.stringify(payload),
     });
@@ -2709,17 +2709,17 @@ app.get('/auth/discord/callback', async (req, res) => {
 
 
 // ========== VIP CUSTOM SCRIPT SITE ==========
-const QYREX_SITE_ROOT = String(process.env.QYREX_SITE_ROOT || 'qyrex.hopto.org').toLowerCase().replace(/^\*\./,'').replace(/\/$/,'');
+const LUAUVANGUARD_SITE_ROOT = String(process.env.LUAUVANGUARD_SITE_ROOT || 'lua-u-vanguard.hopto.org').toLowerCase().replace(/^\*\./,'').replace(/\/$/,'');
 function cleanSiteSlug(v){
   return String(v || '').trim().toLowerCase();
 }
 function validSiteSlug(v){
   return /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/.test(v) && !v.includes('--');
 }
-function siteUrl(slug){ return 'https://' + slug + '.' + QYREX_SITE_ROOT + '/'; }
+function siteUrl(slug){ return 'https://' + slug + '.' + LUAUVANGUARD_SITE_ROOT + '/'; }
 function siteShell(html){
   const text=String(html||'');
-  if(!text.trim()) return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qyrex Site</title></head><body><h1>Qyrex Site</h1></body></html>';
+  if(!text.trim()) return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lua u Vanguard Site</title></head><body><h1>Lua u Vanguard Site</h1></body></html>';
   return text;
 }
 
@@ -2735,7 +2735,7 @@ app.all('/sites/me', (req,res,next)=>{
 app.get('/api/sites/me', auth, needMongo, async (req,res)=>{
   try{
     const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
-    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Lua u Vanguard Sites es exclusivo para VIP/Premium'});
     const site=await ScriptSite.findOne({ownerId:req.user.sub}).lean();
     res.json(site?{...site,url:siteUrl(site.slug)}:{site:null});
   }catch(e){ res.status(500).json({error:e.message||'Error'}); }
@@ -2744,7 +2744,7 @@ app.get('/api/sites/me', auth, needMongo, async (req,res)=>{
 app.post('/api/sites', auth, needMongo, async (req,res)=>{
   try{
     const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
-    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Lua u Vanguard Sites es exclusivo para VIP/Premium'});
     const slug=cleanSiteSlug(req.body?.slug), html=String(req.body?.html||'');
     if(!validSiteSlug(slug)) return res.status(400).json({error:'Slug inválido. Usa 2-30 caracteres: letras, números y guiones.'});
     if(!html.trim()) return res.status(400).json({error:'index.html requerido'});
@@ -2761,7 +2761,7 @@ app.post('/api/sites', auth, needMongo, async (req,res)=>{
 app.put('/api/sites', auth, needMongo, async (req,res)=>{
   try{
     const u=await User.findById(req.user.sub).select('username role premium premiumUntil');
-    if(!isPremiumUser(u)) return res.status(403).json({error:'Qyrex Sites es exclusivo para VIP/Premium'});
+    if(!isPremiumUser(u)) return res.status(403).json({error:'Lua u Vanguard Sites es exclusivo para VIP/Premium'});
     const site=await ScriptSite.findOne({ownerId:req.user.sub});
     if(!site) return res.status(404).json({error:'No tienes un sitio publicado'});
     const html=String(req.body?.html||'');
@@ -2791,15 +2791,15 @@ app.delete('/api/sites', auth, needMongo, async (req,res)=>{
   }catch(e){ res.status(500).json({error:e.message||'Error'}); }
 });
 
-// Host-based delivery: requires *.qyrex.hopto.org to point to this service.
+// Host-based delivery: requires *.lua-u-vanguard.hopto.org to point to this service.
 app.use(async (req,res,next)=>{
   try{
-    if(req.method!=='GET' || !req.hostname || !req.hostname.endsWith('.'+QYREX_SITE_ROOT)) return next();
-    const sub=req.hostname.slice(0,-('.'+QYREX_SITE_ROOT).length);
+    if(req.method!=='GET' || !req.hostname || !req.hostname.endsWith('.'+LUAUVANGUARD_SITE_ROOT)) return next();
+    const sub=req.hostname.slice(0,-('.'+LUAUVANGUARD_SITE_ROOT).length);
     if(!validSiteSlug(sub) || req.path!=='/') return next();
-    if(mongoose.connection.readyState!==1) return res.status(503).type('html').send('<h1>Qyrex Site temporalmente no disponible</h1>');
+    if(mongoose.connection.readyState!==1) return res.status(503).type('html').send('<h1>Lua u Vanguard Site temporalmente no disponible</h1>');
     const site=await ScriptSite.findOne({slug:sub,enabled:true}).lean();
-    if(!site) return res.status(404).type('html').send('<h1>Qyrex Site no encontrado</h1><p>Este subdominio todavía no está publicado.</p>');
+    if(!site) return res.status(404).type('html').send('<h1>Lua u Vanguard Site no encontrado</h1><p>Este subdominio todavía no está publicado.</p>');
     res.set('Cache-Control','public, max-age=60, stale-while-revalidate=300');
     res.set('X-Content-Type-Options','nosniff');
     res.set('Referrer-Policy','strict-origin-when-cross-origin');
@@ -2828,23 +2828,35 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Error interno' });
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('QrexApi listening on 0.0.0.0:' + PORT);
-  console.log('MONGO_URI set:', !!MONGO_URI);
-  if (DEFAULT_JWT_SECRET_WARNING) console.warn('[SECURITY] Define JWT_SECRET in Render Environment before production use.');
-  if (!VOLTILS_API_KEY) console.warn('[CONFIG] VOLTILS_API_KEY is not configured; remote obfuscator access may be unavailable.');
-});
+// Export for Vercel serverless
+module.exports = app;
+
+let server = null;
+if (require.main === module || !process.env.VERCEL) {
+  server = app.listen(PORT, '0.0.0.0', () => {
+    console.log('Lua u Vanguard listening on 0.0.0.0:' + PORT);
+    console.log('MONGO_URI set:', !!MONGO_URI);
+    if (DEFAULT_JWT_SECRET_WARNING) console.warn('[SECURITY] Define JWT_SECRET in Environment before production use.');
+    if (!VOLTILS_API_KEY) console.warn('[CONFIG] VOLTILS_API_KEY is not configured; remote obfuscator access may be unavailable.');
+  });
+} else {
+  console.log('Lua u Vanguard ready for Vercel');
+}
 
 async function shutdown(signal) {
   console.log('[LIFECYCLE] ' + signal + ' received; shutting down gracefully.');
-  server.close(async () => {
-    try {
-      if (mongoose.connection.readyState !== 0) await mongoose.connection.close(false);
-    } catch (e) {
-      console.error('[LIFECYCLE] Mongo close error:', e?.message || e);
-    }
+  if (server) {
+    server.close(async () => {
+      try {
+        if (mongoose.connection.readyState !== 0) await mongoose.connection.close(false);
+      } catch (e) {
+        console.error('[LIFECYCLE] Mongo close error:', e?.message || e);
+      }
+      process.exit(0);
+    });
+  } else {
     process.exit(0);
-  });
+  }
   setTimeout(() => process.exit(1), 10000).unref();
 }
 process.once('SIGTERM', () => shutdown('SIGTERM'));

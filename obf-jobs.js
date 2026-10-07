@@ -1,12 +1,12 @@
 'use strict';
 /**
- * Cliente remoto de QyrexOBF → https://qyrexobfff.onrender.com
+ * Cliente remoto de LuaUVanguardOBF → https://lua-u-vanguard-obf.onrender.com
  * No usa lua ni engines locales. Solo HTTP.
  */
 const crypto = require('crypto');
 
-const DEFAULT_BASE = 'https://qyrexobfff.onrender.com';
-const HEADER = '-- This file was protected using Qyrex Obfuscator v10.3 [https://qyrex.hopto.org]\n';
+const DEFAULT_BASE = 'https://lua-u-vanguard-obf.onrender.com';
+const HEADER = '-- This file was protected using Lua u Vanguard Obfuscator v10.3 [https://lua-u-vanguard.hopto.org]\n';
 
 function withHeader(code) {
   const c = String(code || '');
@@ -16,12 +16,12 @@ function withHeader(code) {
 }
 
 function baseUrl() {
-  return String(process.env.QYREXOBF_URL || DEFAULT_BASE).replace(/\/+$/, '');
+  return String(process.env.LUAUVANGUARDOBF_URL || DEFAULT_BASE).replace(/\/+$/, '');
 }
 
 function apiHeaders() {
   const h = { 'Content-Type': 'application/json', Accept: 'application/json' };
-  const key = process.env.QYREXOBF_API_KEY || process.env.API_KEY || '';
+  const key = process.env.LUAUVANGUARDOBF_API_KEY || process.env.API_KEY || '';
   if (key) h['x-api-key'] = key;
   return h;
 }
@@ -65,7 +65,7 @@ async function remoteFetch(path, opts) {
 }
 
 /**
- * Arranca ofuscación en qyrexobfff.onrender.com y hace poll hasta done/error.
+ * Arranca ofuscación en lua-u-vanguard-obf.onrender.com y hace poll hasta done/error.
  * Expone progreso en jobs Map para GET /api/obf-jobs/:id
  */
 async function runRemoteObf(localId, source, opts) {
@@ -73,7 +73,7 @@ async function runRemoteObf(localId, source, opts) {
     status: 'running',
     progress: 5,
     stage: 'remote',
-    logLine: 'Conectando a QyrexOBF (' + baseUrl() + ')…'
+    logLine: 'Conectando a LuaUVanguardOBF (' + baseUrl() + ')…'
   });
 
   const start = await remoteFetch('/obfuscate', {
@@ -108,7 +108,7 @@ async function runRemoteObf(localId, source, opts) {
       code,
       originalSize: String(source).length,
       obfuscatedSize: code.length,
-      steps: start.data.steps || ['QyrexOBF-remote'],
+      steps: start.data.steps || ['LuaUVanguardOBF-remote'],
       logLine: 'DONE · ' + code.length + ' B'
     });
     return;
@@ -181,7 +181,7 @@ async function runRemoteObf(localId, source, opts) {
         code,
         originalSize: pd.originalSize || String(source).length,
         obfuscatedSize: code.length,
-        steps: pd.steps || ['QyrexOBF-remote'],
+        steps: pd.steps || ['LuaUVanguardOBF-remote'],
         logLine: 'DONE · ' + code.length + ' B'
       });
       return;
@@ -214,7 +214,7 @@ async function runRemoteObf(localId, source, opts) {
     status: 'error',
     progress: 100,
     stage: 'error',
-    error: 'Timeout 25 min esperando QyrexOBF remoto',
+    error: 'Timeout 25 min esperando LuaUVanguardOBF remoto',
     logLine: 'ERROR timeout remoto'
   });
 }

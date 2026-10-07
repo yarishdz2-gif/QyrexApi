@@ -1,6 +1,6 @@
 /**
- * QyrexObf 1.0.2 — max soft protections fused from
- * Hercules · Prometheus · MoonSec patterns · Qyrex core
+ * Lua u Vanguard Obf 1.0.2 — max soft protections fused from
+ * Hercules · Prometheus · MoonSec patterns · Lua u Vanguard core
  * Stable decimal double-nest, Luau/Roblox safe (no hardlocks).
  */
 'use strict';
@@ -110,7 +110,7 @@ function emitAntiTamper(V, L) {
   const str = V[6];
 
   // Watermark (Hercules/Prometheus style)
-  L.push(`local ${V[25]}='QyrexObf v${VERSION} | qyrex.hopto.org'; `);
+  L.push(`local ${V[25]}='Lua u Vanguard Obf v${VERSION} | lua-u-vanguard.hopto.org'; `);
 
   // Prometheus pcall integrity
   L.push(`local ${V[10]}=false; local ${V[21]}=${pcall}(function() ${V[10]}=true end) and ${V[10]}; if not ${V[21]} then ${S}=${S}-12 end; `);
@@ -189,7 +189,7 @@ function buildDecimalLoader(decimal, a, b, expectedHash, sourceLen) {
   const parts = chunkDec(decimal);
   const payloadTable = parts.map((p) => JSON.stringify(p)).join(',');
   const L = [];
-  L.push(`--[[ Protected by QyrexObf v${VERSION} | qyrex.hopto.org ]] `);
+  L.push(`--[[ Protected by Lua u Vanguard Obf v${VERSION} | lua-u-vanguard.hopto.org ]] `);
   L.push('return(function(...) ');
   L.push(`local ${V[0]}={${payloadTable}}; `);
   L.push(`local ${V[1]}=${sourceLen}; local ${V[2]}=${a}; local ${V[3]}=${b}; local ${V[4]}=${expectedHash}; `);
@@ -247,7 +247,7 @@ function obfuscate(source) {
     stats: {
       inputBytes: Buffer.byteLength(src, 'utf8'),
       outputBytes: Buffer.byteLength(code, 'utf8'),
-      mode: `QyrexObf-${VERSION}`,
+      mode: `Lua u Vanguard Obf-${VERSION}`,
       nestLevels: 2,
       layers: [
         'decimal-affine',
@@ -273,7 +273,7 @@ function obfuscate(source) {
         'luau-roblox-stable',
       ],
       verified: true,
-      fusedFrom: ['Hercules', 'Prometheus', 'MoonSec-patterns', 'Qyrex'],
+      fusedFrom: ['Hercules', 'Prometheus', 'MoonSec-patterns', 'Lua u Vanguard'],
     },
   };
 }

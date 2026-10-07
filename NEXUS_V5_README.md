@@ -1,4 +1,4 @@
-# Qyrex Nexus APEX v5 — Ultra Pro
+# Lua u Vanguard Nexus APEX v5 — Ultra Pro
 
 ## Added utilities
 - Workspace Center (`Ctrl+Shift+W`)
@@ -9,9 +9,9 @@
 - Safe technical diagnostics export/copy
 - UI cache cleanup that preserves authentication and script favorites
 - PWA shell + service worker with API endpoints excluded from cache
-- QyrexAI Prompt Library, current-chat statistics and Markdown export
-- QyrexAI shortcuts: `Ctrl+Shift+P` prompts, `Ctrl+Shift+E` Markdown
-- Mobile/PWA metadata and updated Qyrex logo
+- Lua u VanguardAI Prompt Library, current-chat statistics and Markdown export
+- Lua u VanguardAI shortcuts: `Ctrl+Shift+P` prompts, `Ctrl+Shift+E` Markdown
+- Mobile/PWA metadata and updated Lua u Vanguard logo
 - Provider form duplicate-field correction
 
 ## Compatibility

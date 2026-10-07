@@ -1,4 +1,4 @@
-# Qyrex secure delivery
+# Lua u Vanguard secure delivery
 
 La entrega protegida usa dos fases:
 
@@ -10,7 +10,7 @@ La entrega protegida usa dos fases:
 
 ## Secrets
 
-Las credenciales de servicios externos no deben escribirse en `server.js`, `obf-jobs.js` ni archivos públicos. Configúralas en Render Environment Variables usando `.env.example` únicamente como referencia. El repositorio no debe contener valores reales para `JWT_SECRET`, `MONGO_URI`, `DISCORD_CLIENT_SECRET`, `OPENROUTER_API_KEY`, `QYREXOBF_API_KEY`, `API_KEY` o `VOLTILS_API_KEY`.
+Las credenciales de servicios externos no deben escribirse en `server.js`, `obf-jobs.js` ni archivos públicos. Configúralas en Render Environment Variables usando `.env.example` únicamente como referencia. El repositorio no debe contener valores reales para `JWT_SECRET`, `MONGO_URI`, `DISCORD_CLIENT_SECRET`, `OPENROUTER_API_KEY`, `LUA-U-VANGUARDOBF_API_KEY`, `API_KEY` o `VOLTILS_API_KEY`.
 
 ## Límite técnico
 

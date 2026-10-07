@@ -1,9 +1,9 @@
-# Qyrex Nexus v8
+# Lua u Vanguard Nexus v8
 
 Esta revisión añade una capa de utilidades y observabilidad enfocada en el uso diario.
 
 ## Nuevas funciones
-- Qyrex Cockpit con salud de API/Mongo y telemetría local.
+- Lua u Vanguard Cockpit con salud de API/Mongo y telemetría local.
 - Quick Switcher y Command Center.
 - Favoritos y actividad reciente locales.
 - Diagnostics sin leer automáticamente tokens, contraseñas o contenido privado.

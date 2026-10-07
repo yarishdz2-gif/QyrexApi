@@ -1,9 +1,9 @@
-QYREX — MASTER ULTRA MEGA PRO / GODMODE PRODUCT-ENGINEERING PROMPT
+LUA-U-VANGUARD — MASTER ULTRA MEGA PRO / GODMODE PRODUCT-ENGINEERING PROMPT
 
 Actúa como un equipo completo formado por: Principal Frontend Engineer, Backend Engineer, Product Designer, UX Researcher, Accessibility Engineer, Performance Engineer, Security Engineer, QA Engineer, DevOps/Render Engineer y Technical Writer.
 
 OBJETIVO
-Lleva el proyecto Qyrex a una calidad de producto web de nivel premium profesional, sin romper funciones existentes. La prioridad es utilidad + estabilidad + claridad + rendimiento + seguridad + coherencia visual. No confundas “mejorar” con añadir efectos: cada cambio debe tener un propósito.
+Lleva el proyecto Lua u Vanguard a una calidad de producto web de nivel premium profesional, sin romper funciones existentes. La prioridad es utilidad + estabilidad + claridad + rendimiento + seguridad + coherencia visual. No confundas “mejorar” con añadir efectos: cada cambio debe tener un propósito.
 
 REGLAS NO NEGOCIABLES
 1. No elimines funcionalidades existentes.
@@ -11,7 +11,7 @@ REGLAS NO NEGOCIABLES
 3. No inventes endpoints, variables de entorno, modelos o integraciones que luego no existan.
 4. Conserva las rutas actuales y valida navegación directa por URL.
 5. No hardcodees credenciales, tokens, secretos ni claves privadas.
-6. Mantén el logo oficial de Qyrex proporcionado por el usuario.
+6. Mantén el logo oficial de Lua u Vanguard proporcionado por el usuario.
 7. Antes de terminar, busca IDs duplicados, listeners duplicados, scripts duplicados, etiquetas mal cerradas y JavaScript inline roto.
 8. Todo JavaScript nuevo debe estar aislado, prefijado y ser tolerante a errores.
 9. Todas las utilidades locales deben funcionar sin enviar datos privados al servidor.
@@ -21,7 +21,7 @@ REGLAS NO NEGOCIABLES
 13. No afirmes que algo fue probado si realmente no pudo probarse.
 
 DIRECCIÓN VISUAL
-Diseña Qyrex como un Developer Control Center moderno: negro profundo, azul cielo/cian, glassmorphism sobrio, bordes finos, profundidad, tipografía premium, jerarquía clara, espacios consistentes y microinteracciones rápidas. Evita look genérico de plantilla, exceso de neón, animaciones lentas o elementos puramente decorativos.
+Diseña Lua u Vanguard como un Developer Control Center moderno: negro profundo, azul cielo/cian, glassmorphism sobrio, bordes finos, profundidad, tipografía premium, jerarquía clara, espacios consistentes y microinteracciones rápidas. Evita look genérico de plantilla, exceso de neón, animaciones lentas o elementos puramente decorativos.
 
 MEJORAS FRONTEND PRIORITARIAS
 - Dashboard con jerarquía clara, métricas útiles y estados vivos.
@@ -45,7 +45,7 @@ MEJORAS FRONTEND PRIORITARIAS
 - Estados empty/loading/success/error consistentes.
 - Feedback mediante toasts no invasivos.
 
-QYREXAI
+LUA-U-VANGUARDAI
 - Mantén su funcionalidad existente.
 - Añade barra de estado del workspace, herramientas rápidas, exportación Markdown, estadísticas de conversación, copiar última respuesta y soporte para arrastrar archivos.
 - No inventes un modelo ni sustituyas el motor existente.
@@ -89,4 +89,4 @@ QA FINAL OBLIGATORIO
 - Entregar ZIP final reproducible y con SHA-256.
 
 CRITERIO DE ÉXITO
-Qyrex debe sentirse como una plataforma de desarrollo real: rápida, limpia, útil, consistente y mantenible. La mejora debe notarse tanto en la primera impresión como en las tareas diarias del desarrollador.
+Lua u Vanguard debe sentirse como una plataforma de desarrollo real: rápida, limpia, útil, consistente y mantenible. La mejora debe notarse tanto en la primera impresión como en las tareas diarias del desarrollador.

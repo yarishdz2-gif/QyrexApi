@@ -1,4 +1,4 @@
--- QyrexApi Anti-Dump v3 Loader
+-- LuaUVanguard Anti-Dump v3 Loader
 -- IMPORTANT: use HTTPS in production.
 -- This loader targets Luau environments that expose `request` and a `crypt` API.
 
@@ -34,7 +34,7 @@ local player = LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local CONFIG = {
-	Link = "https://qyrex.hopto.org",
+	Link = "https://lua-u-vanguard.hopto.org",
 	Discord = "YzCsksufde",
 
 	TotalDuration = 8,
@@ -72,14 +72,14 @@ local COLORS = {
 	Panel3 = Color3.fromRGB(28, 28, 36)
 }
 
-local oldGui = playerGui:FindFirstChild("QyrexTerminalUI")
+local oldGui = playerGui:FindFirstChild("LuaUVanguardTerminalUI")
 
 if oldGui then
 	oldGui:Destroy()
 end
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "QyrexTerminalUI"
+screenGui.Name = "LuaUVanguardTerminalUI"
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -272,7 +272,7 @@ headerTitle.TextTransparency = 1
 
 local statusLabel = makeText(
 	terminal,
-	"[ SYSTEM ] Initializing Qyrex...",
+	"[ SYSTEM ] Initializing LuaUVanguard...",
 	12,
 	COLORS.Green
 )
@@ -331,10 +331,10 @@ asciiLabel.TextYAlignment = Enum.TextYAlignment.Top
 asciiLabel.TextTransparency = 1
 
 local logs = {
-	"[+] Preparing Qyrex environment... [OK]",
+	"[+] Preparing LuaUVanguard environment... [OK]",
 	"[+] Loading script modules... [OK]",
 	"[+] Validating runtime configuration... [OK]",
-	"[+] Synchronizing Qyrex services... [OK]",
+	"[+] Synchronizing LuaUVanguard services... [OK]",
 	"[+] Optimizing execution state... [OK]",
 	"[+] Finalizing launch sequence... [OK]"
 }
@@ -831,7 +831,7 @@ task.spawn(function()
 	if CONFIG.ShowWatermark then
 
 		watermark = Instance.new("Frame")
-		watermark.Name = "QyrexWatermark"
+		watermark.Name = "LuaUVanguardWatermark"
 		watermark.Size = UDim2.fromOffset(
 			300,
 			40
@@ -935,7 +935,7 @@ task.spawn(function()
 		local site =
 			makeText(
 				watermark,
-				"qyrex.hopto.org",
+				"lua-u-vanguard.hopto.org",
 				13,
 				COLORS.Green
 			)
@@ -1975,7 +1975,7 @@ task.spawn(function()
 
 		actionRow(
 			"Copy website",
-			"qyrex.hopto.org",
+			"lua-u-vanguard.hopto.org",
 			COLORS.Green,
 			"COPY",
 			function()
@@ -2322,7 +2322,7 @@ local function b64decode(s)
     if type(Crypt.base64) == "table" and type(Crypt.base64.decode) == "function" then
         return Crypt.base64.decode(s)
     end
-    error("QyrexApi: base64 decoder missing")
+    error("LuaUVanguard: base64 decoder missing")
 end
 
 local function sha256hex(data)
@@ -2338,7 +2338,7 @@ local function sha256hex(data)
             return out:gsub("%s+", ""):lower()
         end
     end
-    error("QyrexApi: sha256 is unavailable in this environment")
+    error("LuaUVanguard: sha256 is unavailable in this environment")
 end
 
 local function requireEq(a, b)
@@ -2371,7 +2371,7 @@ local function aesGcmDecrypt(ciphertext, key, iv, tag, aad)
         end
     end
 
-    error("QyrexApi: AES-256-GCM is unavailable or has an incompatible API")
+    error("LuaUVanguard: AES-256-GCM is unavailable or has an incompatible API")
 end
 
 local function xorBytes(data, key)
@@ -2388,19 +2388,19 @@ end
 local function deriveChunkKey(sessionKey, salt)
     -- Preferred: HKDF-SHA256 in newer crypt providers.
     if type(Crypt.hkdf) == "function" then
-        local ok, out = pcall(Crypt.hkdf, "sha256", sessionKey, salt, "QyrexApi/A-D/v3/chunk", 32)
+        local ok, out = pcall(Crypt.hkdf, "sha256", sessionKey, salt, "LuaUVanguard/A-D/v3/chunk", 32)
         if ok and type(out) == "string" then return out end
     end
 
     -- Fallback for environments exposing only HMAC/SHA-256.
     if type(Crypt.hmac) == "function" then
-        local ok, out = pcall(Crypt.hmac, "sha256", sessionKey, salt .. "QyrexApi/A-D/v3/chunk")
+        local ok, out = pcall(Crypt.hmac, "sha256", sessionKey, salt .. "LuaUVanguard/A-D/v3/chunk")
         if ok and type(out) == "string" then
             if #out >= 32 then return out:sub(1, 32) end
         end
     end
 
-    error("QyrexApi: HKDF/HMAC support is unavailable")
+    error("LuaUVanguard: HKDF/HMAC support is unavailable")
 end
 
 local function maskKey(sessionKey, salt)
@@ -2420,7 +2420,7 @@ local function httpJson(url, body)
         Headers = {
             ["Content-Type"] = "application/json",
             ["Cache-Control"] = "no-store",
-            ["X-Requested-With"] = "QyrexApi-Luau",
+            ["X-Requested-With"] = "LuaUVanguard-Luau",
         },
         Body = game:GetService("HttpService"):JSONEncode(body),
     })
@@ -2546,7 +2546,7 @@ local function runProtected()
 
     local fn
     local okLoad, loadResult = pcall(function()
-        return loadFn(finalSource, "QyrexProtected")
+        return loadFn(finalSource, "LuaUVanguardProtected")
     end)
     if not okLoad or type(loadResult) ~= "function" then
         return decoy()
