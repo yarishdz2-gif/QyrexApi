@@ -5,9 +5,9 @@
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/><meta charset="utf-8"/>
 
 <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<title>Qyrex · Developer Control Center</title>
-<link rel="icon" type="image/png" href="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
-<link rel="apple-touch-icon" href="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
+<title>Lua u Vanguard · Developer Control Center</title>
+<link rel="icon" type="image/png" href="/logo.png"/>
+<link rel="apple-touch-icon" href="/logo.png"/>
 
 
 
@@ -434,24 +434,24 @@
   }
 
 
-  .qyrex-credit{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  .lua-u-vanguard-credit{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
     color:#fafafa;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.28);
     padding:5px 10px;border-radius:999px;text-decoration:none;transition:all .2s}
-  .qyrex-credit:hover{background:rgba(125,211,252,.22);border-color:rgba(167,139,250,.5);color:#e9e5ff}
-  .qyrex-credit svg{width:14px;height:14px;flex-shrink:0;opacity:.9}
-  .qyrex-footer{text-align:center;padding:16px 12px 28px;font-size:11px;color:#5a5a6e;line-height:1.55}
-  .qyrex-footer a{color:#f4f4f5;text-decoration:none;font-weight:600}
-  .qyrex-footer a:hover{text-decoration:underline}
+  .lua-u-vanguard-credit:hover{background:rgba(125,211,252,.22);border-color:rgba(167,139,250,.5);color:#e9e5ff}
+  .lua-u-vanguard-credit svg{width:14px;height:14px;flex-shrink:0;opacity:.9}
+  .lua-u-vanguard-footer{text-align:center;padding:16px 12px 28px;font-size:11px;color:#5a5a6e;line-height:1.55}
+  .lua-u-vanguard-footer a{color:#f4f4f5;text-decoration:none;font-weight:600}
+  .lua-u-vanguard-footer a:hover{text-decoration:underline}
   .protected-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 
   /* ===== Responsive polish PC + móvil ===== */
   @media (min-width: 901px) {
     .main-content { margin-left: 260px !important; }
-    .qyrex-credit { font-size: 10px; }
+    .lua-u-vanguard-credit { font-size: 10px; }
   }
   @media (max-width: 900px) {
-    .qyrex-credit { font-size: 10px; padding: 4px 8px; }
-    .sidebar .qyrex-credit { max-width: 100%; }
+    .lua-u-vanguard-credit { font-size: 10px; padding: 4px 8px; }
+    .sidebar .lua-u-vanguard-credit { max-width: 100%; }
     #appView main > .p-8, #appView main .p-8 { padding: 12px !important; }
     .card { border-radius: 12px; }
     .btn-primary, .btn-ghost { min-height: 44px; }
@@ -462,7 +462,7 @@
     .editor-body { min-height: 200px !important; max-height: 50vh !important; }
     table { font-size: 12px; }
     .user-pill { margin-bottom: 12px; }
-    .qyrex-footer { padding: 20px 12px 40px; font-size: 11px; }
+    .lua-u-vanguard-footer { padding: 20px 12px 40px; font-size: 11px; }
     #createOut { font-size: 12px !important; }
   }
   @media (max-width: 480px) {
@@ -496,7 +496,7 @@
   #vipParticleCanvas{display:none;position:fixed;inset:0;z-index:0;pointer-events:none}
   body.vip-compact .sidebar{width:78px !important}
   body.vip-compact .sidebar .nav-section,
-  body.vip-compact .sidebar .qyrex-credit,
+  body.vip-compact .sidebar .lua-u-vanguard-credit,
   body.vip-compact .user-pill .flex-1,
   body.vip-compact .user-pill button{display:none !important}
   body.vip-compact .sidebar .nav-item{justify-content:center;padding:12px 8px}
@@ -647,7 +647,7 @@
   body.sidebar-collapsed #appView main.main-content{margin-left:var(--sidebar-mini)!important;width:calc(100% - var(--sidebar-mini))!important}
   body.sidebar-collapsed .sidebar-collapse-btn svg{transform:rotate(180deg)}
   body.sidebar-collapsed .sidebar .nav-section{opacity:0;transform:translateX(-10px);height:8px;padding-top:8px!important;padding-bottom:0!important;overflow:hidden}
-  body.sidebar-collapsed .sidebar .qyrex-credit,
+  body.sidebar-collapsed .sidebar .lua-u-vanguard-credit,
   body.sidebar-collapsed .sidebar .flex.items-center.gap-3.px-5.py-5 > .min-w-0,
   body.sidebar-collapsed .sidebar .user-pill .flex-1,
   body.sidebar-collapsed .sidebar .user-pill button{opacity:0;pointer-events:none;width:0;margin:0;padding-left:0;padding-right:0;overflow:hidden;transition:opacity .15s,width .25s var(--qx-ease)}
@@ -675,7 +675,7 @@
   .stat-val,.ov-stat .val{font-variant-numeric:tabular-nums}
 
   .ov-logo,.lg-mark img,.lg-topbar img,.lg-mobile-mark img,
-  .qx-ring img,.mt-brand img,.sidebar img[alt="QrexApi"],.sidebar img[alt="QyrexApi"]{
+  .qx-ring img,.mt-brand img,.sidebar img[alt="Lua u Vanguard"],.sidebar img[alt="Lua u Vanguard"]{
     object-fit:cover!important;object-position:center;flex-shrink:0;
     background:#12121a;display:block
   }
@@ -754,7 +754,7 @@
 </style>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<style id="qyrex-ultimate-enterprise">
+<style id="lua-u-vanguard-ultimate-enterprise">
 :root{--qe-bg:#f5f7fb;--qe-panel:#7DD3FC;--qe-panel2:#f8fafc;--qe-text:#172033;--qe-muted:#687386;--qe-border:#e5e9f0;--qe-brand:#2563eb;--qe-brand2:#1d4ed8;--qe-soft:#eff6ff;--qe-shadow:0 18px 50px rgba(15,23,42,.08);--qe-radius:18px}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:radial-gradient(circle at 85% 0%,rgba(37,99,235,.08),transparent 32%),radial-gradient(circle at 10% 15%,rgba(14,165,233,.05),transparent 30%),var(--qe-bg)!important;color:var(--qe-text)!important}
 h1,h2,h3,.ov-title,.lg-title,.vip-price{font-family:"Manrope",Inter,ui-sans-serif,sans-serif!important;letter-spacing:-.035em!important}
@@ -805,7 +805,7 @@ input:focus,textarea:focus,select:focus{border-color:#93c5fd!important;box-shado
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<style id="qyrex-enterprise-v2">
+<style id="lua-u-vanguard-enterprise-v2">
 :root{
  --qx-blue:#1769e0;--qx-blue-2:#0e4fb5;--qx-navy:#0b1730;--qx-ink:#101828;--qx-muted:#667085;
  --qx-line:#e4e7ec;--qx-surface:#7DD3FC;--qx-bg:#f5f8fc;--qx-soft:#eef5ff;
@@ -897,7 +897,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 }
 @media(prefers-reduced-motion:reduce){.qx-status i{animation:none!important}.card,.btn-primary{transition:none!important}}
 </style>
-<style id="qyrex-ultra-enterprise">
+<style id="lua-u-vanguard-ultra-enterprise">
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 :root{
   --qx-blue:#2f80ed; --qx-blue-2:#56a6ff; --qx-deep:#0a2a52; --qx-ink:#05070b;
@@ -993,8 +993,8 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 
-<style id="qyrex-final-polish">
-  /* Qyrex final UI polish */
+<style id="lua-u-vanguard-final-polish">
+  /* Lua u Vanguard final UI polish */
   .sidebar-close-btn{display:none!important;visibility:hidden!important;pointer-events:none!important}
   .sidebar{left:0!important;right:auto!important;border-right:1px solid rgba(56,189,248,.14)!important;background:
     linear-gradient(180deg,rgba(6,16,31,.98),rgba(3,9,18,.98))!important;
@@ -1012,45 +1012,45 @@ tbody tr:hover{background:rgba(47,128,237,.045);transform:translateX(1px)}
   .notif-item.unread{background:rgba(56,189,248,.055)!important;border-color:rgba(56,189,248,.13)!important}
   @media(max-width:900px){.sidebar-close-btn{display:none!important}.section-resource{margin-bottom:14px}}
 </style>
-<meta content="Qyrex es una plataforma profesional para gestionar, proteger, publicar y monitorizar scripts, keys, analytics y herramientas de desarrollo." name="description"/><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name="robots"/><meta content="strict-origin-when-cross-origin" name="referrer"/><meta content="#07111f" name="theme-color"/><meta content="dark light" name="color-scheme"/><meta content="Qyrex" name="application-name"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="Qyrex" name="apple-mobile-web-app-title"/><meta content="telephone=no" name="format-detection"/><meta content="website" property="og:type"/><meta content="Qyrex — Plataforma profesional de scripts" property="og:title"/><meta content="Gestiona, protege y monitoriza tus scripts desde Qyrex." property="og:description"/><meta content="https://qyrex.hopto.org/" property="og:url"/><meta content="Qyrex" property="og:site_name"/><meta content="es_ES" property="og:locale"/><meta content="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024" property="og:image"/><meta content="Logotipo de Qyrex" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="Qyrex — Plataforma profesional de scripts" name="twitter:title"/><meta content="Gestión profesional de scripts, keys, analytics y herramientas de desarrollo." name="twitter:description"/><meta content="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024" name="twitter:image"/><meta content="Logotipo de Qyrex" name="twitter:image:alt"/><link href="https://qyrex.hopto.org/" rel="canonical"/><link href="https://qyrex.hopto.org/" hreflang="es" rel="alternate"/><link href="https://qyrex.hopto.org/" hreflang="x-default" rel="alternate"/><link href="//fonts.googleapis.com" rel="dns-prefetch"/><link href="//fonts.gstatic.com" rel="dns-prefetch"/><link href="https://cdn.jsdelivr.net" rel="preconnect"/><link href="//cdn.jsdelivr.net" rel="dns-prefetch"/><meta content="nosniff" http-equiv="X-Content-Type-Options"/><meta content="strict-origin-when-cross-origin" http-equiv="Referrer-Policy"/><meta content="camera=(), microphone=(), geolocation=(), payment=()" http-equiv="Permissions-Policy"/><script type="application/ld+json">{
+<meta content="Lua u Vanguard es una plataforma profesional para gestionar, proteger, publicar y monitorizar scripts, keys, analytics y herramientas de desarrollo." name="description"/><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name="robots"/><meta content="strict-origin-when-cross-origin" name="referrer"/><meta content="#07111f" name="theme-color"/><meta content="dark light" name="color-scheme"/><meta content="Lua u Vanguard" name="application-name"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="Lua u Vanguard" name="apple-mobile-web-app-title"/><meta content="telephone=no" name="format-detection"/><meta content="website" property="og:type"/><meta content="Lua u Vanguard — Plataforma profesional de scripts" property="og:title"/><meta content="Gestiona, protege y monitoriza tus scripts desde Lua u Vanguard." property="og:description"/><meta content="https://lua-u-vanguard.hopto.org/" property="og:url"/><meta content="Lua u Vanguard" property="og:site_name"/><meta content="es_ES" property="og:locale"/><meta content="/logo.png" property="og:image"/><meta content="Logotipo de Lua u Vanguard" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="Lua u Vanguard — Plataforma profesional de scripts" name="twitter:title"/><meta content="Gestión profesional de scripts, keys, analytics y herramientas de desarrollo." name="twitter:description"/><meta content="/logo.png" name="twitter:image"/><meta content="Logotipo de Lua u Vanguard" name="twitter:image:alt"/><link href="https://lua-u-vanguard.hopto.org/" rel="canonical"/><link href="https://lua-u-vanguard.hopto.org/" hreflang="es" rel="alternate"/><link href="https://lua-u-vanguard.hopto.org/" hreflang="x-default" rel="alternate"/><link href="//fonts.googleapis.com" rel="dns-prefetch"/><link href="//fonts.gstatic.com" rel="dns-prefetch"/><link href="https://cdn.jsdelivr.net" rel="preconnect"/><link href="//cdn.jsdelivr.net" rel="dns-prefetch"/><meta content="nosniff" http-equiv="X-Content-Type-Options"/><meta content="strict-origin-when-cross-origin" http-equiv="Referrer-Policy"/><meta content="camera=(), microphone=(), geolocation=(), payment=()" http-equiv="Permissions-Policy"/><script type="application/ld+json">{
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://qyrex.hopto.org/#organization",
-      "name": "Qyrex",
-      "url": "https://qyrex.hopto.org/",
+      "@id": "https://lua-u-vanguard.hopto.org/#organization",
+      "name": "Lua u Vanguard",
+      "url": "https://lua-u-vanguard.hopto.org/",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"
+        "url": "/logo.png"
       }
     },
     {
       "@type": "SoftwareApplication",
-      "@id": "https://qyrex.hopto.org/#application",
-      "name": "Qyrex",
-      "url": "https://qyrex.hopto.org/",
+      "@id": "https://lua-u-vanguard.hopto.org/#application",
+      "name": "Lua u Vanguard",
+      "url": "https://lua-u-vanguard.hopto.org/",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
       "publisher": {
-        "@id": "https://qyrex.hopto.org/#organization"
+        "@id": "https://lua-u-vanguard.hopto.org/#organization"
       }
     },
     {
       "@type": "WebPage",
-      "@id": "https://qyrex.hopto.org/#webpage",
-      "url": "https://qyrex.hopto.org/",
-      "name": "Qyrex — Plataforma de gestión y protección de scripts",
+      "@id": "https://lua-u-vanguard.hopto.org/#webpage",
+      "url": "https://lua-u-vanguard.hopto.org/",
+      "name": "Lua u Vanguard — Plataforma de gestión y protección de scripts",
       "inLanguage": "es",
       "isPartOf": {
-        "@id": "https://qyrex.hopto.org/#application"
+        "@id": "https://lua-u-vanguard.hopto.org/#application"
       },
       "about": {
-        "@id": "https://qyrex.hopto.org/#organization"
+        "@id": "https://lua-u-vanguard.hopto.org/#organization"
       }
     }
   ]
-}</script><style id="qyrex-principal-ux">
+}</script><style id="lua-u-vanguard-principal-ux">
 /* QYREX PRINCIPAL ARCHITECT LAYER */
 :root{
   color-scheme:dark light;
@@ -1095,7 +1095,7 @@ section.page[hidden],section.page.hidden{display:none!important}
   #appView main.main-content{contain:layout paint style}
 }
 </style>
-<style id="qyrex-apex-ui">
+<style id="lua-u-vanguard-apex-ui">
 :root{
   --qx-bg:#03070d;
   --qx-bg-2:#06101a;
@@ -1225,7 +1225,7 @@ body.sidebar-collapsed #appView .main-content{margin-left:76px!important;width:c
 body.sidebar-collapsed .sidebar .nav-item{width:54px!important;margin:4px auto!important;padding:0!important;justify-content:center!important;border-radius:15px!important}
 body.sidebar-collapsed .sidebar .nav-item::before{left:3px!important}
 body.sidebar-collapsed .sidebar .user-pill{width:56px!important;margin:10px auto 14px!important;justify-content:center!important;padding:10px!important}
-body.sidebar-collapsed .sidebar .nav-section,body.sidebar-collapsed .sidebar .qyrex-credit{opacity:0!important;height:7px!important;overflow:hidden!important}
+body.sidebar-collapsed .sidebar .nav-section,body.sidebar-collapsed .sidebar .lua-u-vanguard-credit{opacity:0!important;height:7px!important;overflow:hidden!important}
 body.sidebar-collapsed .sidebar .nav-item span,body.sidebar-collapsed .sidebar .user-pill .flex-1,body.sidebar-collapsed .sidebar .user-pill button,body.sidebar-collapsed .sidebar .sidebar-brand-text{display:none!important}
 body.sidebar-collapsed .sidebar .nav-item:hover::after{content:attr(data-page);position:fixed;left:90px;padding:7px 10px;border-radius:9px;background:#0b1b2a;border:1px solid #214863;color:#7dd3fc;font-size:11px;box-shadow:0 10px 30px rgba(0,0,0,.36);z-index:100}
 .lg-topbar{background:rgba(3,9,15,.75)!important;border:1px solid rgba(80,171,229,.14)!important;border-radius:999px!important;backdrop-filter:blur(18px)!important;box-shadow:0 12px 36px rgba(0,0,0,.28)!important;color:#dcefff!important}
@@ -1278,7 +1278,7 @@ body.sidebar-collapsed .sidebar .nav-item:hover::after{content:attr(data-page);p
   <meta name="theme-color" content="#03070b">
   <meta name="mobile-web-app-capable" content="yes">
 
-<style id="qyrex-ultra-v4">
+<style id="lua-u-vanguard-ultra-v4">
 :root{
   --qx-bg:#03070b;--qx-bg2:#050c12;--qx-panel:rgba(8,16,23,.82);--qx-panel-solid:#09121a;
   --qx-line:rgba(125,211,252,.10);--qx-line-strong:rgba(125,211,252,.22);
@@ -1391,7 +1391,7 @@ html.qx-ultra #appView .qx-modal-box,html.qx-ultra #appView .vip-modal{backgroun
 </style>
 
 
-<style id="qyrex-nexus-v3">
+<style id="lua-u-vanguard-nexus-v3">
 :root{
   --nx-bg:#04070b;--nx-bg2:#071018;--nx-panel:rgba(9,17,25,.78);--nx-panel2:rgba(11,22,31,.92);
   --nx-line:rgba(125,211,252,.11);--nx-line2:rgba(125,211,252,.22);--nx-text:#edfaff;--nx-muted:#7e9cac;
@@ -1493,11 +1493,11 @@ html.qx-ultra body{background:
 @media(prefers-reduced-motion:reduce){#appView .page{animation:none!important}.qx-nx-spotlight{display:none!important}.qx-nx-fab *{transition:none!important}}
 </style>
 
-<link rel="stylesheet" href="/qyrex-nexus-v5.css"><script defer src="/qyrex-nexus-v5.js"></script>
-<script defer src="/qyrex-ultra-v6.js"></script>
-<link rel="stylesheet" href="/qyrex-ultra-v6.css">
-<link rel="stylesheet" href="/qyrex-nexus-v7.css">
-<script defer src="/qyrex-nexus-v7.js"></script>
+<link rel="stylesheet" href="/lua-u-vanguard-nexus-v5.css"><script defer src="/lua-u-vanguard-nexus-v5.js"></script>
+<script defer src="/lua-u-vanguard-ultra-v6.js"></script>
+<link rel="stylesheet" href="/lua-u-vanguard-ultra-v6.css">
+<link rel="stylesheet" href="/lua-u-vanguard-nexus-v7.css">
+<script defer src="/lua-u-vanguard-nexus-v7.js"></script>
 </head>
 <body>
 <a class="qx-skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -1505,8 +1505,8 @@ html.qx-ultra body{background:
 <!-- LOGIN -->
 <!-- LOADER GLOBAL -->
 <aside aria-busy="true" aria-label="Estado de carga" aria-live="polite" class="qx-loader show" id="qxLoader" role="status">
-<div class="qx-ring"><img alt="QyrexApi" decoding="async" fetchpriority="high" loading="eager" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/></div>
-<div class="qx-ltext" data-i18n-html="login.loading" id="qxLoaderText">Cargando <b>QyrexApi</b>...</div>
+<div class="qx-ring"><img alt="Lua u Vanguard" decoding="async" fetchpriority="high" loading="eager" referrerpolicy="no-referrer" src="/logo.png"/></div>
+<div class="qx-ltext" data-i18n-html="login.loading" id="qxLoaderText">Cargando <b>Lua u Vanguard</b>...</div>
 <div class="qx-bar"><i></i></div>
 </aside>
 <!-- MODALES LEGALES -->
@@ -1521,8 +1521,8 @@ html.qx-ultra body{background:
 <aside aria-atomic="true" aria-label="Mensajes del sistema" aria-live="polite" class="toast-wrap" id="toasts" role="status"></aside>
 <main aria-labelledby="login-title" class="min-h-screen flex items-center justify-center p-6" id="loginView">
 <div class="lg-topbar">
-<img alt="QrexApi" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
-<b>QyrexApi</b>
+<img alt="Lua u Vanguard" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
+<b>Lua u Vanguard</b>
 </div>
 <div class="lang-switch lang-switch-login" data-lang-switch="">
 <button aria-haspopup="listbox" aria-label="Language" class="lang-btn" onclick="toggleLangMenu(event,this)" type="button">
@@ -1546,8 +1546,8 @@ html.qx-ultra body{background:
 <section class="lg-aside">
 <div>
 <div class="lg-mark">
-<img alt="QrexApi" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
-<b>QyrexApi</b>
+<img alt="Lua u Vanguard" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
+<b>Lua u Vanguard</b>
 </div>
 <p class="lg-kicker" data-i18n="login.kicker" style="margin-top:34px">Panel privado</p>
 <h1 class="lg-title" data-i18n="login.title" id="login-title">Tus scripts, bajo llave.</h1>
@@ -1562,8 +1562,8 @@ html.qx-ultra body{background:
 </section>
 <section class="lg-panel">
 <div class="lg-mobile-mark">
-<img alt="QrexApi" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
-<b>QyrexApi</b>
+<img alt="Lua u Vanguard" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
+<b>Lua u Vanguard</b>
 </div>
 <div class="lg-switch">
 <i class="lg-thumb" id="tabThumb"></i>
@@ -1579,24 +1579,24 @@ html.qx-ultra body{background:
 <div class="lg-field"><input autocomplete="current-password" data-i18n-placeholder="login.pass" id="authPass" placeholder="Contraseña" type="password"/></div>
 <button class="btn-primary w-full" id="authBtn" onclick="doAuth()" style="padding:13px" type="button">Entrar</button>
 <p class="text-red-400 text-sm text-center hidden mt-3" id="loginErr"></p>
-<p class="lg-legal" data-i18n-html="login.legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de QyrexApi.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
+<p class="lg-legal" data-i18n-html="login.legal">Al continuar aceptas los <a href="#" onclick="openLegal('terms');return false">Terminos de servicio</a> y la <a href="#" onclick="openLegal('privacy');return false">Politica de privacidad</a> de Lua u Vanguard.<br/>Nunca compartas tu key ni tu contrasena con terceros. El soporte jamas te las pedira.</p>
 <div class="lg-links">
 <button data-i18n="login.terms" onclick="openLegal('terms')" type="button">Terminos</button><span>·</span>
 <button data-i18n="login.privacy" onclick="openLegal('privacy')" type="button">Privacidad</button><span>·</span>
 <button data-i18n="login.cookies" onclick="openLegal('cookies')" type="button">Cookies</button><span>·</span>
 <button data-i18n="login.support" onclick="openLegal('support')" type="button">Soporte</button>
 </div>
-<p class="lg-legal" data-i18n-html="login.rights" style="margin-top:14px;color:#3f3f52">© 2026 QyrexApi · Todos los derechos reservados</p>
+<p class="lg-legal" data-i18n-html="login.rights" style="margin-top:14px;color:#3f3f52">© 2026 Lua u Vanguard · Todos los derechos reservados</p>
 </section>
 </div>
 </main>
 <dialog aria-modal="true" class="vip-modal-backdrop" id="vipModal" onclick="if(event.target===this)closeVipModal()">
 <div aria-labelledby="vipModalTitle" aria-modal="true" class="vip-modal" role="dialog">
 <div class="vip-modal-head">
-<div><div class="text-lg font-bold" data-i18n="vip.title" id="vipModalTitle" style="color:#fbbf24">✦ Qyrex VIP Licenses</div><div class="text-xs mt-1" data-i18n="vip.sub" style="color:#757589">Elige una licencia y abre un ticket para comprarla.</div></div>
+<div><div class="text-lg font-bold" data-i18n="vip.title" id="vipModalTitle" style="color:#fbbf24">✦ Lua u Vanguard VIP Licenses</div><div class="text-xs mt-1" data-i18n="vip.sub" style="color:#757589">Elige una licencia y abre un ticket para comprarla.</div></div>
 <button aria-label="Cerrar" class="btn-ghost" onclick="closeVipModal()" type="button">✕</button>
 </div>
-<div class="vip-free"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-semibold">FREE</div><div class="text-xs mt-1" data-i18n="vip.freeDesc">Para empezar: acceso básico a Qyrex con límites estándar.</div></div><span class="chip" data-i18n="vip.included">INCLUIDO</span></div></div>
+<div class="vip-free"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-semibold">FREE</div><div class="text-xs mt-1" data-i18n="vip.freeDesc">Para empezar: acceso básico a Lua u Vanguard con límites estándar.</div></div><span class="chip" data-i18n="vip.included">INCLUIDO</span></div></div>
 <div class="vip-compare">
 <div class="vip-compare-card free"><div class="vc-head"><div><span class="vc-badge">FREE</span><div class="vc-title" data-i18n="vip.start">Para empezar</div></div><span class="vc-state" data-i18n="vip.active">● ACTIVO</span></div><div class="vc-list">
 <div><span>✓</span> <span data-i18n="vip.f1">Acceso básico a la plataforma</span></div><div><span>✓</span> <span data-i18n="vip.f2">Uso con límites estándar</span></div><div><span>✓</span> <span data-i18n="vip.f3">Publicación básica de scripts</span></div><div><span>•</span> <span data-i18n="vip.f4">Sin extras VIP</span></div>
@@ -1614,7 +1614,7 @@ html.qx-ultra body{background:
 <div class="vip-row"><span data-i18n="vip.r4">Personalización VIP</span><b>—</b><b class="gold">✓</b></div>
 <div class="vip-row"><span data-i18n="vip.r5">Experiencia prioritaria</span><b>—</b><b class="gold">✓</b></div>
 </div>
-<div class="vip-value"><div><div class="text-xs font-bold" data-i18n="vip.why" style="color:#fbbf24">✦ ¿Por qué VIP?</div><div class="text-xs mt-1" data-i18n="vip.whySub">Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.</div></div><div class="vip-save" data-i18n="vip.best">10 MESES • MEJOR VALOR</div></div>
+<div class="vip-value"><div><div class="text-xs font-bold" data-i18n="vip.why" style="color:#fbbf24">✦ ¿Por qué VIP?</div><div class="text-xs mt-1" data-i18n="vip.whySub">Más funciones, personalización y una experiencia pensada para usuarios que usan Lua u Vanguard al máximo.</div></div><div class="vip-save" data-i18n="vip.best">10 MESES • MEJOR VALOR</div></div>
 <div class="vip-plans">
 <div class="vip-plan"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 1 MES</div><div class="vip-price mt-3">$30 <small>MXN</small></div><div class="text-xs mt-2 mb-5" data-i18n="vip.m1" style="color:#77778b">Acceso VIP por 30 días.</div><button class="btn-primary w-full" data-i18n="vip.buy" onclick="buyVip('1 mes','30 MXN')" type="button">Comprar</button></div>
 <div class="vip-plan featured"><div class="flex items-center justify-between"><div class="text-[11px] font-bold" style="color:#fbbf24;letter-spacing:.12em">VIP • 10 MESES</div><span class="chip" style="border-color:#5c4d1f;color:#fbbf24;background:#211d10">POPULAR</span></div><div class="vip-price mt-3">$150 <small>MXN</small></div><div class="text-xs mt-2 mb-5" data-i18n="vip.m10" style="color:#77778b">Una opción de mejor valor para uso prolongado.</div><button class="btn-primary w-full" data-i18n="vip.buy" onclick="buyVip('10 meses','150 MXN')" type="button">Comprar</button></div>
@@ -1624,12 +1624,12 @@ html.qx-ultra body{background:
 </div>
 </dialog>
 <!-- APP -->
-<div aria-label="Aplicación web de Qyrex" id="appView" role="application" style="display:none;min-height:100vh">
+<div aria-label="Aplicación web de Lua u Vanguard" id="appView" role="application" style="display:none;min-height:100vh">
 <canvas id="vipParticleCanvas"></canvas>
 <header aria-label="Barra superior móvil" class="mobile-topbar">
 <div class="mt-brand">
-<img alt="QrexApi" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
-<b>QyrexApi</b>
+<img alt="Lua u Vanguard" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
+<b>Lua u Vanguard</b>
 </div>
 <div class="lang-switch" data-lang-switch="">
 <button aria-haspopup="listbox" aria-label="Language" class="lang-btn" onclick="toggleLangMenu(event,this)" type="button">
@@ -1650,17 +1650,17 @@ html.qx-ultra body{background:
 </header>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="app-shell flex" style="min-height:100vh">
-<aside aria-label="Barra lateral de Qyrex" class="sidebar flex flex-col fixed h-full z-20" id="appSidebar">
+<aside aria-label="Barra lateral de Lua u Vanguard" class="sidebar flex flex-col fixed h-full z-20" id="appSidebar">
 <button aria-label="Ocultar barra lateral" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Ocultar/mostrar barra lateral" type="button">
 <svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
 </button>
 <header class="sidebar-brand flex items-center gap-3 px-5 py-5">
-<img alt="QrexApi" class="w-9 h-9 rounded-xl object-cover" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
+<img alt="Lua u Vanguard" class="w-9 h-9 rounded-xl object-cover" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
 <div class="min-w-0">
-<div class="font-bold text-lg tracking-tight leading-tight">QyrexApi</div>
-<a class="qyrex-credit mt-1" href="#" rel="noopener noreferrer" target="_blank" title="Ofuscador QyrexObf">
+<div class="font-bold text-lg tracking-tight leading-tight">Lua u Vanguard</div>
+<a class="lua-u-vanguard-credit mt-1" href="#" rel="noopener noreferrer" target="_blank" title="Ofuscador Lua u VanguardObf">
 <svg aria-hidden="true" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l-10 5 10 5 10-5-10-5z"></path></svg>
-            Protected by QyrexObf (beta)
+            Protected by Lua u VanguardObf (beta)
           </a>
 </div>
 </header>
@@ -1736,8 +1736,8 @@ html.qx-ultra body{background:
 <span data-i18n="nav.playground">API Playground</span>
 </button>
 <div class="nav-section">VIP / PUBLISHING</div>
-<button aria-current="false" class="nav-item vip-site-nav hidden" data-page="site" onclick="go('site')" type="button" title="Tu sitio Qyrex">
-  <span aria-hidden="true">⌂</span><span>Mi sitio Qyrex</span>
+<button aria-current="false" class="nav-item vip-site-nav hidden" data-page="site" onclick="go('site')" type="button" title="Tu sitio Lua u Vanguard">
+  <span aria-hidden="true">⌂</span><span>Mi sitio Lua u Vanguard</span>
 </button>
 <div class="nav-section admin-only" data-i18n="nav.adminsec" style="display:none">ADMIN</div>
 <button aria-current="false" class="nav-item admin-only" data-page="admin" onclick="go('admin')" style="display:none" type="button">
@@ -1745,7 +1745,7 @@ html.qx-ultra body{background:
 <span data-i18n="nav.admin">Admin Panel</span>
 </button>
 <div class="nav-section">IA</div>
-<button aria-current="false" class="nav-item" data-page="ia" onclick="go('ia')" type="button" title="QyrexAI Chat">
+<button aria-current="false" class="nav-item" data-page="ia" onclick="go('ia')" type="button" title="Lua u VanguardAI Chat">
 <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
 <span>IA</span>
 </button>
@@ -1796,14 +1796,14 @@ html.qx-ultra body{background:
 <div class="p-8">
 <!-- OVERVIEW -->
 <section aria-labelledby="page-overview-title" class="page" id="page-overview" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Resumen del workspace · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Resumen del workspace · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="ov-hero">
 <div class="flex flex-wrap items-center gap-5">
-<img alt="QyrexApi" class="ov-logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024"/>
+<img alt="Lua u Vanguard" class="ov-logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="/logo.png"/>
 <div class="min-w-0">
-<div class="ov-kicker" data-i18n="ov.kicker">QyrexApi · Panel privado</div>
+<div class="ov-kicker" data-i18n="ov.kicker">Lua u Vanguard · Panel privado</div>
 <h2 class="ov-title" data-i18n="ov.title" id="page-overview-title">Tus scripts, bajo control.</h2>
-<p class="ov-sub" data-i18n="ov.sub">Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
+<p class="ov-sub" data-i18n="ov.sub">Sube tu Lua, protégela con Lua u VanguardObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.</p>
 </div>
 </div>
 <div class="flex flex-wrap gap-3 mt-7">
@@ -1839,7 +1839,7 @@ html.qx-ultra body{background:
 </section>
 <!-- SCRIPTS LIST -->
 <section aria-labelledby="page-scripts-title" class="page hidden" id="page-scripts" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Gestión de scripts · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Gestión de scripts · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
 <h2 class="text-2xl font-bold" data-i18n="nav.lua" id="page-scripts-title">Lua Scripts</h2>
 <div class="flex items-center gap-3">
@@ -1862,7 +1862,7 @@ html.qx-ultra body{background:
 </section>
 <!-- SCRIPT HUB -->
 <section aria-labelledby="page-hub-title" class="page hidden" id="page-hub" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Script Hub · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Script Hub · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
 <div>
 <h2 class="text-2xl font-bold" data-i18n="nav.hub" id="page-hub-title">Script Hub</h2>
@@ -1901,7 +1901,7 @@ html.qx-ultra body{background:
 </section>
 <!-- KEY SYSTEM -->
 <section aria-labelledby="page-keys-title" class="page hidden" id="page-keys" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Keys &amp; Providers · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Keys &amp; Providers · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
 <div>
 <h2 class="text-2xl font-bold" data-i18n="page.keys" id="page-keys-title">Key System</h2>
@@ -1977,7 +1977,7 @@ html.qx-ultra body{background:
 </section>
 <!-- CREATE SCRIPT (estilo UNKIE) -->
 <section class="page hidden" id="page-create">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Crear y publicar · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Crear y publicar · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="card max-w-3xl overflow-hidden">
 <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:#1e1e2a">
 <div class="flex items-center gap-3">
@@ -2085,7 +2085,7 @@ local Players = game:GetService("Players")
 </div>
 </section>
 <section aria-labelledby="heading-page-logs" class="page hidden" id="page-logs" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Registros del sistema · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Registros del sistema · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-2" data-i18n="nav.logs" id="heading-page-logs">Logs</h2>
 <p class="text-xs mb-4" data-i18n="logs.sub" style="color:#5a5a6e">Quién ejecuta tus scripts · ban por HWID o IP</p>
 <div class="log-summary" id="logsSummary">Cargando…</div>
@@ -2097,7 +2097,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- ANALYTICS / EXECUTIONS CON GRÁFICAS -->
 <section aria-labelledby="page-executions-title" class="page hidden" id="page-executions" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Analítica de ejecuciones · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Analítica de ejecuciones · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.analytics" id="page-executions-title">Analytics</h2>
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
 <div class="card p-5">
@@ -2126,7 +2126,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- API INFO -->
 <section aria-labelledby="heading-page-apiinfo" class="page hidden" id="page-apiinfo" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Información de API · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Información de API · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.apiinfo" id="heading-page-apiinfo">API Info</h2>
 <div class="card p-6 max-w-2xl space-y-4">
 <div>
@@ -2146,12 +2146,12 @@ local Players = game:GetService("Players")
 </section>
 <!-- QYREX SITE -->
 <section aria-labelledby="heading-page-site" class="page hidden" id="page-site" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Publicación VIP · Qyrex Sites</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Publicación VIP · Lua u Vanguard Sites</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <header class="qx-admin-hero" style="margin-bottom:18px">
 <div style="position:relative;z-index:1">
-<div class="qx-kicker">Qyrex Sites · VIP</div>
+<div class="qx-kicker">Lua u Vanguard Sites · VIP</div>
 <h2 class="qx-title font-bold mb-2" id="heading-page-site">Tu página de scripts</h2>
-<p class="qx-sub mb-0">Publica tu propio <code>index.html</code> y obtén un subdominio personalizado como <b>tuscripts.qyrex.hopto.org</b>.</p>
+<p class="qx-sub mb-0">Publica tu propio <code>index.html</code> y obtén un subdominio personalizado como <b>tuscripts.lua-u-vanguard.hopto.org</b>.</p>
 </div>
 </header>
 <div class="grid lg:grid-cols-2 gap-5">
@@ -2159,7 +2159,7 @@ local Players = game:GetService("Players")
 <h3 class="text-sm font-semibold mb-1">Identidad de tu sitio</h3>
 <p class="text-xs mb-4" style="color:#6b6b80">El subdominio debe usar letras, números y guiones.</p>
 <label class="field" for="siteSlug">Subdominio</label>
-<div class="flex items-center gap-2 mb-4"><input id="siteSlug" maxlength="30" placeholder="miscripts" autocomplete="off"/><span class="text-xs" style="color:#6b6b80;white-space:nowrap">.qyrex.hopto.org</span></div>
+<div class="flex items-center gap-2 mb-4"><input id="siteSlug" maxlength="30" placeholder="miscripts" autocomplete="off"/><span class="text-xs" style="color:#6b6b80;white-space:nowrap">.lua-u-vanguard.hopto.org</span></div>
 <label class="field" for="siteFile">Subir index.html</label>
 <input id="siteFile" accept=".html,text/html" type="file" class="mb-3" aria-describedby="siteFileHint"/>
 <div id="siteFileHint" class="text-[11px] mb-3" style="color:#5f7790">Máximo recomendado: 900 KB. El contenido se guarda como tu página pública.</div>
@@ -2191,10 +2191,10 @@ local Players = game:GetService("Players")
 </section>
 <!-- ADMIN -->
 <section aria-labelledby="heading-page-admin" class="page hidden" id="page-admin" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Centro de administración · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Centro de administración · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="qx-admin-hero">
 <div style="position:relative;z-index:1">
-<div class="qx-kicker">Qyrex Control Center</div>
+<div class="qx-kicker">Lua u Vanguard Control Center</div>
 <h2 class="qx-title font-bold mb-2" data-i18n="nav.admin" id="heading-page-admin">Admin Panel</h2>
 <p class="qx-sub mb-0">Centro operativo para gestionar usuarios, scripts, publicaciones, seguridad y mantenimiento.</p>
 </div>
@@ -2302,7 +2302,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- WEBHOOKS -->
 <section aria-labelledby="heading-page-webhooks" class="page hidden" id="page-webhooks" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Webhooks · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Webhooks · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-2" data-i18n="nav.webhooks" id="heading-page-webhooks">Webhooks</h2>
 <p class="text-xs mb-6" style="color:#5a5a6e">Alertas a Discord cuando verifican una key o ejecutan un script</p>
 <div class="card p-6 max-w-xl mb-6 space-y-3">
@@ -2314,7 +2314,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- LEADERBOARD -->
 <section aria-labelledby="heading-page-leaderboard" class="page hidden" id="page-leaderboard" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Leaderboard · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Leaderboard · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.leaderboard" id="heading-page-leaderboard">Leaderboard</h2>
 <div class="card overflow-hidden max-w-2xl">
 <table>
@@ -2325,7 +2325,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- ASSETS -->
 <section aria-labelledby="heading-page-assets" class="page hidden" id="page-assets" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Assets · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Assets · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-2" data-i18n="nav.assets" id="heading-page-assets">My Assets</h2>
 <p class="text-xs mb-6" style="color:#5a5a6e">Nube privada: texto, URLs, snippets UI (máx 20 free / 100 VIP)</p>
 <div class="card p-6 max-w-xl mb-6 space-y-3">
@@ -2338,13 +2338,13 @@ local Players = game:GetService("Players")
 </section>
 <!-- TEMPLATES -->
 <section aria-labelledby="heading-page-templates" class="page hidden" id="page-templates" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Plantillas · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Plantillas · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="page.templates" id="heading-page-templates">Templates / Snippets</h2>
 <div class="grid gap-3 max-w-3xl" id="tplList"></div>
 </section>
 <!-- STATUS -->
 <section aria-labelledby="heading-page-status" class="page hidden" id="page-status" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Estado del sistema · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Estado del sistema · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.status" id="heading-page-status">System Status</h2>
 <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mb-6">
 <div class="card p-5"><div class="text-xs mb-1" style="color:#6b6b80">API</div><div class="text-lg font-bold" id="stApi">—</div></div>
@@ -2359,7 +2359,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- PLAYGROUND -->
 <section aria-labelledby="heading-page-playground" class="page hidden" id="page-playground" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>API Playground · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>API Playground · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.playground" id="heading-page-playground">API Playground</h2>
 <div class="card p-6 max-w-2xl space-y-3">
 <div class="flex gap-2">
@@ -2374,7 +2374,7 @@ local Players = game:GetService("Players")
 </section>
 <!-- CHANGELOG -->
 <section aria-labelledby="heading-page-changelog" class="page hidden" id="page-changelog" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Historial de cambios · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Historial de cambios · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.changelog" id="heading-page-changelog">Changelog</h2>
 <div class="space-y-4 max-w-2xl">
 <div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist, límite 15 scripts (ilimitado VIP).</div></div>
@@ -2382,7 +2382,7 @@ local Players = game:GetService("Players")
 </div>
 </section>
 <section aria-labelledby="heading-page-studio" class="page hidden" id="page-studio" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Entorno de desarrollo · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Entorno de desarrollo · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
 <div>
 <h2 class="text-2xl font-bold" data-i18n="nav.studio" id="heading-page-studio">Studio</h2>
@@ -2425,10 +2425,10 @@ local Players = game:GetService("Players")
 <!-- SETTINGS -->
 <!-- IA CHAT -->
 <section aria-labelledby="heading-page-ia" class="page hidden" id="page-ia" role="region" style="padding:0!important;margin:0!important;max-width:none!important;height:calc(100vh - 56px);">
-<iframe id="iaFrame" src="/ia.html" title="QyrexAI Chat" style="width:100%;height:100%;border:0;border-radius:0;background:#0b0f19;display:block;" allow="clipboard-write"></iframe>
+<iframe id="iaFrame" src="/ia.html" title="Lua u VanguardAI Chat" style="width:100%;height:100%;border:0;border-radius:0;background:#0b0f19;display:block;" allow="clipboard-write"></iframe>
 </section>
 <section aria-labelledby="heading-page-settings" class="page hidden" id="page-settings" role="region">
-<aside aria-label="Recurso de sección" class="section-resource"><span>Cuenta y preferencias · QyrexApi</span><a href="https://qyrex.hopto.org/scripts" rel="noopener noreferrer" target="_blank">qyrex.hopto.org/scripts</a></aside>
+<aside aria-label="Recurso de sección" class="section-resource"><span>Cuenta y preferencias · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <div class="flex flex-wrap items-end justify-between gap-3 mb-6"><div><div class="text-xs uppercase tracking-[.16em]" style="color:#66667c">Account Center</div><h2 class="text-2xl font-bold" data-i18n="settings.account" id="heading-page-settings">Tu cuenta</h2></div><button class="btn-ghost text-xs" onclick="loadNotifications();loadAccountData();" type="button">↻ Actualizar</button></div>
 <div class="grid gap-4 max-w-4xl">
 <div class="card overflow-hidden"><div class="profile-banner" id="profileBanner"><div class="profile-avatar-xl" id="profileAvatarLarge">?</div></div><div class="p-6 pt-8"><div class="flex flex-wrap items-end justify-between gap-4"><div><div class="text-xl font-bold" id="profileDisplayName">—</div><div class="text-xs" id="profileHandle" style="color:#68687e">@—</div></div><div class="flex flex-wrap gap-1" id="profileBadges"></div></div><p class="text-sm mt-3" id="profileBioPreview" style="color:#9696aa">Sin biografía.</p></div></div>
@@ -2543,28 +2543,28 @@ es:{
 "login.kicker":"Panel privado","login.title":"Tus scripts, bajo llave.","login.sub":"Subes el script, generas las keys y ves quien lo ejecuta. Sin vueltas.",
 "login.p1":"Loadstrings con version y rollback","login.p2":"Keys con caducidad y HWID lock","login.p3":"Webhooks a tu Discord al instante",
 "login.foot":"API operativa · ~80ms","login.enter":"Entrar","login.register":"Registrarse","login.create":"Crear cuenta","login.discord":"Continuar con Discord",
-"login.or":"o con tu cuenta","login.user":"Usuario","login.pass":"Contraseña","login.ok":"Entendido","login.loading":"Cargando QyrexApi...",
-"login.legal":"Al continuar aceptas los Términos de servicio y la Política de privacidad de QyrexApi. Nunca compartas tu key ni tu contraseña con terceros. El soporte jamás te las pedirá.",
+"login.or":"o con tu cuenta","login.user":"Usuario","login.pass":"Contraseña","login.ok":"Entendido","login.loading":"Cargando Lua u Vanguard...",
+"login.legal":"Al continuar aceptas los Términos de servicio y la Política de privacidad de Lua u Vanguard. Nunca compartas tu key ni tu contraseña con terceros. El soporte jamás te las pedirá.",
 "login.terms":"Términos","login.privacy":"Privacidad","login.cookies":"Cookies","login.support":"Soporte",
-"login.rights":"© 2026 QyrexApi · Todos los derechos reservados",
+"login.rights":"© 2026 Lua u Vanguard · Todos los derechos reservados",
 "nav.general":"GENERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
 "nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
 "nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
 "nav.community":"COMMUNITY","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
 "nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"ACCOUNT","nav.settings":"Settings",
-"ov.kicker":"QyrexApi · Panel privado","ov.title":"Tus scripts, bajo control.",
-"ov.sub":"Sube tu Lua, protégela con QyrexObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.",
+"ov.kicker":"Lua u Vanguard · Panel privado","ov.title":"Tus scripts, bajo control.",
+"ov.sub":"Sube tu Lua, protégela con Lua u VanguardObf (beta), genera keys con HWID y mira quien lo ejecuta en vivo.",
 "ov.create":"Create Script","ov.myscripts":"Mis scripts","ov.panel":"Abrir panel","ov.scripts":"Scripts","ov.exec":"Ejecuciones totales",
 "ov.state":"Estado","ov.online":"Online","ov.chart":"Ejecuciones (últimos 7 días)",
 "dash.crumb":"Dashboard","notif.title":"Notificaciones","notif.read":"Marcar leídas","notif.loading":"Cargando…","notif.empty":"Todo está al día",
 "role.user":"Usuario","role.admin":"Administrador","role.vip":"VIP · Premium",
-"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Elige una licencia y abre un ticket para comprarla.","vip.aria":"Ver licencias VIP",
-"vip.freeDesc":"Para empezar: acceso básico a Qyrex con límites estándar.","vip.included":"INCLUIDO","vip.start":"Para empezar","vip.active":"● ACTIVO",
+"vip.title":"✦ Lua u Vanguard VIP Licenses","vip.sub":"Elige una licencia y abre un ticket para comprarla.","vip.aria":"Ver licencias VIP",
+"vip.freeDesc":"Para empezar: acceso básico a Lua u Vanguard con límites estándar.","vip.included":"INCLUIDO","vip.start":"Para empezar","vip.active":"● ACTIVO",
 "vip.f1":"Acceso básico a la plataforma","vip.f2":"Uso con límites estándar","vip.f3":"Publicación básica de scripts","vip.f4":"Sin extras VIP",
 "vip.intense":"Para uso intensivo","vip.v1":"Todo lo incluido en FREE","vip.v2":"Límites y cuotas superiores*","vip.v3":"Funciones y temas exclusivos VIP","vip.v4":"Prioridad en futuras mejoras*",
 "vip.compare":"Comparación rápida","vip.compareNote":"*Según la licencia y las funciones habilitadas","vip.feature":"Característica",
 "vip.r1":"Acceso al dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalización VIP","vip.r5":"Experiencia prioritaria",
-"vip.why":"✦ ¿Por qué VIP?","vip.whySub":"Más funciones, personalización y una experiencia pensada para usuarios que usan Qyrex al máximo.",
+"vip.why":"✦ ¿Por qué VIP?","vip.whySub":"Más funciones, personalización y una experiencia pensada para usuarios que usan Lua u Vanguard al máximo.",
 "vip.best":"10 MESES • MEJOR VALOR","vip.m1":"Acceso VIP por 30 días.","vip.m10":"Una opción de mejor valor para uso prolongado.","vip.m12":"Acceso VIP por 12 meses.",
 "vip.buy":"Comprar","vip.note":"Al pulsar comprar se abrirá Discord. <b style=\"color:#a8a8b8\">Saca un ticket para contactarte con el owner.</b>",
 "scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"No hay scripts","scripts.first":"Crear el primero",
@@ -2579,28 +2579,28 @@ en:{
 "login.kicker":"Private panel","login.title":"Your scripts,<br/><em>under lock.</em>","login.sub":"Upload the script, generate keys and see who runs it. No fuss.",
 "login.p1":"Loadstrings with versioning and rollback","login.p2":"Keys with expiry and HWID lock","login.p3":"Instant Discord webhooks",
 "login.foot":"API online · ~80ms","login.enter":"Sign in","login.register":"Sign up","login.create":"Create account","login.discord":"Continue with Discord",
-"login.or":"or with your account","login.user":"Username","login.pass":"Password","login.ok":"Got it","login.loading":"Loading <b>QyrexApi</b>...",
-"login.legal":"By continuing you accept the <a href=\"#\" onclick=\"openLegal('terms');return false\">Terms of service</a> and the <a href=\"#\" onclick=\"openLegal('privacy');return false\">Privacy policy</a> of QyrexApi.<br/>Never share your key or password. Support will never ask for them.",
+"login.or":"or with your account","login.user":"Username","login.pass":"Password","login.ok":"Got it","login.loading":"Loading <b>Lua u Vanguard</b>...",
+"login.legal":"By continuing you accept the <a href=\"#\" onclick=\"openLegal('terms');return false\">Terms of service</a> and the <a href=\"#\" onclick=\"openLegal('privacy');return false\">Privacy policy</a> of Lua u Vanguard.<br/>Never share your key or password. Support will never ask for them.",
 "login.terms":"Terms","login.privacy":"Privacy","login.cookies":"Cookies","login.support":"Support",
-"login.rights":"© 2026 QyrexApi · All rights reserved",
+"login.rights":"© 2026 Lua u Vanguard · All rights reserved",
 "nav.general":"GENERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
 "nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
 "nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
 "nav.community":"COMMUNITY","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
 "nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"ACCOUNT","nav.settings":"Settings",
-"ov.kicker":"QyrexApi · Private panel","ov.title":"Your scripts, under control.",
-"ov.sub":"Upload your Lua, protect it with QyrexObf (beta), generate HWID keys and watch who runs it live.",
+"ov.kicker":"Lua u Vanguard · Private panel","ov.title":"Your scripts, under control.",
+"ov.sub":"Upload your Lua, protect it with Lua u VanguardObf (beta), generate HWID keys and watch who runs it live.",
 "ov.create":"Create Script","ov.myscripts":"My scripts","ov.panel":"Open panel","ov.scripts":"Scripts","ov.exec":"Total executions",
 "ov.state":"Status","ov.online":"Online","ov.chart":"Executions (last 7 days)",
 "dash.crumb":"Dashboard","notif.title":"Notifications","notif.read":"Mark as read","notif.loading":"Loading…","notif.empty":"You're all caught up",
 "role.user":"User","role.admin":"Administrator","role.vip":"VIP · Premium",
-"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Pick a license and open a ticket to buy it.","vip.aria":"View VIP licenses",
-"vip.freeDesc":"To get started: basic Qyrex access with standard limits.","vip.included":"INCLUDED","vip.start":"To get started","vip.active":"● ACTIVE",
+"vip.title":"✦ Lua u Vanguard VIP Licenses","vip.sub":"Pick a license and open a ticket to buy it.","vip.aria":"View VIP licenses",
+"vip.freeDesc":"To get started: basic Lua u Vanguard access with standard limits.","vip.included":"INCLUDED","vip.start":"To get started","vip.active":"● ACTIVE",
 "vip.f1":"Basic platform access","vip.f2":"Standard usage limits","vip.f3":"Basic script publishing","vip.f4":"No VIP extras",
 "vip.intense":"For heavy use","vip.v1":"Everything in FREE","vip.v2":"Higher limits and quotas*","vip.v3":"Exclusive VIP features and themes","vip.v4":"Priority on future upgrades*",
 "vip.compare":"Quick comparison","vip.compareNote":"*Depends on the license and enabled features","vip.feature":"Feature",
 "vip.r1":"Dashboard access","vip.r2":"API / scripts","vip.r3":"Exclusive themes","vip.r4":"VIP customization","vip.r5":"Priority experience",
-"vip.why":"✦ Why VIP?","vip.whySub":"More features, customization and an experience built for people who use Qyrex at full speed.",
+"vip.why":"✦ Why VIP?","vip.whySub":"More features, customization and an experience built for people who use Lua u Vanguard at full speed.",
 "vip.best":"10 MONTHS • BEST VALUE","vip.m1":"VIP access for 30 days.","vip.m10":"Better value for long-term use.","vip.m12":"VIP access for 12 months.",
 "vip.buy":"Buy","vip.note":"Buying opens Discord. <b style=\"color:#a8a8b8\">Open a ticket to contact the owner.</b>",
 "scripts.search":"Search script...","scripts.create":"Create","scripts.empty":"No scripts yet","scripts.first":"Create the first one",
@@ -2615,28 +2615,28 @@ pt:{
 "login.kicker":"Painel privado","login.title":"Seus scripts,<br/><em>sob chave.</em>","login.sub":"Envie o script, gere as keys e veja quem executa. Sem rodeios.",
 "login.p1":"Loadstrings com versão e rollback","login.p2":"Keys com validade e HWID lock","login.p3":"Webhooks no Discord na hora",
 "login.foot":"API online · ~80ms","login.enter":"Entrar","login.register":"Registrar","login.create":"Criar conta","login.discord":"Continuar com Discord",
-"login.or":"ou com sua conta","login.user":"Usuário","login.pass":"Senha","login.ok":"Entendi","login.loading":"Carregando <b>QyrexApi</b>...",
-"login.legal":"Ao continuar você aceita os <a href=\"#\" onclick=\"openLegal('terms');return false\">Termos de serviço</a> e a <a href=\"#\" onclick=\"openLegal('privacy');return false\">Política de privacidade</a> da QyrexApi.<br/>Nunca compartilhe sua key nem sua senha. O suporte jamais pedirá isso.",
+"login.or":"ou com sua conta","login.user":"Usuário","login.pass":"Senha","login.ok":"Entendi","login.loading":"Carregando <b>Lua u Vanguard</b>...",
+"login.legal":"Ao continuar você aceita os <a href=\"#\" onclick=\"openLegal('terms');return false\">Termos de serviço</a> e a <a href=\"#\" onclick=\"openLegal('privacy');return false\">Política de privacidade</a> da Lua u Vanguard.<br/>Nunca compartilhe sua key nem sua senha. O suporte jamais pedirá isso.",
 "login.terms":"Termos","login.privacy":"Privacidade","login.cookies":"Cookies","login.support":"Suporte",
-"login.rights":"© 2026 QyrexApi · Todos os direitos reservados",
+"login.rights":"© 2026 Lua u Vanguard · Todos os direitos reservados",
 "nav.general":"GERAL","nav.overview":"Overview","nav.analytics":"Analytics","nav.logs":"Logs","nav.status":"System Status",
 "nav.scripts":"SCRIPTS","nav.lua":"Lua Scripts","nav.create":"Create Script","nav.studio":"Studio","nav.hub":"Script Hub","nav.templates":"Templates",
 "nav.keysys":"KEY SYSTEM","nav.keys":"Keys & Providers","nav.webhooks":"Webhooks","nav.cloud":"CLOUD","nav.assets":"My Assets",
 "nav.community":"COMUNIDADE","nav.leaderboard":"Leaderboard","nav.changelog":"Changelog","nav.dev":"DEVELOPER","nav.apiinfo":"API Info",
 "nav.playground":"API Playground","nav.adminsec":"ADMIN","nav.admin":"Admin Panel","nav.account":"CONTA","nav.settings":"Settings",
-"ov.kicker":"QyrexApi · Painel privado","ov.title":"Seus scripts, sob controle.",
-"ov.sub":"Envie seu Lua, proteja com QyrexObf (beta), gere keys com HWID e veja quem executa ao vivo.",
+"ov.kicker":"Lua u Vanguard · Painel privado","ov.title":"Seus scripts, sob controle.",
+"ov.sub":"Envie seu Lua, proteja com Lua u VanguardObf (beta), gere keys com HWID e veja quem executa ao vivo.",
 "ov.create":"Create Script","ov.myscripts":"Meus scripts","ov.panel":"Abrir painel","ov.scripts":"Scripts","ov.exec":"Execuções totais",
 "ov.state":"Status","ov.online":"Online","ov.chart":"Execuções (últimos 7 dias)",
 "dash.crumb":"Dashboard","notif.title":"Notificações","notif.read":"Marcar lidas","notif.loading":"Carregando…","notif.empty":"Tudo em dia",
 "role.user":"Usuário","role.admin":"Administrador","role.vip":"VIP · Premium",
-"vip.title":"✦ Qyrex VIP Licenses","vip.sub":"Escolha uma licença e abra um ticket para comprar.","vip.aria":"Ver licenças VIP",
-"vip.freeDesc":"Para começar: acesso básico ao Qyrex com limites padrão.","vip.included":"INCLUÍDO","vip.start":"Para começar","vip.active":"● ATIVO",
+"vip.title":"✦ Lua u Vanguard VIP Licenses","vip.sub":"Escolha uma licença e abra um ticket para comprar.","vip.aria":"Ver licenças VIP",
+"vip.freeDesc":"Para começar: acesso básico ao Lua u Vanguard com limites padrão.","vip.included":"INCLUÍDO","vip.start":"Para começar","vip.active":"● ATIVO",
 "vip.f1":"Acesso básico à plataforma","vip.f2":"Uso com limites padrão","vip.f3":"Publicação básica de scripts","vip.f4":"Sem extras VIP",
 "vip.intense":"Para uso intenso","vip.v1":"Tudo do FREE","vip.v2":"Limites e cotas superiores*","vip.v3":"Funções e temas exclusivos VIP","vip.v4":"Prioridade em melhorias futuras*",
 "vip.compare":"Comparação rápida","vip.compareNote":"*Conforme a licença e as funções ativas","vip.feature":"Recurso",
 "vip.r1":"Acesso ao dashboard","vip.r2":"API / scripts","vip.r3":"Temas exclusivos","vip.r4":"Personalização VIP","vip.r5":"Experiência prioritária",
-"vip.why":"✦ Por que VIP?","vip.whySub":"Mais funções, personalização e uma experiência feita para quem usa o Qyrex no máximo.",
+"vip.why":"✦ Por que VIP?","vip.whySub":"Mais funções, personalização e uma experiência feita para quem usa o Lua u Vanguard no máximo.",
 "vip.best":"10 MESES • MELHOR VALOR","vip.m1":"Acesso VIP por 30 dias.","vip.m10":"Melhor custo para uso prolongado.","vip.m12":"Acesso VIP por 12 meses.",
 "vip.buy":"Comprar","vip.note":"Ao comprar, o Discord abre. <b style=\"color:#a8a8b8\">Abra um ticket para falar com o owner.</b>",
 "scripts.search":"Buscar script...","scripts.create":"Create","scripts.empty":"Nenhum script","scripts.first":"Criar o primeiro",
@@ -2718,7 +2718,7 @@ document.addEventListener('click', (e) => {
   }
 });
 function buildPageNames(){
-  return { overview:t('nav.overview'), scripts:t('nav.lua'), site:'Mi sitio Qyrex', hub:t('nav.hub'), keys:t('page.keys'), webhooks:t('nav.webhooks'), leaderboard:t('nav.leaderboard'), assets:t('nav.assets'), templates:t('nav.templates'), status:t('nav.status'), playground:t('nav.playground'), changelog:t('nav.changelog'), create:t('nav.create'), studio:t('nav.studio'), executions:t('nav.analytics'), logs:t('nav.logs'), apiinfo:t('nav.apiinfo'), ia:'IA', settings:t('nav.settings'), admin:t('nav.admin') };
+  return { overview:t('nav.overview'), scripts:t('nav.lua'), site:'Mi sitio Lua u Vanguard', hub:t('nav.hub'), keys:t('page.keys'), webhooks:t('nav.webhooks'), leaderboard:t('nav.leaderboard'), assets:t('nav.assets'), templates:t('nav.templates'), status:t('nav.status'), playground:t('nav.playground'), changelog:t('nav.changelog'), create:t('nav.create'), studio:t('nav.studio'), executions:t('nav.analytics'), logs:t('nav.logs'), apiinfo:t('nav.apiinfo'), ia:'IA', settings:t('nav.settings'), admin:t('nav.admin') };
 }
 
 function scriptDownloadUrl(id){
@@ -2801,7 +2801,7 @@ function showApp(user){
     let b = '';
     if (user?.role === 'admin') b += '<span class="chip" style="background:#161618;color:#f4f4f5;border-color:#3b2a5c">ADMIN</span> ';
     if (user?.premium) b += '<span class="chip" style="background:#1a1810;color:#fbbf24;border-color:#3d3418">VIP</span>';
-    badgeEl.innerHTML = b || '<span class="text-xs" style="color:#5a5a6e">Usuario QyrexApi</span>';
+    badgeEl.innerHTML = b || '<span class="text-xs" style="color:#5a5a6e">Usuario Lua u Vanguard</span>';
   }
   const vip = document.getElementById('sidebarVip');
   const adm = document.getElementById('sidebarAdmin');
@@ -3082,7 +3082,7 @@ async function deleteMyAccount(){const password=document.getElementById('deleteA
 function openVipModal(){const m=document.getElementById('vipModal');if(m){m.classList.add('show');document.body.classList.add('modal-open');}}
 function closeVipModal(){const m=document.getElementById('vipModal');if(m){m.classList.remove('show');document.body.classList.remove('modal-open');}}
 function buyVip(duration,price){
-  const msg=`Qyrex VIP | ${duration} | ${price} | Saca un ticket para contactar al owner`;
+  const msg=`Lua u Vanguard VIP | ${duration} | ${price} | Saca un ticket para contactar al owner`;
   try{if(navigator.clipboard)navigator.clipboard.writeText(msg).catch(()=>{});}catch(e){}
   window.open('https://discord.gg/YzCsksufde','_blank','noopener');
   setTimeout(()=>toast('Abierto Discord. Saca un ticket para contactar al owner.','ok'),80);
@@ -3212,7 +3212,7 @@ function go(p, navOptions){
   if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current','page'); }
   const crumb = document.getElementById('breadcrumb');
   if (crumb) crumb.textContent = pageNames[p] || p;
-  document.title = 'Qyrex — ' + (pageNames[p] || p);
+  document.title = 'Lua u Vanguard — ' + (pageNames[p] || p);
   if (p === 'scripts') loadScripts();
   if (p === 'hub') loadHub();
   if (p === 'keys') loadKeysPage();
@@ -3771,7 +3771,7 @@ async function qxExportAdminData(){
     ]);
     const payload={exportedAt:new Date().toISOString(),admin:currentUser?.username||'',users,scripts,hub};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='qyrex-admin-export-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lua-u-vanguard-admin-export-'+new Date().toISOString().slice(0,10)+'.json';a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('Exportación preparada','ok');
   }catch(e){ toast('No se pudo exportar','err'); }
 }
@@ -4029,7 +4029,7 @@ function updateLoaderSnippet(){
   const base = location.origin;
   const sel = document.getElementById('keyProvSelect');
   const provName = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : 'MyProvider';
-  const snip = `-- QyrexApi Key Loader
+  const snip = `-- Lua u Vanguard Key Loader
 local HttpService = game:GetService("HttpService")
 local cfg = {
   api = "${base}",
@@ -4636,7 +4636,7 @@ window.addEventListener('load', ()=> setTimeout(hideLoader, 500), { once: true }
 /* ===== Textos legales ===== */
 const LEGAL = {
   terms: { title:'Terminos de servicio', body:`
-    <p>Al crear una cuenta o iniciar sesion en QyrexApi aceptas estas condiciones. Si no estas de acuerdo, no uses el servicio.</p>
+    <p>Al crear una cuenta o iniciar sesion en Lua u Vanguard aceptas estas condiciones. Si no estas de acuerdo, no uses el servicio.</p>
     <h4>1. Uso de la cuenta</h4>
     <ul>
       <li>Tu cuenta es personal e intransferible; eres responsable de todo lo que ocurra con ella.</li>
@@ -4654,7 +4654,7 @@ const LEGAL = {
     <h4>4. Limites y abuso</h4>
     <p>Se aplican limites de peticiones por cuenta. El uso abusivo, los ataques o la ingenieria inversa del panel pueden derivar en el bloqueo permanente.</p>
     <h4>5. Cambios</h4>
-    <p>Podemos actualizar estos terminos. Seguir usando QyrexApi despues de un cambio implica su aceptacion.</p>` },
+    <p>Podemos actualizar estos terminos. Seguir usando Lua u Vanguard despues de un cambio implica su aceptacion.</p>` },
   privacy: { title:'Politica de privacidad', body:`
     <p>Explicamos que datos tratamos y para que, de forma clara y sin letra pequena.</p>
     <h4>Datos que recogemos</h4>
@@ -4676,7 +4676,7 @@ const LEGAL = {
     <h4>Tus derechos</h4>
     <p>Puedes pedir acceso, correccion o eliminacion de tus datos desde Ajustes o contactando con el soporte.</p>` },
   cookies: { title:'Uso de cookies y almacenamiento', body:`
-    <p>QyrexApi usa el minimo almacenamiento necesario para funcionar.</p>
+    <p>Lua u Vanguard usa el minimo almacenamiento necesario para funcionar.</p>
     <h4>Almacenamiento tecnico</h4>
     <ul>
       <li><b>Token de sesion</b>: se guarda en tu navegador para mantenerte conectado.</li>
@@ -4710,7 +4710,7 @@ function closeLegal(){ document.getElementById('qxModal').classList.remove('show
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal(); });
 
 </script>
-<script id="qyrex-enterprise-v2-js">
+<script id="lua-u-vanguard-enterprise-v2-js">
 (function(){
   function ready(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn,{once:true}); else fn(); }
   ready(function(){
@@ -4753,15 +4753,15 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal();
   });
 })();
 </script>
-<script id="qyrex-sites-runtime">
+<script id="lua-u-vanguard-sites-runtime">
 (function(){
   const siteMeUrl=()=>location.origin + '/api/sites/me';
   const siteApiUrl=()=>location.origin + '/api/sites';
   const el=id=>document.getElementById(id);
   window.qxSiteTemplate=`<!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mis Scripts · Qyrex</title><style>body{font-family:system-ui;background:#07101a;color:#dff6ff;padding:48px}a{color:#38bdf8}</style>
-<style id="qyrex-godmode-v3">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mis Scripts · Lua u Vanguard</title><style>body{font-family:system-ui;background:#07101a;color:#dff6ff;padding:48px}a{color:#38bdf8}</style>
+<style id="lua-u-vanguard-godmode-v3">
 :root{
  --qg-bg:#04070a;--qg-bg2:#070c11;--qg-panel:#0a1118;--qg-panel2:#0d1720;
  --qg-line:rgba(125,211,252,.10);--qg-line2:rgba(125,211,252,.22);--qg-text:#ecfaff;
@@ -4784,8 +4784,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 #appView .sidebar-brand{min-height:80px!important;padding:17px 18px!important;border-bottom:1px solid rgba(125,211,252,.07)!important}
 #appView .sidebar-brand img{width:42px!important;height:42px!important;border-radius:13px!important;object-fit:cover!important;border:1px solid rgba(125,211,252,.18)!important;box-shadow:0 0 0 1px rgba(125,211,252,.05),0 12px 30px rgba(0,0,0,.32)!important}
 #appView .sidebar-brand .font-bold{font-family:Outfit,Inter,sans-serif!important;font-size:18px!important;color:#effcff!important;letter-spacing:-.035em!important}
-#appView .qyrex-credit{color:#4f6e7f!important}
-#appView .qyrex-credit:hover{color:var(--qg-blue)!important}
+#appView .lua-u-vanguard-credit{color:#4f6e7f!important}
+#appView .lua-u-vanguard-credit:hover{color:var(--qg-blue)!important}
 #appView .nav-section{padding:17px 16px 7px!important;color:#436274!important;font-size:9.5px!important;font-weight:800!important;letter-spacing:.18em!important}
 #appView .nav-item{position:relative!important;height:42px!important;margin:3px 10px!important;padding:0 12px!important;gap:11px!important;border-radius:12px!important;border:1px solid transparent!important;background:transparent!important;color:#7893a4!important;transition:all .22s var(--qg-ease)!important;overflow:hidden!important}
 #appView .nav-item:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:99px;background:linear-gradient(180deg,#38bdf8,#7dd3fc);opacity:0;transform:scaleY(.35);transition:.22s var(--qg-ease)}
@@ -4915,7 +4915,7 @@ body.sidebar-collapsed #appView .nav-item{justify-content:center!important;paddi
 </style>
 
 </head>
-<body><main><p>Qyrex Sites</p><h1>Mis scripts</h1><p>Bienvenido a mi página de scripts.</p></main>
+<body><main><p>Lua u Vanguard Sites</p><h1>Mis scripts</h1><p>Bienvenido a mi página de scripts.</p></main>
 <!-- ========== QYREX POWER LAYER v2.1 — ~30 utilidades ========== -->
 <style id="qx-power-layer">
 #qxFab{position:fixed;right:22px;bottom:22px;z-index:9000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -5184,7 +5184,7 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
   };
   window.qxDownloadNotes=function(){
     const blob=new Blob([document.getElementById('qxNotesTa').value||''],{type:'text/markdown'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='qyrex-notes.md'; a.click();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lua-u-vanguard-notes.md'; a.click();
   };
 
   // --- Focus / compact / big text ---
@@ -5299,7 +5299,7 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
       if(!r.ok) throw new Error('HTTP '+r.status);
       const data=await r.json();
       const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='qyrex-scripts-'+Date.now()+'.json'; a.click();
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lua-u-vanguard-scripts-'+Date.now()+'.json'; a.click();
       toast('Export listo','ok');
     }catch(e){ toast('Export falló: '+e.message,'err'); }
   };
@@ -5514,7 +5514,7 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
     if(e.target.closest('[data-page="overview"]')) setTimeout(injectOverviewExtras,200);
   });
 
-  console.log('%c[Qyrex Power Layer] 30 utilidades activas','color:#7DD3FC;font-weight:bold');
+  console.log('%c[Lua u Vanguard Power Layer] 30 utilidades activas','color:#7DD3FC;font-weight:bold');
 })();
 \x3C/script>
 <!-- ========== /QYREX POWER LAYER ========== -->
@@ -5537,7 +5537,7 @@ body.qx-bigtext .stat-val,body.qx-bigtext .ov-stat .val{font-size:36px}
   document.addEventListener('click',e=>{const nav=e.target.closest('[data-page="site"]');if(nav) setTimeout(qxSiteLoad,60)});
 })();
 </script>
-<style id="qyrex-admin-accent">
+<style id="lua-u-vanguard-admin-accent">
 #adminStats>.card{padding:16px!important}
 #adminStats>.card:nth-child(1){border-top:2px solid rgba(47,128,237,.8)!important}
 #adminStats>.card:nth-child(2){border-top:2px solid rgba(86,166,255,.68)!important}
@@ -5559,7 +5559,7 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
   :root{color-scheme:light dark;}
 }
 </style>
-<script id="qyrex-a11y-runtime">
+<script id="lua-u-vanguard-a11y-runtime">
 (function(){
   const status=document.getElementById('a11yStatus');
   document.addEventListener('click',function(e){
@@ -5578,7 +5578,7 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
 })();
 </script>
 
-<script id="qyrex-apex-runtime">
+<script id="lua-u-vanguard-apex-runtime">
 (function(){
   'use strict';
   const ROUTES={
@@ -5633,12 +5633,12 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
 </script>
 
 
-<script id="qyrex-godmode-runtime">
+<script id="lua-u-vanguard-godmode-runtime">
 (function(){
  'use strict';
- const logo='https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024';
+ const logo='/logo.png';
  const safe=fn=>{try{return fn()}catch(_){}};
- function setLogos(){document.querySelectorAll('img[src*="i.ibb.co/wZbspqp2"]').forEach(img=>{img.src=logo;img.alt='QrexApi';});}
+ function setLogos(){document.querySelectorAll('img[src*="i.ibb.co/wZbspqp2"]').forEach(img=>{img.src=logo;img.alt='Lua u Vanguard';});}
  function syncMeta(){const p=document.querySelector('.page:not(.hidden)');if(p)document.documentElement.dataset.qxPage=p.id.replace(/^page-/,'');}
  function bindPress(){document.querySelectorAll('#appView button:not([data-qg-bound])').forEach(b=>{b.dataset.qgBound='1';b.addEventListener('pointerdown',()=>b.classList.add('qx-press'),{passive:true});b.addEventListener('pointerup',()=>b.classList.remove('qx-press'),{passive:true});b.addEventListener('pointercancel',()=>b.classList.remove('qx-press'),{passive:true})})}
  function announce(msg){const a=document.getElementById('a11yStatus');if(a){a.textContent='';requestAnimationFrame(()=>a.textContent=String(msg||''))}}
@@ -5657,30 +5657,30 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
 })();
 </script>
 
-<script id="qyrex-ultra-v4-runtime">
+<script id="lua-u-vanguard-ultra-v4-runtime">
 (function(){
   'use strict';
-  const LOGO="https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024";
+  const LOGO="/logo.png";
   const routeMeta={
     overview:['Overview','Centro de mando','Tu actividad, scripts y estado general en un vistazo.'],
     executions:['Analytics','Rendimiento','Métricas y actividad reciente de tus scripts.'],
     logs:['Logs','Auditoría','Eventos y actividad registrada del sistema.'],
-    status:['Status','Infraestructura','Estado de los servicios y componentes de Qyrex.'],
+    status:['Status','Infraestructura','Estado de los servicios y componentes de Lua u Vanguard.'],
     scripts:['Scripts','Biblioteca','Gestiona tus scripts protegidos y sus versiones.'],
     create:['Create','Nuevo script','Carga una nueva versión y configura su distribución.'],
     studio:['Studio','Workspace','Edita, valida y prepara tu script desde un editor avanzado.'],
     hub:['Script Hub','Descubrimiento','Explora y organiza recursos publicados.'],
     templates:['Templates','Biblioteca','Plantillas y snippets reutilizables.'],
     keys:['Key System','Acceso','Controla keys, expiración y seguridad.'],
-    webhooks:['Webhooks','Automatización','Conecta eventos de Qyrex con tus servicios.'],
+    webhooks:['Webhooks','Automatización','Conecta eventos de Lua u Vanguard con tus servicios.'],
     assets:['Assets','Recursos','Administra imágenes y recursos del proyecto.'],
     leaderboard:['Leaderboard','Comunidad','Actividad y métricas públicas.'],
     changelog:['Changelog','Producto','Cambios y novedades recientes.'],
     apiinfo:['API Info','Developer','Rutas y capacidades de la API.'],
     playground:['API Playground','Developer','Prueba endpoints y payloads directamente.'],
-    site:['Qyrex Sites','Publicación','Gestiona tu página de scripts personalizada.'],
+    site:['Lua u Vanguard Sites','Publicación','Gestiona tu página de scripts personalizada.'],
     admin:['Admin Panel','Administración','Herramientas de gestión y observabilidad.'],
-    ia:['QyrexAI','Intelligence','Workspace de asistencia y utilidades de desarrollo.'],
+    ia:['Lua u VanguardAI','Intelligence','Workspace de asistencia y utilidades de desarrollo.'],
     settings:['Settings','Cuenta','Preferencias, identidad y seguridad.']
   };
   const routePaths={overview:'/',executions:'/analytics',logs:'/logs',status:'/status',scripts:'/scripts',create:'/create',studio:'/studio',hub:'/hub',templates:'/templates',keys:'/keys',webhooks:'/webhooks',assets:'/assets',leaderboard:'/leaderboard',changelog:'/changelog',apiinfo:'/api-info',playground:'/playground',site:'/site',admin:'/admin',ia:'/ia',settings:'/settings'};
@@ -5689,12 +5689,12 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
   function qsa(s,r=document){return [...r.querySelectorAll(s)]}
   function safe(fn){try{return fn()}catch(_){return undefined}}
   function add(tag,attrs,parent){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='text')e.textContent=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v)};if(parent)parent.appendChild(e);return e}
-  function setLogos(){qsa('img').forEach(img=>{const src=img.getAttribute('src')||'';if(src.includes('i.ibb.co/wZbspqp2')||img.classList.contains('qx-brand-logo')){img.src=LOGO;img.alt='QyrexApi'}})}
+  function setLogos(){qsa('img').forEach(img=>{const src=img.getAttribute('src')||'';if(src.includes('i.ibb.co/wZbspqp2')||img.classList.contains('qx-brand-logo')){img.src=LOGO;img.alt='Lua u Vanguard'}})}
   function pageKey(){const p=qsa('#appView .page:not(.hidden)')[0];return p?.id?.replace(/^page-/,'')||document.documentElement.dataset.qxPage||'overview'}
   function updatePagebar(){
     const k=pageKey(), m=routeMeta[k]||routeMeta.overview, title=qs('#qxPageTitle'),sub=qs('#qxPageSub'),kick=qs('#qxPageKickerText');
     if(title)title.textContent=m[0];if(sub)sub.textContent=m[2];if(kick)kick.textContent=m[1];
-    document.title='Qyrex · '+m[0]; document.documentElement.dataset.qxPage=k;
+    document.title='Lua u Vanguard · '+m[0]; document.documentElement.dataset.qxPage=k;
   }
   let progTimer;
   function progress(on,done){const bar=qs('#qxTopProgress'),i=bar?.querySelector('i');if(!bar||!i)return;if(on){bar.style.opacity='1';clearTimeout(progTimer);i.style.width='15%';requestAnimationFrame(()=>i.style.width='76%')}else{i.style.width='100%';progTimer=setTimeout(()=>{bar.style.opacity='0';i.style.width='0%'},260)}}
@@ -5706,7 +5706,7 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
   }
   function setupCommand(){
     if(qs('#qxCommandOverlay'))return;
-    const ov=add('div',{id:'qxCommandOverlay','role':'dialog','aria-modal':'true','aria-label':'Paleta de comandos'});ov.innerHTML='<div class="qx-command"><div class="qx-command-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="qxCommandInput" autocomplete="off" placeholder="Buscar una sección o acción…" aria-label="Buscar comandos"><span class="qx-command-kbd">ESC</span></div><div class="qx-command-list" id="qxCommandList"></div><div class="qx-command-foot"><span>↑ ↓ navegar · Enter abrir</span><span>Qyrex Command Center</span></div></div>';
+    const ov=add('div',{id:'qxCommandOverlay','role':'dialog','aria-modal':'true','aria-label':'Paleta de comandos'});ov.innerHTML='<div class="qx-command"><div class="qx-command-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="qxCommandInput" autocomplete="off" placeholder="Buscar una sección o acción…" aria-label="Buscar comandos"><span class="qx-command-kbd">ESC</span></div><div class="qx-command-list" id="qxCommandList"></div><div class="qx-command-foot"><span>↑ ↓ navegar · Enter abrir</span><span>Lua u Vanguard Command Center</span></div></div>';
     document.body.appendChild(ov);
     const input=qs('#qxCommandInput'),list=qs('#qxCommandList');let active=0,current=commands.slice();
     function render(){list.innerHTML='';current.forEach((c,idx)=>{const b=add('button',{type:'button',class:'qx-cmd-item'+(idx===active?' active':'')},list);b.innerHTML='<span class="qx-cmd-icon">'+c.icon+'</span><span class="qx-cmd-copy"><span class="qx-cmd-title">'+c.title+'</span><span class="qx-cmd-desc">'+c.desc+'</span></span><span class="qx-cmd-go">'+(routePaths[c.page]||'')+'</span>';b.addEventListener('mouseenter',()=>{active=idx;render()});b.addEventListener('click',()=>run(c))})}
@@ -5762,17 +5762,17 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
     document.documentElement.classList.add('qx-ultra');setLogos();setupHud();setupCommand();setupPagebar();bindKeys();enhanceLinks();observe();
     setTimeout(()=>{if(window.currentUser)showWelcome()},900)
     // Make every image resilient without changing its source unless it actually fails.
-    qsa('img').forEach(img=>{if(!img.loading&&img!==qs('.qx-loader img'))img.loading='lazy';img.addEventListener('error',()=>{if(img.src!==LOGO&&img.alt.toLowerCase().includes('qyrex')){img.src=LOGO}}, {once:true})});
+    qsa('img').forEach(img=>{if(!img.loading&&img!==qs('.qx-loader img'))img.loading='lazy';img.addEventListener('error',()=>{if(img.src!==LOGO&&img.alt.toLowerCase().includes('lua-u-vanguard')){img.src=LOGO}}, {once:true})});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 
-<script id="qyrex-nexus-v3-runtime">
+<script id="lua-u-vanguard-nexus-v3-runtime">
 (function(){
 'use strict';
-const LOGO='https://cdn.discordapp.com/icons/1537598458951762061/58c643c7729993c23d7ec4c5eebd1f81.png?size=1024';
-const K={recent:'qyrex_nx_recent_v3',seen:'qyrex_nx_seen_v3'};
+const LOGO='/logo.png';
+const K={recent:'lua-u-vanguard_nx_recent_v3',seen:'lua-u-vanguard_nx_seen_v3'};
 const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const safe=(fn,f)=>{try{return fn()}catch(e){return f}};
 function goSafe(page){if(typeof window.go==='function')window.go(page);}
@@ -5799,7 +5799,7 @@ function addSpotlight(){
 }
 function addFab(){
  if($('#qxNxFab'))return;const f=document.createElement('div');f.id='qxNxFab';f.className='qx-nx-fab';
- f.innerHTML='<button type="button" aria-label="Acciones rápidas" title="Acciones rápidas">✦</button><div class="qx-nx-fab-menu"><button type="button" data-a="create">＋ Crear script</button><button type="button" data-a="scripts">◇ Mis scripts</button><button type="button" data-a="ia">✧ Abrir QyrexAI</button><button type="button" data-a="studio">▣ Abrir Studio</button><button type="button" data-a="keys">⌁ Keys & Providers</button><button type="button" data-a="settings">⚙ Settings</button></div>';
+ f.innerHTML='<button type="button" aria-label="Acciones rápidas" title="Acciones rápidas">✦</button><div class="qx-nx-fab-menu"><button type="button" data-a="create">＋ Crear script</button><button type="button" data-a="scripts">◇ Mis scripts</button><button type="button" data-a="ia">✧ Abrir Lua u VanguardAI</button><button type="button" data-a="studio">▣ Abrir Studio</button><button type="button" data-a="keys">⌁ Keys & Providers</button><button type="button" data-a="settings">⚙ Settings</button></div>';
  document.body.appendChild(f);const b=f.querySelector(':scope>button');b.addEventListener('click',()=>f.classList.toggle('open'));f.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{f.classList.remove('open');goSafe(x.dataset.a)}));document.addEventListener('click',e=>{if(!f.contains(e.target))f.classList.remove('open')});
 }
 function addMobileDock(){
@@ -5813,13 +5813,13 @@ function network(){const c=$('#nxNet');if(!c)return;const on=navigator.onLine;c.
 function session(){const el=$('#nxMetricSession');if(!el)return;window.__qxNxStarted??=Date.now();const sec=Math.floor((Date.now()-window.__qxNxStarted)/1000);const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');el.textContent=m+':'+s;}
 function patchGo(){if(window.__qxNxGoPatched||typeof window.go!=='function')return;const original=window.go;window.go=function(page){updateRecent(page);syncDock();const r=original.apply(this,arguments);setTimeout(()=>{syncDock();updateBar();},60);return r};window.__qxNxGoPatched=true;}
 function updateBar(){safe(()=>{const page=$$('#appView .page:not(.hidden)')[0];const key=page?.id?.replace(/^page-/,'')||'overview';document.documentElement.dataset.qxPage=key;syncDock()});}
-function logoGuard(){ $$('#appView img').forEach(img=>{if(!img.src||img.src.includes('i.ibb.co')){img.src=LOGO;img.alt='QyrexApi'}}); }
+function logoGuard(){ $$('#appView img').forEach(img=>{if(!img.src||img.src.includes('i.ibb.co')){img.src=LOGO;img.alt='Lua u Vanguard'}}); }
 function shortcuts(){document.addEventListener('keydown',e=>{const tag=(e.target?.tagName||'').toLowerCase();const typing=['input','textarea','select'].includes(tag)||e.target?.isContentEditable;if(e.key==='/'&&!typing&&!e.ctrlKey&&!e.metaKey){e.preventDefault();safe(()=>window.qxOpenCmd?.())} if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='a'&&!typing){e.preventDefault();goSafe('ia')} if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='m'&&!typing){e.preventDefault();goSafe('create')}});}
 function hookHealth(){setInterval(()=>safe(()=>window.qxCheckHealth?.()),120000);window.addEventListener('online',network);window.addEventListener('offline',network);}
 function observe(){const app=$('#appView');if(!app)return;let t=0;const obs=new MutationObserver(()=>{if(t)return;t=1;requestAnimationFrame(()=>{t=0;updateBar();logoGuard();addCockpit()})});obs.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});}
 function boot(){
  if(!$('#appView'))return;document.documentElement.classList.add('qx-nexus-v3');addLive();addCockpit();addSpotlight();addFab();addMobileDock();network();clock();session();setInterval(clock,1000);setInterval(session,1000);patchGo();observe();shortcuts();hookHealth();logoGuard();
- setTimeout(()=>toast('Qyrex Nexus listo · nueva interfaz activada','ok'),1200);
+ setTimeout(()=>toast('Lua u Vanguard Nexus listo · nueva interfaz activada','ok'),1200);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
