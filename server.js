@@ -43,7 +43,7 @@ app.use((req, res, next) => {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   const originalEnd = res.end;
-  res.setHeader('X-Lua u Vanguard-Request-Id', requestId);
+  res.setHeader('X-LuaUVanguard-Request-Id', requestId);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.end = function patchedEnd(...args) {
     if (!res.headersSent) res.setHeader('Server-Timing', 'app;dur=' + Math.max(0, Date.now() - started));
@@ -1225,7 +1225,7 @@ async function serveRealScript(req, res, scriptId) {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-Qrex-Layer', 'cache');
+  res.setHeader('X-LuaUVanguard-Layer', 'cache');
   res.setHeader('Referrer-Policy', 'no-referrer');
 
   let payload = s.obfuscated || '';
@@ -1299,7 +1299,7 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
 
   if (isScraperUa(ua) && !/roblox/i.test(ua)) {
     res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-Qrex-Layer', 'public');
+    res.setHeader('X-LuaUVanguard-Layer', 'public');
     return res.type('text/plain').send(decoyLua());
   }
 
@@ -1317,7 +1317,7 @@ app.get(['/api/raw/:id', '/api/v1/luascripts/public/:id/download', '/api/v1/luas
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('X-Qrex-Layer', 'public');
+  res.setHeader('X-LuaUVanguard-Layer', 'public');
   res.type('text/plain').send(buildDoubleLinkStub(cacheUrl));
 });
 
@@ -1331,12 +1331,12 @@ app.get(['/api/v1/luascripts/cache/public/:id/download', '/api/cache/:id', '/api
   }
   if (isBrowserReq(req)) return res.status(403).type('html').send(DENY_HTML);
 
-  const token = String(req.query.t || req.headers['x-qrex-token'] || '');
+  const token = String(req.query.t || req.headers['x-luauvanguard-token'] || '');
   const ok = consumeScriptToken(req.params.id, token, ip, ua);
   if (!ok) {
     if (isScraperUa(ua) || hits > 12) await banIp(ip, 'Scraper cache without valid token');
     res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-Qrex-Layer', 'cache');
+    res.setHeader('X-LuaUVanguard-Layer', 'cache');
     return res.status(403).type('text/plain').send(decoyLua());
   }
   return serveRealScript(req, res, req.params.id);

@@ -2,7 +2,7 @@
   "name": "lua-u-vanguard",
   "version": "1.0.0",
   "private": true,
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
