@@ -22,10 +22,10 @@ const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1540116209348116491'
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://lua-u-vanguard.hopto.org/auth/discord/callback';
 
-// Voltfuscator API (Flaxo)
-const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'voltfuscator_1267954195982581782_688ace9cb0ff47f96888ab4a3f07251e6716cadb';
+// Voltils / Voltfuscator API
+const VOLTILS_API_KEY = process.env.VOLTILS_API_KEY || 'vf_live_1f4402451f2615e75142e46e9b8dc49b97b02e7043817767193bd071e0dc344e';
 const HAS_VOLTILS_KEY = Boolean(VOLTILS_API_KEY);
-const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltfuscator-production.up.railway.app/v1/obfuscate';
+const VOLTILS_ENDPOINT = process.env.VOLTILS_ENDPOINT || 'https://voltils.cc/v1/obfuscate';
 
 const PORT = process.env.PORT || 10000;
 
@@ -349,7 +349,8 @@ const BlacklistIP = mongoose.models.QrexBlacklistIP || mongoose.model('QrexBlack
   createdAt: { type: Date, default: Date.now }
 }));
 
-const FREE_SCRIPT_LIMIT = 15;
+const FREE_SCRIPT_LIMIT = 1; // máximo 1 script por día para usuarios free
+const FREE_SCRIPT_DAILY = true;
 
 async function fireWebhooks(ownerId, event, payload) {
   try {
@@ -601,10 +602,10 @@ function wrapWithEnvLogger(source) {
 async function obfuscateWithVoltils(code, preset) {
   const src = String(code || '');
   if (!src.trim()) throw new Error('Código vacío');
-  // Voltfuscator limita a 500 KiB
-  const maxBytes = 500 * 1024;
+  // Voltils limita a 350 KiB
+  const maxBytes = 350 * 1024;
   if (Buffer.byteLength(src, 'utf8') > maxBytes) {
-    throw new Error('El código supera el límite de 500 KiB de Voltfuscator');
+    throw new Error('El código supera el límite de 350 KiB de Voltils');
   }
   const body = {
     code: src,
@@ -977,9 +978,19 @@ app.post('/api/scripts', auth, needMongo, async (req, res) => {
 
     const me = await User.findById(req.user.sub);
     const prem = isPremiumUser(me);
-    const count = await Script.countDocuments({ ownerId: req.user.sub });
-    if (!prem && count >= FREE_SCRIPT_LIMIT) {
-      return res.status(403).json({ error: 'Límite de ' + FREE_SCRIPT_LIMIT + ' scripts. Activa VIP/Premium para ilimitados.' });
+    if (!prem) {
+      // Límite: solo 1 script por día (UTC) para usuarios free
+      const startOfDay = new Date();
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const todayCount = await Script.countDocuments({
+        ownerId: req.user.sub,
+        createdAt: { $gte: startOfDay }
+      });
+      if (todayCount >= FREE_SCRIPT_LIMIT) {
+        return res.status(403).json({
+          error: 'Límite diario alcanzado: solo puedes crear 1 script por día. Activa VIP/Premium para ilimitados.'
+        });
+      }
     }
 
     let providerName = '';
