@@ -1699,9 +1699,79 @@ body {
 
 /* —— Login view —— */
 #loginView .card {
-  border-radius: 20px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(125,211,252,.12) !important;
+  box-shadow: 0 28px 90px rgba(0,0,0,.5), 0 0 0 1px rgba(125,211,252,.05), 0 0 80px rgba(56,189,248,.06) !important;
+  backdrop-filter: blur(20px);
+}
+#loginView input {
+  border-radius: 12px !important;
   border: 1px solid rgba(125,211,252,.1) !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(125,211,252,.04) !important;
+  background: rgba(6,12,18,.9) !important;
+  min-height: 44px !important;
+}
+#loginView input:focus {
+  border-color: rgba(125,211,252,.4) !important;
+  box-shadow: 0 0 0 3px rgba(125,211,252,.12) !important;
+}
+#loginView .btn-primary,
+#loginView button.btn-primary {
+  min-height: 46px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+}
+
+/* —— Logo cutout (nuevo icono) —— */
+img[src="/logo.png"],
+img[src*="logo.png"] {
+  object-fit: contain !important;
+  background: transparent !important;
+}
+.sidebar img[src="/logo.png"],
+.mt-brand img,
+.ov-logo {
+  filter: drop-shadow(0 4px 14px rgba(56,189,248,.18));
+}
+.qx-loader .qx-ring img {
+  width: 72px !important;
+  height: 72px !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 8px 28px rgba(56,189,248,.25));
+}
+.qx-ring {
+  border-radius: 22px !important;
+  background: radial-gradient(circle at 40% 30%, rgba(125,211,252,.08), transparent 70%) !important;
+  border: 1px solid rgba(125,211,252,.1) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,.35) !important;
+}
+
+/* —— Scripts list —— */
+#scriptsList .card {
+  border-radius: 14px !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .2s ease !important;
+}
+#scriptsList .card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125,211,252,.18) !important;
+}
+
+/* —— Error message login —— */
+#loginErr {
+  border-radius: 12px !important;
+  border: 1px solid rgba(248,113,113,.25) !important;
+  background: rgba(248,113,113,.08) !important;
+  color: #fca5a5 !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* —— Ambient depth —— */
+#appView {
+  background:
+    radial-gradient(900px 500px at 10% -10%, rgba(56,189,248,.05), transparent 55%),
+    radial-gradient(700px 400px at 90% 0%, rgba(125,211,252,.03), transparent 50%),
+    #060a0f !important;
 }
 
 /* —— Reduced motion —— */
@@ -3326,7 +3396,12 @@ async function doAuth(){
       const snip = (text || '').replace(/\s+/g,' ').slice(0,80);
       throw new Error('API no JSON (HTTP '+r.status+'). ¿Servidor caído? ' + snip);
     }
-    if (!r.ok) throw new Error(d.error || ('Error HTTP '+r.status));
+    if (!r.ok) {
+      if (r.status === 503) {
+        throw new Error(d.error || 'Servicio no disponible (503). MongoDB no está conectado: configura MONGO_URI en el hosting.');
+      }
+      throw new Error(d.error || ('Error HTTP '+r.status));
+    }
     token = d.token; localStorage.setItem('qrex_token', token); showApp(d.user);
   } catch(e) { setErr(e.message); }
   finally { hideLoader(); btn.disabled = false; btn.textContent = mode === 'login' ? t('login.enter') : t('login.create'); }
