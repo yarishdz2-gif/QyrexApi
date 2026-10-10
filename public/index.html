@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/><meta charset="utf-8"/>
-
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<meta name="description" content="Lua u Vanguard — Developer Control Center. Gestiona, protege y publica scripts Lua con ofuscación Voltils."/>
 <title>Lua u Vanguard · Developer Control Center</title>
 <link rel="icon" type="image/png" href="/logo.png"/>
 <link rel="apple-touch-icon" href="/logo.png"/>
-
+<link rel="manifest" href="/manifest.webmanifest"/>
 <link href="//fonts.googleapis.com" rel="dns-prefetch"/>
 <link href="//fonts.gstatic.com" rel="dns-prefetch"/>
 <link href="//cdn.jsdelivr.net" rel="dns-prefetch"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Outfit:wght@500;600;700;800&amp;display=swap" media="print" onload="this.media='all'" rel="stylesheet"/>
-<script defer="" src="https://cdn.tailwindcss.com"></script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" media="print" onload="this.media='all'" rel="stylesheet"/>
+<script defer src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   .vip-head-safe{display:none;height:0}.main-content{position:relative;z-index:1}
   *{box-sizing:border-box}
@@ -1590,7 +1591,7 @@ html.qx-ultra body{background:
 <div class="vip-matrix">
 <div class="vip-row vip-row-head"><span data-i18n="vip.feature">Característica</span><b>FREE</b><b>VIP</b></div>
 <div class="vip-row"><span data-i18n="vip.r1">Acceso al dashboard</span><b>✓</b><b class="gold">✓</b></div>
-<div class="vip-row"><span data-i18n="vip.r2">API / scripts</span><b>Estándar</b><b class="gold">✓ Premium</b></div>
+<div class="vip-row"><span data-i18n="vip.r2">API / scripts</span><b>1 / día</b><b class="gold">Ilimitados</b></div>
 <div class="vip-row"><span data-i18n="vip.r3">Temas exclusivos</span><b>—</b><b class="gold">✓</b></div>
 <div class="vip-row"><span data-i18n="vip.r4">Personalización VIP</span><b>—</b><b class="gold">✓</b></div>
 <div class="vip-row"><span data-i18n="vip.r5">Experiencia prioritaria</span><b>—</b><b class="gold">✓</b></div>
@@ -2001,7 +2002,7 @@ html.qx-ultra body{background:
 <div class="w-full mt-1" style="padding:11px 14px;background:#0c0c12;border:1px solid #252533;border-radius:10px;color:#a7f3d0;font-size:14px">Voltils — siempre activo</div>
 <input type="hidden" id="sObfMode" value="voltils">
 <div class="text-xs mt-1" style="color:#5a5a6e">Todos los scripts se ofuscan automáticamente con Voltils.</div></div>
-<div class="text-xs" style="color:#5a5a6e">Gratis: máx 15 scripts · VIP: ilimitados</div>
+<div class="text-xs px-3 py-2 rounded-lg" style="color:#a7f3d0;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.18)">Gratis: <strong>1 script por día</strong> · VIP: ilimitados</div>
 <div class="tab-bar">
 <button class="active" id="tabScript" type="button">
 <span style="color:#34d399">●</span> Script
@@ -2358,7 +2359,8 @@ local Players = game:GetService("Players")
 <aside aria-label="Recurso de sección" class="section-resource"><span>Historial de cambios · Lua u Vanguard</span><a href="https://lua-u-vanguard.hopto.org/scripts" rel="noopener noreferrer" target="_blank">lua-u-vanguard.hopto.org/scripts</a></aside>
 <h2 class="text-2xl font-bold mb-6" data-i18n="nav.changelog" id="heading-page-changelog">Changelog</h2>
 <div class="space-y-4 max-w-2xl">
-<div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist, límite 15 scripts (ilimitado VIP).</div></div>
+<div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.1 — Voltils + límites diarios</div><div class="text-xs mt-2" style="color:#8b8b9e">API Voltils actualizada (voltils.cc), límite free de <strong>1 script por día</strong>, UI refinada y mensajes de cuota más claros. VIP sigue ilimitado.</div></div>
+<div class="card p-5"><div class="text-sm font-semibold" style="color:#f4f4f5">v2.0 — Feature drop</div><div class="text-xs mt-2" style="color:#8b8b9e">Key System, Hub, VIP, Admin, Webhooks, Leaderboard, Assets, Templates, Versions, Status, Themes, Playground, IP Blacklist.</div></div>
 <div class="card p-5"><div class="text-sm font-semibold">v1.0 — Launch</div><div class="text-xs mt-2" style="color:#8b8b9e">Auth usuario/contraseña, scripts ofuscados, analytics, access denied page.</div></div>
 </div>
 </section>
