@@ -1480,6 +1480,238 @@ html.qx-ultra body{background:
 <link rel="stylesheet" href="/lua-u-vanguard-nexus-v7.css?v=umax">
 <link rel="stylesheet" href="/lua-u-vanguard-ultra-v6.css?v=umax">
 <script defer src="/lua-u-vanguard-nexus-v7.js?v=umax"></script>
+<style id="lua-u-vanguard-pro-2026">
+/* ═══════════════════════════════════════════════════════════════
+   Lua u Vanguard · Pro UI Layer 2026
+   Interfaz limpia, sin barras de estado, diseño brutalmente pro
+   ═══════════════════════════════════════════════════════════════ */
+
+/* —— Ocultar clutter / status bars —— */
+#qxNxLive,
+.qx-nx-live,
+#qxUltraStatus,
+#qxEnterpriseRail,
+.qx-enterprise-rail,
+#qxSessionBadge { display: none !important; }
+
+/* —— Foundation —— */
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-feature-settings: "ss01","ss02","cv11";
+  letter-spacing: -0.011em;
+}
+::selection { background: rgba(125,211,252,.28); color: #f0f9ff; }
+
+/* —— Sidebar premium —— */
+#appView .sidebar {
+  background: linear-gradient(180deg, rgba(8,12,18,.97) 0%, rgba(5,8,12,.99) 100%) !important;
+  border-right: 1px solid rgba(125,211,252,.06) !important;
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+#appView .nav-item {
+  border-radius: 11px !important;
+  margin: 2px 8px !important;
+  padding: 9px 12px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.01em !important;
+  transition: background .18s ease, color .18s ease, transform .15s ease, box-shadow .2s ease !important;
+}
+#appView .nav-item:hover {
+  background: rgba(125,211,252,.06) !important;
+  color: #e0f2fe !important;
+  transform: translateX(2px);
+}
+#appView .nav-item[aria-current="true"],
+#appView .nav-item.active {
+  background: linear-gradient(135deg, rgba(56,189,248,.14), rgba(125,211,252,.07)) !important;
+  color: #7dd3fc !important;
+  box-shadow: inset 0 0 0 1px rgba(125,211,252,.12), 0 4px 16px rgba(56,189,248,.06) !important;
+}
+#appView .nav-section {
+  font-size: 10px !important;
+  letter-spacing: .14em !important;
+  color: #4a6575 !important;
+  font-weight: 800 !important;
+  padding: 16px 16px 6px !important;
+}
+
+/* —— Cards glass —— */
+#appView .card {
+  background: linear-gradient(165deg, rgba(14,20,28,.92), rgba(8,12,18,.96)) !important;
+  border: 1px solid rgba(125,211,252,.07) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 40px rgba(0,0,0,.22) !important;
+  transition: border-color .2s ease, box-shadow .25s ease, transform .2s ease !important;
+}
+#appView .card:hover {
+  border-color: rgba(125,211,252,.14) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 16px 48px rgba(0,0,0,.28), 0 0 0 1px rgba(125,211,252,.04) !important;
+}
+
+/* —— Buttons —— */
+#appView .btn-primary {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e2e8f0 100%) !important;
+  color: #0a0f14 !important;
+  border: none !important;
+  border-radius: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 8px 24px rgba(125,211,252,.12) !important;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .15s !important;
+}
+#appView .btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 12px 32px rgba(125,211,252,.18) !important;
+  opacity: 1 !important;
+}
+#appView .btn-primary:active { transform: translateY(0) !important; }
+#appView .btn-ghost {
+  border-radius: 11px !important;
+  border: 1px solid rgba(125,211,252,.1) !important;
+  background: rgba(125,211,252,.03) !important;
+  color: #94b8c9 !important;
+  font-weight: 600 !important;
+  transition: all .18s ease !important;
+}
+#appView .btn-ghost:hover {
+  background: rgba(125,211,252,.08) !important;
+  border-color: rgba(125,211,252,.2) !important;
+  color: #e0f2fe !important;
+}
+
+/* —— Inputs —— */
+#appView input,
+#appView select,
+#appView textarea {
+  border-radius: 11px !important;
+  border: 1px solid rgba(125,211,252,.08) !important;
+  background: rgba(6,12,18,.85) !important;
+  color: #e2e8f0 !important;
+  transition: border-color .18s ease, box-shadow .18s ease !important;
+}
+#appView input:focus,
+#appView select:focus,
+#appView textarea:focus {
+  border-color: rgba(125,211,252,.35) !important;
+  box-shadow: 0 0 0 3px rgba(125,211,252,.1) !important;
+  outline: none !important;
+}
+#appView label.field {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+  color: #5a7a8a !important;
+  margin-bottom: 6px !important;
+}
+
+/* —— Typography —— */
+#appView h2,
+#appView .text-2xl {
+  font-family: Outfit, Inter, system-ui, sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.04em !important;
+  color: #f0f9ff !important;
+}
+#appView .ov-title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem) !important;
+  line-height: 1.15 !important;
+}
+
+/* —— Metrics / cockpit —— */
+.qx-nx-metric {
+  border-radius: 16px !important;
+  border: 1px solid rgba(125,211,252,.08) !important;
+  background: linear-gradient(160deg, rgba(12,22,32,.9), rgba(6,12,18,.95)) !important;
+  transition: transform .2s ease, border-color .2s ease !important;
+}
+.qx-nx-metric:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125,211,252,.16) !important;
+}
+.qx-nx-metric .v {
+  background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* —— Main content spacing —— */
+#appView .main-content { background: transparent !important; }
+#appView .p-8 { padding: 28px 32px !important; }
+@media (max-width: 900px) {
+  #appView .p-8 { padding: 18px 16px !important; }
+}
+
+/* —— Page transitions —— */
+#appView .page {
+  animation: proFadeUp .38s cubic-bezier(.22,1,.36,1) both !important;
+}
+@keyframes proFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* —— Scrollbar —— */
+#appView ::-webkit-scrollbar { width: 8px; height: 8px; }
+#appView ::-webkit-scrollbar-track { background: transparent; }
+#appView ::-webkit-scrollbar-thumb {
+  background: rgba(125,211,252,.12);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+#appView ::-webkit-scrollbar-thumb:hover { background: rgba(125,211,252,.22); background-clip: padding-box; }
+
+/* —— FAB —— */
+.qx-nx-fab > button {
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(14,28,40,.95), rgba(6,14,20,.98)) !important;
+  border: 1px solid rgba(125,211,252,.16) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(125,211,252,.04), 0 0 24px rgba(56,189,248,.08) !important;
+}
+.qx-nx-fab > button:hover {
+  transform: scale(1.06);
+  box-shadow: 0 16px 48px rgba(0,0,0,.4), 0 0 32px rgba(56,189,248,.14) !important;
+}
+
+/* —— Section resource links —— quieter —— */
+.section-resource {
+  opacity: .55 !important;
+  font-size: 11px !important;
+  margin-bottom: 10px !important;
+}
+.section-resource:hover { opacity: .85 !important; }
+
+/* —— Create page notice —— */
+#page-create .card { overflow: hidden; }
+#page-create .btn-primary { min-width: 140px; }
+
+/* —— Toast polish —— */
+.qx7-toast,
+[class*="toast"] {
+  border-radius: 12px !important;
+  backdrop-filter: blur(16px) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* —— Login view —— */
+#loginView .card {
+  border-radius: 20px !important;
+  border: 1px solid rgba(125,211,252,.1) !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(125,211,252,.04) !important;
+}
+
+/* —— Reduced motion —— */
+@media (prefers-reduced-motion: reduce) {
+  #appView .page,
+  #appView .nav-item,
+  #appView .card,
+  #appView .btn-primary { animation: none !important; transition: none !important; }
+}
+</style>
 </head>
 <body>
 <a class="qx-skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -4695,6 +4927,8 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLegal();
   ready(function(){
     const app=document.getElementById('appView');
     if(!app || document.getElementById('qxEnterpriseRail')) return;
+    // Enterprise rail desactivado — UI limpia sin barra de estado
+    return;
     const main=app.querySelector('main.main-content');
     if(!main) return;
     const content=main.querySelector('.p-8');
@@ -5693,7 +5927,7 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
     if(!qs('#qxUltraBackdrop'))add('div',{id:'qxUltraBackdrop','aria-hidden':'true'},document.body);
     if(!qs('#qxTopProgress')){const p=add('div',{id:'qxTopProgress','aria-hidden':'true'},document.body);p.innerHTML='<i></i>'}
     if(!qs('#qxScrollTop')){const b=add('button',{id:'qxScrollTop',type:'button','aria-label':'Volver arriba',title:'Volver arriba'},document.body);b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 14 6-6 6 6"></path></svg>';b.querySelector('svg').style.width='18px';b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}))}
-    if(!qs('#qxUltraStatus')){const s=add('div',{id:'qxUltraStatus','aria-live':'polite'},document.body);s.innerHTML='<i class="dot"></i><span id="qxUltraStatusText">SISTEMA ONLINE</span>'}
+    // Status flotante eliminado — interfaz limpia
     if(!qs('#qxUltraWelcome'))add('div',{id:'qxUltraWelcome','aria-hidden':'true'},document.body);
     window.addEventListener('scroll',()=>qs('#qxScrollTop')?.classList.toggle('show',window.scrollY>480),{passive:true});
     let healthBusy=false;
@@ -5753,10 +5987,9 @@ function toast(msg,type='ok'){safe(()=>window.toast?.(msg,type));}
 function inject(sel,html,where='beforeend'){const root=$(sel);if(!root)return null;if(root.querySelector('.qx-nx-injected'))return root.querySelector('.qx-nx-injected');const w=document.createElement('div');w.className='qx-nx-injected';w.innerHTML=html;root.insertAdjacentElement(where,w);return w}
 function updateRecent(page){try{const a=JSON.parse(localStorage.getItem(K.recent)||'[]').filter(x=>x!==page);a.unshift(page);localStorage.setItem(K.recent,JSON.stringify(a.slice(0,7)))}catch(_){} }
 function addLive(){
- const main=$('#appView .main-content');if(!main||$('#qxNxLive'))return;
- const live=document.createElement('div');live.id='qxNxLive';live.className='qx-nx-live';
- live.innerHTML='<span class="qx-nx-chip" id="nxNet"><i></i>Red <b>ONLINE</b></span><span class="qx-nx-chip"><i></i>Workspace <b>READY</b></span><span class="qx-nx-chip" id="nxClock"><i></i>Local <b>--:--:--</b></span><span class="qx-nx-chip"><i></i>Shortcuts <b><span class="qx-nx-key">/</span> <span class="qx-nx-key">K</span></b></span>';
- const target=$('#qxPagebar');if(target)target.insertAdjacentElement('afterend',live);else main.prepend(live);
+  // Status bar eliminada (Red ONLINE / Workspace READY / Local / Shortcuts)
+  const existing = $('#qxNxLive');
+  if (existing) existing.remove();
 }
 function addCockpit(){
  const page=$('#page-overview');if(!page||$('#qxNxCockpit'))return;
@@ -5791,8 +6024,11 @@ function shortcuts(){document.addEventListener('keydown',e=>{const tag=(e.target
 function hookHealth(){setInterval(()=>safe(()=>window.qxCheckHealth?.()),120000);window.addEventListener('online',network);window.addEventListener('offline',network);}
 function observe(){const app=$('#appView');if(!app)return;let t=0;const obs=new MutationObserver(()=>{if(t)return;t=1;requestAnimationFrame(()=>{t=0;updateBar();logoGuard();addCockpit()})});obs.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});}
 function boot(){
- if(!$('#appView'))return;document.documentElement.classList.add('qx-nexus-v3');addLive();addCockpit();addSpotlight();addFab();addMobileDock();network();clock();session();setInterval(clock,1000);setInterval(session,1000);patchGo();observe();shortcuts();hookHealth();logoGuard();
- setTimeout(()=>toast('Lua u Vanguard Nexus listo · nueva interfaz activada','ok'),1200);
+ if(!$('#appView'))return;document.documentElement.classList.add('qx-nexus-v3');
+ addLive(); // no-op: elimina barra de estado si existía
+ addCockpit();addSpotlight();addFab();addMobileDock();
+ network();clock();session();setInterval(clock,1000);setInterval(session,1000);
+ patchGo();observe();shortcuts();hookHealth();logoGuard();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
